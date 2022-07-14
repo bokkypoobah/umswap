@@ -14,6 +14,6 @@ pragma solidity ^0.8.0;
 // (c) BokkyPooBah / Bok Consulting Pty Ltd 2022
 // ----------------------------------------------------------------------------
 
-contract Nix {
-    
+contract Umswap {
+    uint public something = 1;
 }
