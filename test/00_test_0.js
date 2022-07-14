@@ -31,7 +31,7 @@ describe("umswap", function () {
     //
 
     const erc721Mock = await ERC721Mock.deploy("Symbol", "Name");
-    // await erc721Mock.deployed();
+    await erc721Mock.deployed();
     await data.setERC721Mock(erc721Mock);
     const erc721MockReceipt = await data.erc721Mock.deployTransaction.wait();
     if (DETAILS > 0) {
