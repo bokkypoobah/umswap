@@ -16,6 +16,8 @@ class Data {
     this.accountNames = {};
     this.contracts = [];
 
+    this.erc721Mock = null;
+
     this.weth = null;
     this.royaltyEngine = null;
     this.nftA = null;
@@ -133,6 +135,10 @@ class Data {
     return o;
   }
 
+  async setERC721Mock(erc721Mock) {
+    this.erc721Mock = erc721Mock;
+    this.addContract(erc721Mock, "ERC721Mock");
+  }
   async setWeth(weth) {
     this.weth = weth;
     this.addContract(weth, "WETH");
