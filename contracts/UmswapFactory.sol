@@ -75,6 +75,37 @@ contract CloneFactory {
 // End CloneFactory.sol
 
 
+/// @author Alex W.(github.com/nonstopcoderaxw)
+/// @title Array utility functions optimized for Nix
+library ArrayUtils {
+    /// @notice divide-and-conquer check if an targeted item exists in a sorted array
+    /// @param self the given sorted array
+    /// @param target the targeted item to the array
+    /// @return true - if exists, false - not found
+    function includes(uint256[] memory self, uint256 target) internal pure returns (bool) {
+        if (self.length > 0) {
+            uint256 left;
+            uint256 right = self.length - 1;
+            uint256 mid;
+            while (left <= right) {
+                mid = (left + right) / 2;
+                if (self[mid] < target) {
+                    left = mid + 1;
+                } else if (self[mid] > target) {
+                    if (mid < 1) {
+                        break;
+                    }
+                    right = mid - 1;
+                } else {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+}
+
+
 /// @notice ERC20 https://eips.ethereum.org/EIPS/eip-20 with optional symbol, name and decimals
 interface IERC20 {
     function totalSupply() external view returns (uint);
@@ -270,6 +301,7 @@ contract UmswapFactory is Owned, CloneFactory {
     Umswap public template;
 
     error NotERC721();
+    error TokenIdsMustBeSortedWithNoDuplicates();
 
     event ThankYou(uint tip);
 
@@ -281,6 +313,13 @@ contract UmswapFactory is Owned, CloneFactory {
     function newUmswap(IERC721Partial _collection, string memory _name, uint[] memory _tokenIds) public {
         if (!isERC721(address(_collection))) {
             revert NotERC721();
+        }
+        if (_tokenIds.length > 0) {
+            for (uint i = 1; i < _tokenIds.length; i++) {
+                if (_tokenIds[i - 1] >= _tokenIds[i]) {
+                    revert TokenIdsMustBeSortedWithNoDuplicates();
+                }
+            }
         }
         Umswap umswap = Umswap(createClone(address(template)));
         umswap.initUmswap(_collection, "UMS001", _name, _tokenIds);
