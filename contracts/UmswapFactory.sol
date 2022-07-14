@@ -245,13 +245,15 @@ contract ReentrancyGuard {
 
 /// @author BokkyPooBah, Bok Consulting Pty Ltd
 /// @title ERC-721 pool
-contract Umswap is Owned, ReentrancyGuard, ERC721TokenReceiver {
-    uint public something = 1;
+contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
+
+    IERC721Partial public collection;
 
     event ThankYou(uint tip);
 
-    constructor() {
-        super.initOwned(msg.sender);
+    function initUmswap(IERC721Partial _collection, string memory _symbol, string memory _name) public {
+        collection = _collection;
+        super.initToken(msg.sender, _symbol, _name, 18);
     }
 
     function onERC721Received(address /*_operator*/, address /*_from*/, uint _tokenId, bytes memory /*_data*/) external override returns(bytes4) {
@@ -260,14 +262,17 @@ contract Umswap is Owned, ReentrancyGuard, ERC721TokenReceiver {
     }
 }
 
-contract UmswapFactory is Owned {
-    uint public something = 1;
-
+contract UmswapFactory is Owned, CloneFactory {
     event ThankYou(uint tip);
+    Umswap public template;
 
     constructor() {
         super.initOwned(msg.sender);
+        template = new Umswap();
     }
 
-
+    function newUmswap(IERC721Partial _collection, string memory _name) public {
+        Umswap umswap = Umswap(createClone(address(template)));
+        umswap.initUmswap(_collection, "UMS001", _name);
+    }
 }
