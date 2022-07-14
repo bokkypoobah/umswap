@@ -263,8 +263,10 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
 }
 
 contract UmswapFactory is Owned, CloneFactory {
-    event ThankYou(uint tip);
+
     Umswap public template;
+
+    event ThankYou(uint tip);
 
     constructor() {
         super.initOwned(msg.sender);
