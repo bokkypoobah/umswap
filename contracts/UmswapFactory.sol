@@ -119,3 +119,14 @@ contract Umswap is Owned, ReentrancyGuard, ERC721TokenReceiver {
     }
 
 }
+
+contract UmswapFactory is Owned {
+    uint public something = 1;
+
+    event ThankYou(uint tip);
+
+    constructor() {
+    }
+
+
+}

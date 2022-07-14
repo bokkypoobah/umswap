@@ -17,6 +17,7 @@ class Data {
     this.contracts = [];
 
     this.erc721Mock = null;
+    this.umswapFactory = null;
 
     this.weth = null;
     this.royaltyEngine = null;
@@ -138,6 +139,10 @@ class Data {
   async setERC721Mock(erc721Mock) {
     this.erc721Mock = erc721Mock;
     this.addContract(erc721Mock, "ERC721Mock");
+  }
+  async setUmswapFactory(umswapFactory) {
+    this.umswapFactory = umswapFactory;
+    this.addContract(umswapFactory, "UmswapFactory");
   }
   async setWeth(weth) {
     this.weth = weth;

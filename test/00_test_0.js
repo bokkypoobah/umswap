@@ -14,7 +14,7 @@ describe("umswap", function () {
     // const TestERC20 = await ethers.getContractFactory("TestERC20");
     // const MockRoyaltyEngineV1 = await ethers.getContractFactory("MockRoyaltyEngineV1");
     const ERC721Mock  = await ethers.getContractFactory("ERC721Mock");
-    const Umswap  = await ethers.getContractFactory("Umswap");
+    const UmswapFactory  = await ethers.getContractFactory("UmswapFactory");
     // const Nix = await ethers.getContractFactory("Nix");
     // const NixHelper = await ethers.getContractFactory("NixHelper");
     data = new Data();
@@ -39,14 +39,14 @@ describe("umswap", function () {
     }
     console.log("        erc721Mock deployed");
 
-    const umswap = await Umswap.deploy();
-    await umswap.deployed();
-    // await data.setUmswap(umswap);
-    // const umswapReceipt = await data.umswap.deployTransaction.wait();
-    // if (DETAILS > 0) {
-      // await data.printEvents("Deployed Umswap", umswapReceipt);
-    // }
-    // console.log("        erc721Mock deployed");
+    const umswapFactory = await UmswapFactory.deploy();
+    await umswapFactory.deployed();
+    await data.setUmswapFactory(umswapFactory);
+    const umswapFactoryReceipt = await data.umswapFactory.deployTransaction.wait();
+    if (DETAILS > 0) {
+      await data.printEvents("Deployed UmswapFactory", umswapFactoryReceipt);
+    }
+    console.log("        UmswapFactory deployed");
 
     // const royaltyEngine = await MockRoyaltyEngineV1.deploy(data.royalty1, data.royalty2);
     // await royaltyEngine.deployed();
