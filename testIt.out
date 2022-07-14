@@ -1,2 +1,13 @@
-Compiled 22 Solidity files successfully
+
+
+  umswap
+      beforeEach
+        --- Setup Accounts, WETH, NFT and Nix Contracts ---
+        > Deployed ERC721Mock - gasUsed: 2301218 ~ ETH 0.193302312 ~ USD 721
+        erc721Mock deployed
+      00. Maker BuyAny Test
+    ✔ 00. Maker BuyAny Test
+
+
+  1 passing (648ms)
 

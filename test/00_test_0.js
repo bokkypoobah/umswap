@@ -7,7 +7,7 @@ const util = require('util');
 let data;
 
 describe("umswap", function () {
-  // const DETAILS = 0;
+  const DETAILS = 1;
 
   beforeEach(async function () {
     console.log("      beforeEach");
@@ -31,8 +31,12 @@ describe("umswap", function () {
     //
 
     const erc721Mock = await ERC721Mock.deploy("Symbol", "Name");
-    await erc721Mock.deployed();
+    // await erc721Mock.deployed();
     await data.setERC721Mock(erc721Mock);
+    const erc721MockReceipt = await data.erc721Mock.deployTransaction.wait();
+    if (DETAILS > 0) {
+      await data.printEvents("Deployed ERC721Mock", erc721MockReceipt);
+    }
     console.log("        erc721Mock deployed");
 
     // const royaltyEngine = await MockRoyaltyEngineV1.deploy(data.royalty1, data.royalty2);
