@@ -171,6 +171,8 @@ class Data {
 
   async printState(prefix) {
     console.log("        --- " + prefix + " ---");
+    if (false) {
+
     let totalSupplyA = 0;
     let totalSupplyB = 0;
     const ownersA = {};
@@ -279,6 +281,7 @@ class Data {
       //   }
       // }
     }
+  }
   }
 }
 

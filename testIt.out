@@ -1,2 +1,23 @@
-Compiled 24 Solidity files successfully
+Compiled 1 Solidity file successfully
+
+
+  umswap
+      beforeEach
+        --- Setup Accounts, WETH, NFT and Nix Contracts ---
+        > Deployed ERC721Mock - gasUsed: 2301218 ~ ETH 0.193302312 ~ USD 721
+        erc721Mock deployed
+        > Deployed UmswapFactory - gasUsed: 2831746 ~ ETH 0.237866664 ~ USD 887
+        UmswapFactory deployed
+        --- Setup Completed ---
+      00. Test 00
+    ✔ 00. Test 00
+        > Minted ERC721Mock - gasUsed: 69269 ~ ETH 0.005818596 ~ USD 21
+          + ERC721Mock:0x5FbD 3.0 Transfer(from: null:0x0000, to: maker0:0x7099, tokenId: 123)
+        > Minted ERC721Mock - gasUsed: 52181 ~ ETH 0.004383204 ~ USD 16
+          + ERC721Mock:0x5FbD 4.0 Transfer(from: null:0x0000, to: maker0:0x7099, tokenId: 456)
+        > Minted ERC721Mock - gasUsed: 52181 ~ ETH 0.004383204 ~ USD 16
+          + ERC721Mock:0x5FbD 5.0 Transfer(from: null:0x0000, to: maker0:0x7099, tokenId: 789)
+
+
+  1 passing (859ms)
 

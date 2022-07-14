@@ -145,10 +145,11 @@ describe("umswap", function () {
     // }
     // // console.log("bytecode ~" + JSON.stringify(nix.deployTransaction.data.length/2, null, 2));
     // await data.printState("Setup Completed. Nix bytecode ~" + nix.deployTransaction.data.length/2 + ", NixHelper bytecode ~" + nixHelper.deployTransaction.data.length/2);
+    await data.printState("Setup Completed");
   });
 
-  it("00. Maker BuyAny Test", async function () {
-    console.log("      00. Maker BuyAny Test");
+  it("00. Test 00", async function () {
+    console.log("      00. Test 00");
   //   console.log("        --- Maker Add Orders ---");
   //   const addOrder1Tx = await data.nix.connect(data.maker0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ANY, [ 3, 4, 5 ], ethers.utils.parseEther("11"), 0, 5, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") });
   //   await data.printEvents("Maker Added Order #0 - BuyAny Max 5 NFTA:{3|4|5} for 11e", await addOrder1Tx.wait());

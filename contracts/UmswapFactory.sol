@@ -249,12 +249,14 @@ contract ReentrancyGuard {
 contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
 
     IERC721Partial public collection;
+    uint[] public tokenIds;
 
     event ThankYou(uint tip);
 
-    function initUmswap(IERC721Partial _collection, string memory _symbol, string memory _name) public {
+    function initUmswap(IERC721Partial _collection, string memory _symbol, string memory _name, uint[] memory _tokenIds) public {
         collection = _collection;
         super.initToken(msg.sender, _symbol, _name, 18);
+        tokenIds = _tokenIds;
     }
 
     function onERC721Received(address /*_operator*/, address /*_from*/, uint _tokenId, bytes memory /*_data*/) external override returns(bytes4) {
@@ -276,11 +278,11 @@ contract UmswapFactory is Owned, CloneFactory {
         template = new Umswap();
     }
 
-    function newUmswap(IERC721Partial _collection, string memory _name) public {
+    function newUmswap(IERC721Partial _collection, string memory _name, uint[] memory _tokenIds) public {
         if (!isERC721(address(_collection))) {
             revert NotERC721();
         }
         Umswap umswap = Umswap(createClone(address(template)));
-        umswap.initUmswap(_collection, "UMS001", _name);
+        umswap.initUmswap(_collection, "UMS001", _name, _tokenIds);
     }
 }
