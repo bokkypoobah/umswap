@@ -7,7 +7,13 @@
         erc721Mock deployed
       00. Maker BuyAny Test
     ✔ 00. Maker BuyAny Test
+        > Minted ERC721Mock - gasUsed: 69269 ~ ETH 0.005818596 ~ USD 21
+          + ERC721Mock:0x5FbD 2.0 Transfer(from: null:0x0000, to: maker0:0x7099, tokenId: 123)
+        > Minted ERC721Mock - gasUsed: 52181 ~ ETH 0.004383204 ~ USD 16
+          + ERC721Mock:0x5FbD 3.0 Transfer(from: null:0x0000, to: maker0:0x7099, tokenId: 456)
+        > Minted ERC721Mock - gasUsed: 52181 ~ ETH 0.004383204 ~ USD 16
+          + ERC721Mock:0x5FbD 4.0 Transfer(from: null:0x0000, to: maker0:0x7099, tokenId: 789)
 
 
-  1 passing (648ms)
+  1 passing (816ms)
 

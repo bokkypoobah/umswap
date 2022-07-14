@@ -85,19 +85,16 @@ describe("umswap", function () {
     //   });
     // }
     //
-    // const setup2 = [];
-    // setup2.push(data.nftA.mint(data.maker0));
-    // setup2.push(data.nftA.mint(data.maker0));
-    // setup2.push(data.nftA.mint(data.maker0));
-    // setup2.push(data.nftA.mint(data.taker0));
-    // setup2.push(data.nftA.mint(data.taker0));
-    // setup2.push(data.nftA.mint(data.taker0));
-    // const mintATxs = await Promise.all(setup2);
-    // if (DETAILS > 0) {
-    //   mintATxs.forEach( async function (a) {
-    //     await data.printEvents("Minted NFTA", await a.wait());
-    //   });
-    // }
+    const setup2 = [];
+    setup2.push(data.erc721Mock.mint(data.maker0, 123));
+    setup2.push(data.erc721Mock.mint(data.maker0, 456));
+    setup2.push(data.erc721Mock.mint(data.maker0, 789));
+    const mintATxs = await Promise.all(setup2);
+    if (DETAILS > 0) {
+      mintATxs.forEach( async function (a) {
+        await data.printEvents("Minted ERC721Mock", await a.wait());
+      });
+    }
     //
     // const setup3 = [];
     // setup3.push(data.nftB.mint(data.maker0));
