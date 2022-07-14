@@ -109,9 +109,9 @@ interface ERC721TokenReceiver {
 }
 
 
-contract Owned {
-    bytes4 private constant ERC721_INTERFACE = 0x80ac58cd;
+bytes4 constant ERC721_INTERFACE = 0x80ac58cd;
 
+contract Owned {
     bool initialised;
     address public owner;
 
@@ -141,6 +141,12 @@ contract Owned {
         owner = _newOwner;
     }
 
+    function isERC721(address token) internal view returns (bool b) {
+        try IERC721Partial(token).supportsInterface(ERC721_INTERFACE) returns (bool _b) {
+            b = _b;
+        } catch {
+        }
+    }
     function withdraw(address token, uint tokens, uint tokenId) public onlyOwner {
         if (token == address(0)) {
             if (tokens == 0) {
@@ -148,12 +154,7 @@ contract Owned {
             }
             payable(owner).transfer(tokens);
         } else {
-            bool isERC721 = false;
-            try IERC721Partial(token).supportsInterface(ERC721_INTERFACE) returns (bool b) {
-                isERC721 = b;
-            } catch {
-            }
-            if (isERC721) {
+            if (isERC721(token)) {
                 IERC721Partial(token).safeTransferFrom(address(this), owner, tokenId);
             } else {
                 if (tokens == 0) {
@@ -266,6 +267,8 @@ contract UmswapFactory is Owned, CloneFactory {
 
     Umswap public template;
 
+    error NotERC721();
+
     event ThankYou(uint tip);
 
     constructor() {
@@ -274,6 +277,9 @@ contract UmswapFactory is Owned, CloneFactory {
     }
 
     function newUmswap(IERC721Partial _collection, string memory _name) public {
+        if (!isERC721(address(_collection))) {
+            revert NotERC721();
+        }
         Umswap umswap = Umswap(createClone(address(template)));
         umswap.initUmswap(_collection, "UMS001", _name);
     }
