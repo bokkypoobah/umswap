@@ -26,7 +26,7 @@ describe("umswap", function () {
     // await data.setWeth(weth);
     //
 
-    const erc721Mock = await ERC721Mock.deploy("Symbol", "Name");
+    const erc721Mock = await ERC721Mock.deploy("ERC721Mock", "ERC721MOCK");
     await erc721Mock.deployed();
     await data.setERC721Mock(erc721Mock);
     const erc721MockReceipt = await data.erc721Mock.deployTransaction.wait();
@@ -44,45 +44,11 @@ describe("umswap", function () {
     }
     console.log("        UmswapFactory deployed");
 
-    // const royaltyEngine = await MockRoyaltyEngineV1.deploy(data.royalty1, data.royalty2);
-    // await royaltyEngine.deployed();
-    // await data.setRoyaltyEngine(royaltyEngine);
-    //
-    // const nix = await Nix.deploy(weth.address, royaltyEngine.address);
-    // // console.log(nix);
-    // await nix.deployed();
-    // await data.setNix(nix);
-    // const nixTransactionReceipt = await data.nix.deployTransaction.wait();
-    // if (DETAILS >= 0) {
-    //   await data.printEvents("Deployed Nix", nixTransactionReceipt);
-    // }
-    //
-    // const nixHelper = await NixHelper.deploy(nix.address);
-    // // console.log(nixHelper);
-    // await nixHelper.deployed();
-    // await data.setNixHelper(nixHelper);
-    // const nixHelperTransactionReceipt = await data.nixHelper.deployTransaction.wait();
-    // if (DETAILS >= 0) {
-    //   await data.printEvents("Deployed NixHelper", nixHelperTransactionReceipt);
-    // }
-    //
-    // const setup1 = [];
-    // setup1.push(weth.transfer(data.user0, ethers.utils.parseEther("100")));
-    // setup1.push(weth.transfer(data.maker1, ethers.utils.parseEther("100")));
-    // setup1.push(weth.transfer(data.taker0, ethers.utils.parseEther("100")));
-    // setup1.push(weth.transfer(data.taker1, ethers.utils.parseEther("100")));
-    // const [transferWeth0Tx, transferWeth1Tx, transferWeth2Tx, transferWeth3Tx] = await Promise.all(setup1);
-    // if (DETAILS > 0) {
-    //   [transferWeth0Tx, transferWeth1Tx, transferWeth2Tx, transferWeth3Tx].forEach( async function (a) {
-    //     await data.printEvents("Transfer WETH", await a.wait());
-    //   });
-    // }
-    //
-    const setup2 = [];
-    setup2.push(data.erc721Mock.mint(data.user0, 123));
-    setup2.push(data.erc721Mock.mint(data.user0, 456));
-    setup2.push(data.erc721Mock.mint(data.user0, 789));
-    const mintATxs = await Promise.all(setup2);
+    const setup1 = [];
+    setup1.push(data.erc721Mock.mint(data.user0, 123));
+    setup1.push(data.erc721Mock.mint(data.user0, 456));
+    setup1.push(data.erc721Mock.mint(data.user0, 789));
+    const mintATxs = await Promise.all(setup1);
     if (DETAILS > 0) {
       mintATxs.forEach( async function (a) {
         await data.printEvents("Minted ERC721Mock", await a.wait());

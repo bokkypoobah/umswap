@@ -19,13 +19,6 @@ class Data {
     this.erc721Mock = null;
     this.umswapFactory = null;
 
-    this.weth = null;
-    this.royaltyEngine = null;
-    this.nftA = null;
-    this.nftB = null;
-    this.nix = null;
-    this.nixHelper = null;
-
     this.gasPrice = ethers.utils.parseUnits("20", "gwei");
     this.ethUsd = ethers.utils.parseUnits("1186.00", 18);
 
@@ -168,50 +161,31 @@ class Data {
 
   async printState(prefix) {
     console.log("        --- " + prefix + " ---");
-    if (false) {
 
-    let totalSupplyA = 0;
-    let totalSupplyB = 0;
-    const ownersA = {};
-    const ownersB = {};
-    if (this.nftA != null) {
-      totalSupplyA = await this.nftA.totalSupply();
-      for (let i = 0; i < totalSupplyA; i++) {
-        const ownerOf = await this.nftA.ownerOf(i);
-        if (!ownersA[ownerOf]) {
-          ownersA[ownerOf] = [];
+    let totalSupply = 0;
+    const owners = {};
+    if (this.erc721Mock != null) {
+      totalSupply = await this.erc721Mock.totalSupply();
+      for (let i = 0; i < totalSupply; i++) {
+        const tokenId = await this.erc721Mock.tokenByIndex(i);
+        const ownerOf = await this.erc721Mock.ownerOf(tokenId);
+        if (!owners[ownerOf]) {
+          owners[ownerOf] = [];
         }
-        ownersA[ownerOf].push(i);
+        owners[ownerOf].push(parseInt(tokenId));
       }
     }
-    if (this.nftB != null) {
-      totalSupplyB = await this.nftB.totalSupply();
-      for (let i = 0; i < totalSupplyB; i++) {
-        const ownerOf = await this.nftB.ownerOf(i);
-        if (!ownersB[ownerOf]) {
-          ownersB[ownerOf] = [];
-        }
-        ownersB[ownerOf].push(i);
-      }
-    }
-    console.log("          Account                               ETH                 WETH " + this.padRight(await this.nftA.symbol() + " (" + totalSupplyA + ")", 26) + this.padRight(await this.nftB.symbol() + " (" + totalSupplyB + ")", 26) );
-    console.log("          -------------------- -------------------- -------------------- ------------------------- -------------------------");
-    const checkAccounts = [this.deployer, this.user0, this.user1, this.user2, this.taker1, this.royalty1, this.royalty2, this.integrator];
-    if (this.nix != null) {
-      checkAccounts.push(this.nix.address);
-    }
-    if (this.nixHelper != null) {
-      checkAccounts.push(this.nixHelper.address);
-    }
+    console.log("          Account                               ETH " + this.padRight(await this.erc721Mock.symbol() + " (" + totalSupply + ")", 26) );
+    console.log("          -------------------- -------------------- -------------------------");
+    const checkAccounts = [this.deployer, this.user0, this.user1, this.user2, this.integrator];
     for (let i = 0; i < checkAccounts.length; i++) {
-      const ownerDataA = ownersA[checkAccounts[i]] || [];
-      const ownerDataB = ownersB[checkAccounts[i]] || [];
+      const ownerData = owners[checkAccounts[i]] || [];
       const balance = await ethers.provider.getBalance(checkAccounts[i]);
-      const wethBalance = this.weth == null ? 0 : await this.weth.balanceOf(checkAccounts[i]);
-      console.log("          " + this.padRight(this.getShortAccountName(checkAccounts[i]), 20) + " " + this.padLeft(ethers.utils.formatEther(balance), 20) + " " + this.padLeft(ethers.utils.formatEther(wethBalance), 20) + " " + this.padRight(JSON.stringify(ownerDataA), 25) + " " + JSON.stringify(ownerDataB));
+      console.log("          " + this.padRight(this.getShortAccountName(checkAccounts[i]), 20) + " " + this.padLeft(ethers.utils.formatEther(balance), 20) + " " + this.padRight(JSON.stringify(ownerData), 25));
     }
     console.log();
 
+    if (false) {
     if (this.nix != null) {
       const tokensLength = (await this.nix.getLengths())[0];
       if (tokensLength > 0) {
