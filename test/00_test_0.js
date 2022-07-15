@@ -126,7 +126,7 @@ describe("umswap", function () {
     await data.printState("NFT Swapped Out");
   });
 
-  it("01. Test 01", async function () {
+  it.skip("01. Test 01", async function () {
     console.log("      01. Test 01 - New Umswaps with 16, 32 and 256 bit tokenId collections");
     for (let numberOfTokenIds of [10, 100, 1000]) {
       for (let rangeStart of [0, 65535, 6553565535]) {
