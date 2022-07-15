@@ -190,7 +190,6 @@ contract Owned {
     address public owner;
 
     event OwnershipTransferred(address indexed from, address indexed to);
-    event Withdrawn(address indexed token, uint tokens, uint tokenId);
 
     error AlreadyInitialised();
     error NotOwner();
@@ -221,6 +220,11 @@ contract Owned {
         } catch {
         }
     }
+}
+
+contract OwnedWithWithdraw is Owned {
+    event Withdrawn(address indexed token, uint tokens, uint tokenId);
+
     function withdraw(address token, uint tokens, uint tokenId) public onlyOwner {
         if (token == address(0)) {
             if (tokens == 0) {
@@ -240,7 +244,6 @@ contract Owned {
         emit Withdrawn(token, tokens, tokenId);
     }
 }
-
 
 /// @notice Basic token = ERC20 + symbol + name + decimals + mint + ownership
 contract BasicToken is IERC20, Owned {
@@ -441,7 +444,7 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
     }
 }
 
-contract UmswapFactory is Owned, CloneFactory {
+contract UmswapFactory is OwnedWithWithdraw, CloneFactory {
 
     Umswap public template;
     Umswap[] public umswaps;
