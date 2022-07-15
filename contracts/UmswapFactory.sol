@@ -457,6 +457,7 @@ contract UmswapFactory is Owned, CloneFactory {
     Umswap[] public umswaps;
 
     error NotERC721();
+    error InvalidName();
     error TokenIdsMustBeSortedWithNoDuplicates();
 
     event NewUmswap(Umswap _umswap, IERC721Partial _collection, string _name, uint[] _tokenIds, uint timestamp);
@@ -490,9 +491,43 @@ contract UmswapFactory is Owned, CloneFactory {
         s = string(b);
     }
 
+    function validateName(string memory str) public pure returns (bool) {
+        bytes memory b = bytes(str);
+        if (b.length < 1 || b.length > 48) {
+            return false;
+        }
+        // Leading and trailing space
+        if (b[0] == 0x20 || b[b.length-1] == 0x20) {
+            return false;
+        }
+        bytes1 lastChar = b[0];
+        for (uint i; i < b.length;) {
+            bytes1 char = b[i];
+             // Cannot contain continous spaces
+            if (char == 0x20 && lastChar == 0x20) {
+                return false;
+            }
+            // 9-0, A-Z, a-z, space
+            if (!(char >= 0x30 && char <= 0x39) &&
+                !(char >= 0x41 && char <= 0x5A) &&
+                !(char >= 0x61 && char <= 0x7A) &&
+                !(char == 0x20)) {
+                return false;
+            }
+            lastChar = char;
+            unchecked {
+                i++;
+            }
+        }
+        return true;
+    }
+
     function newUmswap(IERC721Partial _collection, string memory _name, uint[] memory _tokenIds) public {
         if (!isERC721(address(_collection))) {
             revert NotERC721();
+        }
+        if (!validateName(_name)) {
+            revert InvalidName();
         }
         if (_tokenIds.length > 0) {
             for (uint i = 1; i < _tokenIds.length;) {
