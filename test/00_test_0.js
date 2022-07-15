@@ -159,9 +159,12 @@ describe("umswap", function () {
     const getUmswapsLength = await data.umswapFactory.getUmswapsLength();
     console.log("      getUmswapsLength: " + getUmswapsLength);
     let indices = generateRange(0, getUmswapsLength - 1, 1);
-    console.log("      indices: " + JSON.stringify(indices));
+    // console.log("      indices: " + JSON.stringify(indices));
     const getUmswaps = await data.umswapFactory.getUmswaps(indices);
-    console.log("      getUmswaps: " + JSON.stringify(getUmswaps, null, 2));
+    // console.log("      getUmswaps: " + JSON.stringify(getUmswaps.map((x) => { return x.toString(); }), null, 2));
+    for (let i = 0; i < getUmswaps[0].length; i++) {
+      console.log("      " + i + " " + JSON.stringify(getUmswaps[0][i]) + " " + JSON.stringify(getUmswaps[1][i].map((x) => { return parseInt(x.toString()); })));
+    }
   });
 
   // it("01. Maker BuyAll Test", async function () {

@@ -411,6 +411,36 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
         emit ERC721Received(address(this), _from, _tokenId);
         return this.onERC721Received.selector;
     }
+
+    function getTokenIds() public view returns (uint[] memory tokenIds) {
+        if (tokenIds16.length > 0) {
+            tokenIds = new uint[](tokenIds16.length);
+            for (uint i = 0; i < tokenIds16.length; ) {
+                tokenIds[i] = tokenIds16[i];
+                unchecked {
+                    i++;
+                }
+            }
+        } else if (tokenIds32.length > 0) {
+            tokenIds = new uint[](tokenIds32.length);
+            for (uint i = 0; i < tokenIds32.length; ) {
+                tokenIds[i] = tokenIds32[i];
+                unchecked {
+                    i++;
+                }
+            }
+        } else if (tokenIds256.length > 0) {
+            tokenIds = new uint[](tokenIds256.length);
+            for (uint i = 0; i < tokenIds256.length; ) {
+                tokenIds[i] = tokenIds256[i];
+                unchecked {
+                    i++;
+                }
+            }
+        } else {
+            tokenIds = new uint[](0);
+        }
+    }
 }
 
 contract UmswapFactory is Owned, CloneFactory {
@@ -509,43 +539,54 @@ contract UmswapFactory is Owned, CloneFactory {
         return umswaps.length;
     }
 
-    function getUmswaps(uint[] memory indices) public view returns (Umswap[] memory _umswaps) {
+    function getUmswaps(uint[] memory indices) public view returns (
+        Umswap[] memory _umswaps,
+        uint[][] memory _tokenIds
+    ) {
         uint length = indices.length;
         _umswaps = new Umswap[](length);
+        _tokenIds = new uint[][](length);
         for (uint i = 0; i < length;) {
             _umswaps[i] = umswaps[i];
+            _tokenIds[i] = umswaps[i].getTokenIds();
             unchecked {
                 i++;
             }
         }
     }
 
-    //
-    // function getTokens(
-    //     uint[] memory tokensIndices
+    // function getOrders(
+    //     address token,
+    //     uint[] memory orderIndices
     // ) public view returns (
-    //     address[] memory tokens,
-    //     uint[] memory ordersLengthList,
-    //     uint[] memory executedList,
-    //     uint[] memory volumeTokenList,
-    //     uint[] memory volumeWethList
+    //     address[] memory makers,
+    //     address[] memory takers,
+    //     uint[][] memory tokenIds,
+    //     uint[] memory prices,
+    //     uint[7][] memory data
     // ) {
-    //     uint length = tokensIndices.length;
-    //     tokens = new address[](length);
-    //     ordersLengthList = new uint[](length);
-    //     executedList = new uint[](length);
-    //     volumeTokenList = new uint[](length);
-    //     volumeWethList = new uint[](length);
-    //     (uint tokensLength,) = nix.getLengths();
+    //     uint length = orderIndices.length;
+    //     makers = new address[](length);
+    //     takers = new address[](length);
+    //     tokenIds = new uint[][](length);
+    //     prices = new uint[](length);
+    //     data = new uint[7][](length);
+    //     uint ordersLength = nix.ordersLength(token);
     //     for (uint i = 0; i < length; i++) {
-    //         uint tokenIndex = tokensIndices[i];
-    //         if (tokenIndex < tokensLength) {
-    //             (address token, uint64 ordersLength, uint64 executed, uint64 volumeToken, uint volumeWeth) = nix.getToken(tokenIndex);
-    //             tokens[i] = token;
-    //             ordersLengthList[i] = ordersLength;
-    //             executedList[i] = executed;
-    //             volumeTokenList[i] = volumeToken;
-    //             volumeWethList[i] = volumeWeth;
+    //         uint orderIndex = orderIndices[i];
+    //         if (orderIndex < ordersLength) {
+    //             Nix.Order memory order = nix.getOrder(token, orderIndex);
+    //             makers[i] = order.maker;
+    //             takers[i] = order.taker;
+    //             tokenIds[i] = nix.getTokenIds(order.tokenIdsKey);
+    //             prices[i] = order.price;
+    //             data[i][0] = uint(order.buyOrSell);
+    //             data[i][1] = uint(order.anyOrAll);
+    //             data[i][2] = uint(order.expiry);
+    //             data[i][3] = uint(order.tradeCount);
+    //             data[i][4] = uint(order.tradeMax);
+    //             data[i][5] = uint(order.royaltyFactor);
+    //             data[i][6] = uint(orderStatus(token, order));
     //         }
     //     }
     // }

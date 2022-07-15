@@ -7,7 +7,7 @@
         --- Setup Accounts, NFT and Umswap Contracts - Assuming gasPrice: 20.0 gwei, ethUsd: 1186.0 ---
         > Deployed ERC721Mock - gasUsed: 2722226 ~ ETH 0.05444452 ~ USD 64
         erc721Mock deployed
-        > Deployed UmswapFactory - gasUsed: 4075522 ~ ETH 0.08151044 ~ USD 96
+        > Deployed UmswapFactory - gasUsed: 4431209 ~ ETH 0.08862418 ~ USD 105
         UmswapFactory deployed
         --- Setup Completed ---
         > Minted ERC721Mock - gasUsed: 141088 ~ ETH 0.00282176 ~ USD 3
@@ -24,7 +24,7 @@
           + ERC721Mock:0x5FbD 8.0 Transfer(from: null:0x0000, to: user1:0x3C44, tokenId: 666)
           Account                                   ETH ERC721MOCK (6)            ?            0.0
           -------------------- ------------------------ ------------------------- -----------------------
-          deployer:0xf39F       9999.986289514133751258 []                                            0.0
+          deployer:0xf39F       9999.985652951089196371 []                                            0.0
           user0:0x7099                          10000.0 [111,222,333]                                 0.0
           user1:0x3C44                          10000.0 [444,555,666]                                 0.0
           user2:0x90F7                          10000.0 []                                            0.0
@@ -33,30 +33,27 @@
 
       02. Test 02 - Get Data
         > Collection size 10 starting 0 - gasUsed: 321664 ~ ETH 0.00643328 ~ USD 7
-          + UmswapFactory:0xe7f1 9.0 NewUmswap(_umswap: 0x9f1ac54BEF0DD2f6f3462EA0fa94fC62300d3a8e, _collection: ERC721Mock:0x5FbD, _name: Collection size 10 starting 0, _tokenIds: 0,1,2,3,4,5,6,7,8,9,10, timestamp: 1657901521)
+          + UmswapFactory:0xe7f1 9.0 NewUmswap(_umswap: 0x9f1ac54BEF0DD2f6f3462EA0fa94fC62300d3a8e, _collection: ERC721Mock:0x5FbD, _name: Collection size 10 starting 0, _tokenIds: 0,1,2,3,4,5,6,7,8,9,10, timestamp: 1657902434)
         > Collection size 10 starting 65 - gasUsed: 304645 ~ ETH 0.0060929 ~ USD 7
-          + UmswapFactory:0xe7f1 10.0 NewUmswap(_umswap: 0xbf9fBFf01664500A33080Da5d437028b07DFcC55, _collection: ERC721Mock:0x5FbD, _name: Collection size 10 starting 65, _tokenIds: 65,66,67,68,69,70,71,72,73,74,75, timestamp: 1657901522)
+          + UmswapFactory:0xe7f1 10.0 NewUmswap(_umswap: 0xbf9fBFf01664500A33080Da5d437028b07DFcC55, _collection: ERC721Mock:0x5FbD, _name: Collection size 10 starting 65, _tokenIds: 65,66,67,68,69,70,71,72,73,74,75, timestamp: 1657902435)
         > Collection size 20 starting 0 - gasUsed: 353631 ~ ETH 0.00707262 ~ USD 8
-          + UmswapFactory:0xe7f1 11.0 NewUmswap(_umswap: 0x93b6BDa6a0813D808d75aA42e900664Ceb868bcF, _collection: ERC721Mock:0x5FbD, _name: Collection size 20 starting 0, _tokenIds: 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20, timestamp: 1657901523)
+          + UmswapFactory:0xe7f1 11.0 NewUmswap(_umswap: 0x93b6BDa6a0813D808d75aA42e900664Ceb868bcF, _collection: ERC721Mock:0x5FbD, _name: Collection size 20 starting 0, _tokenIds: 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20, timestamp: 1657902436)
         > Collection size 20 starting 65 - gasUsed: 353712 ~ ETH 0.00707424 ~ USD 8
-          + UmswapFactory:0xe7f1 12.0 NewUmswap(_umswap: 0xA22D78bc37cE77FeE1c44F0C2C0d2524318570c3, _collection: ERC721Mock:0x5FbD, _name: Collection size 20 starting 65, _tokenIds: 65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85, timestamp: 1657901524)
+          + UmswapFactory:0xe7f1 12.0 NewUmswap(_umswap: 0xA22D78bc37cE77FeE1c44F0C2C0d2524318570c3, _collection: ERC721Mock:0x5FbD, _name: Collection size 20 starting 65, _tokenIds: 65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85, timestamp: 1657902437)
         > Collection size 30 starting 0 - gasUsed: 380852 ~ ETH 0.00761704 ~ USD 9
-          + UmswapFactory:0xe7f1 13.0 NewUmswap(_umswap: 0x0ed2E86FcE2e5A7965f59708c01f88a722BC7f07, _collection: ERC721Mock:0x5FbD, _name: Collection size 30 starting 0, _tokenIds: 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30, timestamp: 1657901525)
+          + UmswapFactory:0xe7f1 13.0 NewUmswap(_umswap: 0x0ed2E86FcE2e5A7965f59708c01f88a722BC7f07, _collection: ERC721Mock:0x5FbD, _name: Collection size 30 starting 0, _tokenIds: 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30, timestamp: 1657902438)
         > Collection size 30 starting 65 - gasUsed: 380933 ~ ETH 0.00761866 ~ USD 9
-          + UmswapFactory:0xe7f1 14.0 NewUmswap(_umswap: 0xf433C50017d963b6082043445bCD0A54716DDC1d, _collection: ERC721Mock:0x5FbD, _name: Collection size 30 starting 65, _tokenIds: 65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95, timestamp: 1657901526)
+          + UmswapFactory:0xe7f1 14.0 NewUmswap(_umswap: 0xf433C50017d963b6082043445bCD0A54716DDC1d, _collection: ERC721Mock:0x5FbD, _name: Collection size 30 starting 65, _tokenIds: 65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95, timestamp: 1657902439)
       getUmswapsLength: 6
-      indices: [0,1,2,3,4,5]
-      getUmswaps: [
-  "0x9f1ac54BEF0DD2f6f3462EA0fa94fC62300d3a8e",
-  "0xbf9fBFf01664500A33080Da5d437028b07DFcC55",
-  "0x93b6BDa6a0813D808d75aA42e900664Ceb868bcF",
-  "0xA22D78bc37cE77FeE1c44F0C2C0d2524318570c3",
-  "0x0ed2E86FcE2e5A7965f59708c01f88a722BC7f07",
-  "0xf433C50017d963b6082043445bCD0A54716DDC1d"
-]
-    ✔ 02. Test 02 (383ms)
+      0 "0x9f1ac54BEF0DD2f6f3462EA0fa94fC62300d3a8e" [0,1,2,3,4,5,6,7,8,9,10]
+      1 "0xbf9fBFf01664500A33080Da5d437028b07DFcC55" [65,66,67,68,69,70,71,72,73,74,75]
+      2 "0x93b6BDa6a0813D808d75aA42e900664Ceb868bcF" [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+      3 "0xA22D78bc37cE77FeE1c44F0C2C0d2524318570c3" [65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85]
+      4 "0x0ed2E86FcE2e5A7965f59708c01f88a722BC7f07" [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
+      5 "0xf433C50017d963b6082043445bCD0A54716DDC1d" [65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95]
+    ✔ 02. Test 02 (460ms)
 
 
-  1 passing (1s)
+  1 passing (2s)
   2 pending
 
