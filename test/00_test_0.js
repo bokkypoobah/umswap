@@ -139,7 +139,7 @@ describe("umswap", function () {
 
     for (let numberOfTokenIds of [10, 100, 1000]) {
       for (let rangeStart of [0, 65535, 6553565535]) {
-        console.log("numberOfTokenIds: " + numberOfTokenIds + ", rangeStart: " + rangeStart);
+        // console.log("numberOfTokenIds: " + numberOfTokenIds + ", rangeStart: " + rangeStart);
         let tokenIds = generateRange(rangeStart, parseInt(rangeStart) + numberOfTokenIds, 1);
         const name = "Collection size " + numberOfTokenIds + " starting " + rangeStart;
         const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, name, tokenIds, { value: ethers.utils.parseEther("0") });
