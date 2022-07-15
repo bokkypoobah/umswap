@@ -45,9 +45,12 @@ describe("umswap", function () {
     console.log("        UmswapFactory deployed");
 
     const setup1 = [];
-    setup1.push(data.erc721Mock.mint(data.user0, 123));
-    setup1.push(data.erc721Mock.mint(data.user0, 456));
-    setup1.push(data.erc721Mock.mint(data.user0, 789));
+    setup1.push(data.erc721Mock.mint(data.user0, 111));
+    setup1.push(data.erc721Mock.mint(data.user0, 222));
+    setup1.push(data.erc721Mock.mint(data.user0, 333));
+    setup1.push(data.erc721Mock.mint(data.user1, 444));
+    setup1.push(data.erc721Mock.mint(data.user1, 555));
+    setup1.push(data.erc721Mock.mint(data.user1, 666));
     const mintATxs = await Promise.all(setup1);
     if (DETAILS > 0) {
       mintATxs.forEach( async function (a) {
