@@ -83,7 +83,7 @@ class Data {
             if (a.type == 'address') {
               result = result + this.getShortAccountName(data.args[a.name].toString());
             } else if (a.type == 'uint256' || a.type == 'uint128') {
-              if (a.name == 'tokens' || a.name == 'amount' || a.name == 'balance' || a.name == 'value' || a.name == 'tip') {
+              if (a.name == 'tokens' || a.name == 'amount' || a.name == 'balance' || a.name == 'value' || a.name.substring(0, 3) == 'tip') {
                 result = result + ethers.utils.formatUnits(data.args[a.name], 18);
               } else {
                 result = result + data.args[a.name].toString();

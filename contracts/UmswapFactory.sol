@@ -408,18 +408,18 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
 
     function handleTips(address integrator) private {
         if (msg.value > 0) {
-            uint integratorTip;
+            uint tipIntegrator;
             if (integrator != address(0) && integrator != owner) {
-                integratorTip = msg.value * 4 / 5;
-                if (integratorTip > 0) {
-                    payable(integrator).transfer(integratorTip);
+                tipIntegrator = msg.value * 4 / 5;
+                if (tipIntegrator > 0) {
+                    payable(integrator).transfer(tipIntegrator);
                 }
             }
-            uint remainderTip = msg.value - integratorTip;
-            if (remainderTip > 0) {
-                payable(owner).transfer(remainderTip);
+            uint tipRemainder = msg.value - tipIntegrator;
+            if (tipRemainder > 0) {
+                payable(owner).transfer(tipRemainder);
             }
-            emit ThankYou(integrator, integratorTip, remainderTip);
+            emit ThankYou(integrator, tipIntegrator, tipRemainder);
         }
     }
     receive() external payable {
@@ -441,7 +441,7 @@ contract UmswapFactory is Owned, CloneFactory {
     error NotERC721();
     error TokenIdsMustBeSortedWithNoDuplicates();
 
-    event NewUmswap(Umswap _umswap, IERC721Partial _collection, string _name, uint[] _tokenIds);
+    event NewUmswap(Umswap _umswap, IERC721Partial _collection, string _name, uint[] _tokenIds, uint timestamp);
     event ThankYou(uint tip);
 
     constructor() {
@@ -482,7 +482,7 @@ contract UmswapFactory is Owned, CloneFactory {
         Umswap umswap = Umswap(payable(createClone(address(template))));
         umswap.initUmswap(_collection, genSymbol(umswaps.length), _name, _tokenIds);
         umswaps.push(umswap);
-        emit NewUmswap(umswap, _collection, _name, _tokenIds);
+        emit NewUmswap(umswap, _collection, _name, _tokenIds, block.timestamp);
     }
 
     receive() external payable {
