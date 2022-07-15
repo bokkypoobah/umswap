@@ -101,7 +101,7 @@ describe("umswap", function () {
     await data.printState("Setup Completed");
   });
 
-  it.skip("00. Test 00", async function () {
+  it("00. Test 00", async function () {
     console.log("      00. Test 00 - Happy Path 00");
 
     const tokenIds = [111, 333, 555];
@@ -129,6 +129,14 @@ describe("umswap", function () {
     await data.printEvents("withdrawal1Tx", await withdrawal1Tx.wait());
 
     await data.printState("Owner Withdrawn");
+
+    const getUmswapsLength = await data.umswapFactory.getUmswapsLength();
+    console.log("      getUmswapsLength: " + getUmswapsLength);
+    let indices = generateRange(0, getUmswapsLength - 1, 1);
+    const getUmswaps = await data.umswapFactory.getUmswaps(indices);
+    for (let i = 0; i < getUmswaps[0].length; i++) {
+      console.log("      " + i + " " + JSON.stringify(getUmswaps[0][i]) + " " + JSON.stringify(getUmswaps[1][i].map((x) => { return parseInt(x.toString()); })) + " " + getUmswaps[2][i] + " " + getUmswaps[3][i]);
+    }
   });
 
   it.skip("01. Test 01", async function () {
@@ -159,11 +167,9 @@ describe("umswap", function () {
     const getUmswapsLength = await data.umswapFactory.getUmswapsLength();
     console.log("      getUmswapsLength: " + getUmswapsLength);
     let indices = generateRange(0, getUmswapsLength - 1, 1);
-    // console.log("      indices: " + JSON.stringify(indices));
     const getUmswaps = await data.umswapFactory.getUmswaps(indices);
-    // console.log("      getUmswaps: " + JSON.stringify(getUmswaps.map((x) => { return x.toString(); }), null, 2));
     for (let i = 0; i < getUmswaps[0].length; i++) {
-      console.log("      " + i + " " + JSON.stringify(getUmswaps[0][i]) + " " + JSON.stringify(getUmswaps[1][i].map((x) => { return parseInt(x.toString()); })));
+      console.log("      " + i + " " + JSON.stringify(getUmswaps[0][i]) + " " + JSON.stringify(getUmswaps[1][i].map((x) => { return parseInt(x.toString()); })) + " " + getUmswaps[2][i] + " " + getUmswaps[3][i]);
     }
   });
 
