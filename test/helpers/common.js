@@ -167,7 +167,7 @@ class Data {
       umswapTotalSupply = await this.umswap.totalSupply();
     }
 
-    console.log("          Account                                  ETH " + this.padRight(await this.erc721Mock.symbol() + " (" + erc721TotalSupply + ")", 25) + "|" + umswapSymbol + " " + this.padLeft(ethers.utils.formatEther(umswapTotalSupply), 14));
+    console.log("          Account                                  ETH " + this.padRight(await this.erc721Mock.symbol() + " (" + erc721TotalSupply + ")", 25) + " " + umswapSymbol + " " + this.padLeft(ethers.utils.formatEther(umswapTotalSupply), 14));
     console.log("          -------------------- ----------------------- ------------------------- -----------------------");
     const checkAccounts = [this.deployer, this.user0, this.user1, this.user2, this.integrator];
     if (this.umswapFactory != null) {
