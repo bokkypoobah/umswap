@@ -170,6 +170,9 @@ class Data {
     console.log("          Account                                  ETH " + this.padRight(await this.erc721Mock.symbol() + " (" + erc721TotalSupply + ")", 26) + " " + umswapSymbol + " " + ethers.utils.formatEther(umswapTotalSupply));
     console.log("          -------------------- ----------------------- -------------------------");
     const checkAccounts = [this.deployer, this.user0, this.user1, this.user2, this.integrator];
+    if (this.umswapFactory != null) {
+      checkAccounts.push(this.umswapFactory.address);
+    }
     if (this.umswap != null) {
       checkAccounts.push(this.umswap.address);
     }

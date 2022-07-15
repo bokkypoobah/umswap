@@ -174,6 +174,7 @@ interface IERC721Partial is IERC165 {
     function ownerOf(uint tokenId) external view returns (address);
     function balanceOf(address owner) external view returns (uint balance);
     function isApprovedForAll(address owner, address operator) external view returns (bool);
+    function transferFrom(address from, address to, uint tokenId) external payable;
     function safeTransferFrom(address from, address to, uint tokenId) external payable;
 }
 
@@ -390,7 +391,7 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
     //     }
     // }
 
-    function swap(uint[] memory _inTokenIds, uint[] memory _outTokenIds) public payable reentrancyGuard {
+    function swap(uint[] memory _inTokenIds, uint[] memory _outTokenIds, address integrator) public payable reentrancyGuard {
         if (_outTokenIds.length > _inTokenIds.length) {
             _burn(msg.sender, (_outTokenIds.length - _inTokenIds.length) * 10 ** 18);
         }
@@ -398,17 +399,40 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
             if (!isTokenIdOK(_inTokenIds[i])) {
                 revert InvalidTokenId(_inTokenIds[i]);
             }
-            collection.safeTransferFrom(msg.sender, address(this), _inTokenIds[i]);
+            // collection.safeTransferFrom(msg.sender, address(this), _inTokenIds[i]);
+            collection.transferFrom(msg.sender, address(this), _inTokenIds[i]);
         }
         for (uint i = 0; i < _outTokenIds.length; i++) {
             if (!isTokenIdOK(_outTokenIds[i])) {
                 revert InvalidTokenId(_outTokenIds[i]);
             }
-            collection.safeTransferFrom(address(this), msg.sender, _outTokenIds[i]);
+            // collection.safeTransferFrom(address(this), msg.sender, _outTokenIds[i]);
+            collection.transferFrom(address(this), msg.sender, _outTokenIds[i]);
         }
         if (_outTokenIds.length < _inTokenIds.length) {
             _mint(msg.sender, (_inTokenIds.length - _outTokenIds.length) * 10 ** 18);
         }
+        handleTips(integrator);
+    }
+
+    function handleTips(address integrator) private {
+        if (msg.value > 0) {
+            uint integratorTip;
+            if (integrator != address(0) && integrator != owner) {
+                integratorTip = msg.value * 4 / 5;
+                if (integratorTip > 0) {
+                    payable(integrator).transfer(integratorTip);
+                }
+            }
+            uint remainder = msg.value - integratorTip;
+            if (remainder > 0) {
+                payable(owner).transfer(remainder);
+            }
+            emit ThankYou(msg.value);
+        }
+    }
+    receive() external payable {
+        handleTips(address(0));
     }
 
     event ERC721Received(address collection, address from, uint tokenId);
@@ -459,16 +483,18 @@ contract UmswapFactory is Owned, CloneFactory {
             revert NotERC721();
         }
         if (_tokenIds.length > 0) {
-            // TODO: Check for valid tokenIds
             for (uint i = 1; i < _tokenIds.length; i++) {
                 if (_tokenIds[i - 1] >= _tokenIds[i]) {
                     revert TokenIdsMustBeSortedWithNoDuplicates();
                 }
             }
         }
-        Umswap umswap = Umswap(createClone(address(template)));
+        Umswap umswap = Umswap(payable(createClone(address(template))));
         umswap.initUmswap(_collection, genSymbol(umswaps.length), _name, _tokenIds);
         umswaps.push(umswap);
         emit NewUmswap(umswap, _collection, _name, _tokenIds);
+    }
+
+    receive() external payable {
     }
 }
