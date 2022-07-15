@@ -304,12 +304,26 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
                 tokenIds32.push(uint32(_tokenIds[i]));
             }
         } else {
-            for (uint i = 0; i < _tokenIds.length; i++) {
-                tokenIds256.push(_tokenIds[i]);
-            }
+            tokenIds256 = _tokenIds;
         }
-        // TODO: Store as 16 bits or 32 bits or 256 bits?
-        // tokenIds = _tokenIds;
+    }
+
+    function depositNft(uint[] memory _tokenIds) public {
+        for (uint i = 0; i < _tokenIds.length; i++) {
+            // if (order.tokenIdsKey != bytes32(0) && !orderTokenIds.includes(tokenIds[j])) {
+            //     revert TokenIdNotFound(orderIndexes[i], tokenIds[j]);
+            // }
+            collection.safeTransferFrom(msg.sender, address(this), _tokenIds[i]);
+        }
+    }
+
+    function withdrawNft(uint[] memory _tokenIds) public {
+        for (uint i = 0; i < _tokenIds.length; i++) {
+            // if (order.tokenIdsKey != bytes32(0) && !orderTokenIds.includes(tokenIds[i])) {
+            //     revert TokenIdNotFound(orderIndexes[i], tokenIds[j]);
+            // }
+            collection.safeTransferFrom(address(this), msg.sender, _tokenIds[i]);
+        }
     }
 
     function onERC721Received(address /*_operator*/, address /*_from*/, uint _tokenId, bytes memory /*_data*/) external override returns(bytes4) {
