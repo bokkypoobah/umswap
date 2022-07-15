@@ -82,7 +82,49 @@ library ArrayUtils {
     /// @param self the given sorted array
     /// @param target the targeted item to the array
     /// @return true - if exists, false - not found
-    function includes(uint256[] memory self, uint256 target) internal pure returns (bool) {
+    function includes16(uint16[] memory self, uint256 target) internal pure returns (bool) {
+        if (self.length > 0) {
+            uint256 left;
+            uint256 right = self.length - 1;
+            uint256 mid;
+            while (left <= right) {
+                mid = (left + right) / 2;
+                if (uint256(self[mid]) < target) {
+                    left = mid + 1;
+                } else if (uint256(self[mid]) > target) {
+                    if (mid < 1) {
+                        break;
+                    }
+                    right = mid - 1;
+                } else {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    function includes32(uint32[] memory self, uint256 target) internal pure returns (bool) {
+        if (self.length > 0) {
+            uint256 left;
+            uint256 right = self.length - 1;
+            uint256 mid;
+            while (left <= right) {
+                mid = (left + right) / 2;
+                if (uint256(self[mid]) < target) {
+                    left = mid + 1;
+                } else if (uint256(self[mid]) > target) {
+                    if (mid < 1) {
+                        break;
+                    }
+                    right = mid - 1;
+                } else {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    function includes256(uint256[] memory self, uint256 target) internal pure returns (bool) {
         if (self.length > 0) {
             uint256 left;
             uint256 right = self.length - 1;
@@ -308,20 +350,32 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
         }
     }
 
+    function isTokenIdOK(uint _tokenId) public view returns (bool _isOk) {
+        if (tokenIds16.length > 0) {
+            return ArrayUtils.includes16(tokenIds16, _tokenId);
+        } else if (tokenIds32.length > 0) {
+            return ArrayUtils.includes32(tokenIds32, _tokenId);
+        } else if (tokenIds256.length > 0) {
+            return ArrayUtils.includes256(tokenIds256, _tokenId);
+        } else {
+            return true;
+        }
+    }
+
     function depositNft(uint[] memory _tokenIds) public {
         for (uint i = 0; i < _tokenIds.length; i++) {
-            // if (order.tokenIdsKey != bytes32(0) && !orderTokenIds.includes(tokenIds[j])) {
-            //     revert TokenIdNotFound(orderIndexes[i], tokenIds[j]);
-            // }
+            if (!isTokenIdOK(_tokenIds[i])) {
+                // revert TokenIdNotFound(orderIndexes[i], tokenIds[j]);
+            }
             collection.safeTransferFrom(msg.sender, address(this), _tokenIds[i]);
         }
     }
 
     function withdrawNft(uint[] memory _tokenIds) public {
         for (uint i = 0; i < _tokenIds.length; i++) {
-            // if (order.tokenIdsKey != bytes32(0) && !orderTokenIds.includes(tokenIds[i])) {
-            //     revert TokenIdNotFound(orderIndexes[i], tokenIds[j]);
-            // }
+            if (!isTokenIdOK(_tokenIds[i])) {
+                // revert TokenIdNotFound(orderIndexes[i], tokenIds[j]);
+            }
             collection.safeTransferFrom(address(this), msg.sender, _tokenIds[i]);
         }
     }
