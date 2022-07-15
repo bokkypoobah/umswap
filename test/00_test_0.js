@@ -11,16 +11,12 @@ describe("umswap", function () {
 
   beforeEach(async function () {
     console.log("      beforeEach");
-    // const TestERC20 = await ethers.getContractFactory("TestERC20");
-    // const MockRoyaltyEngineV1 = await ethers.getContractFactory("MockRoyaltyEngineV1");
     const ERC721Mock  = await ethers.getContractFactory("ERC721Mock");
     const UmswapFactory  = await ethers.getContractFactory("UmswapFactory");
-    // const Nix = await ethers.getContractFactory("Nix");
-    // const NixHelper = await ethers.getContractFactory("NixHelper");
     data = new Data();
     await data.init();
 
-    console.log("        --- Setup Accounts, WETH, NFT and Nix Contracts ---");
+    console.log("        --- Setup Accounts, NFT and Umswap Contracts - Assuming gasPrice: " + ethers.utils.formatUnits(data.gasPrice, "gwei") + " gwei, ethUsd: " + ethers.utils.formatUnits(data.ethUsd, 18) + " ---");
     // const erc1820Registry = await singletons.ERC1820Registry(data.deployer);
     // await data.addAccount(erc1820Registry.address, "ERC1820Registry");
     //
@@ -52,18 +48,6 @@ describe("umswap", function () {
     // await royaltyEngine.deployed();
     // await data.setRoyaltyEngine(royaltyEngine);
     //
-    // const nftA = await ERC721PresetMinterPauserAutoId.deploy("NFTeeA", "NFTA", "uri");
-    // await data.setNFTA(nftA);
-    // const nftATransactionReceipt = await data.nftA.deployTransaction.wait();
-    // if (DETAILS > 0) {
-    //   await data.printEvents("Deployed NFTA", nftATransactionReceipt);
-    // }
-    // const nftB = await ERC721PresetMinterPauserAutoId.deploy("NFTeeB", "NFTB", "uri");
-    // await data.setNFTB(nftB);
-    // const nftBTransactionReceipt = await data.nftB.deployTransaction.wait();
-    // if (DETAILS > 0) {
-    //   await data.printEvents("Deployed NFTB", nftBTransactionReceipt);
-    // }
     // const nix = await Nix.deploy(weth.address, royaltyEngine.address);
     // // console.log(nix);
     // await nix.deployed();
