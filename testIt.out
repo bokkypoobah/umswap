@@ -5,7 +5,7 @@
         --- Setup Accounts, WETH, NFT and Nix Contracts ---
         > Deployed ERC721Mock - gasUsed: 2301218 ~ ETH 0.04602436 ~ USD 54
         erc721Mock deployed
-        > Deployed UmswapFactory - gasUsed: 2914006 ~ ETH 0.05828012 ~ USD 69
+        > Deployed UmswapFactory - gasUsed: 3240183 ~ ETH 0.06480366 ~ USD 76
         UmswapFactory deployed
         --- Setup Completed ---
       00. Test 00
@@ -18,5 +18,5 @@
           + ERC721Mock:0x5FbD 5.0 Transfer(from: null:0x0000, to: maker0:0x7099, tokenId: 789)
 
 
-  1 passing (859ms)
+  1 passing (879ms)
 

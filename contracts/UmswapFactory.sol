@@ -287,6 +287,7 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
     function initUmswap(IERC721Partial _collection, string memory _symbol, string memory _name, uint[] memory _tokenIds) public {
         collection = _collection;
         super.initToken(msg.sender, _symbol, _name, 18);
+        // TODO: Store as 16 bits or 32 bits or 256 bits?
         tokenIds = _tokenIds;
     }
 
@@ -299,10 +300,12 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
 contract UmswapFactory is Owned, CloneFactory {
 
     Umswap public template;
+    Umswap[] public umswaps;
 
     error NotERC721();
     error TokenIdsMustBeSortedWithNoDuplicates();
 
+    event NewUmswap(Umswap _umswap, IERC721Partial _collection, string _name, uint[] _tokenIds);
     event ThankYou(uint tip);
 
     constructor() {
@@ -310,11 +313,31 @@ contract UmswapFactory is Owned, CloneFactory {
         template = new Umswap();
     }
 
+    uint8 constant ZERO = 48;
+    bytes constant UMSYMBOLPREFIX = "Um";
+    function genSymbol(uint id) internal pure returns (string memory s) {
+        bytes memory b = new bytes(20);
+        uint i;
+        uint j;
+        uint num;
+        for (i = 0; i < UMSYMBOLPREFIX.length; i++) {
+            b[j++] = UMSYMBOLPREFIX[i];
+        }
+        i = 7;
+        do {
+            i--;
+            num = id / 10 ** i;
+            b[j++] = bytes1(uint8(num % 10 + ZERO));
+        } while (i > 0);
+        s = string(b);
+    }
+
     function newUmswap(IERC721Partial _collection, string memory _name, uint[] memory _tokenIds) public {
         if (!isERC721(address(_collection))) {
             revert NotERC721();
         }
         if (_tokenIds.length > 0) {
+            // TODO: Check for valid tokenIds
             for (uint i = 1; i < _tokenIds.length; i++) {
                 if (_tokenIds[i - 1] >= _tokenIds[i]) {
                     revert TokenIdsMustBeSortedWithNoDuplicates();
@@ -322,6 +345,8 @@ contract UmswapFactory is Owned, CloneFactory {
             }
         }
         Umswap umswap = Umswap(createClone(address(template)));
-        umswap.initUmswap(_collection, "UMS001", _name, _tokenIds);
+        umswap.initUmswap(_collection, genSymbol(umswaps.length), _name, _tokenIds);
+        umswaps.push(umswap);
+        emit NewUmswap(umswap, _collection, _name, _tokenIds);
     }
 }
