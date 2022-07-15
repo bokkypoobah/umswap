@@ -112,7 +112,7 @@ describe("umswap", function () {
     // data.addAccount(umswapAddress, "Umswap");
     console.log("        umswapAddress: " + umswapAddress);
     const umswap  = await ethers.getContractAt("Umswap", umswapAddress);
-    data.addContract(umswap, "Umswap");
+    data.setUmswap(umswap);
 
     const umswapTotalSupply  = await umswap.totalSupply();
     console.log("        umswapTotalSupply: " + umswapTotalSupply);

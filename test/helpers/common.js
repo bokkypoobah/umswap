@@ -18,6 +18,7 @@ class Data {
 
     this.erc721Mock = null;
     this.umswapFactory = null;
+    this.umswap = null;
 
     this.gasPrice = ethers.utils.parseUnits("20", "gwei");
     this.ethUsd = ethers.utils.parseUnits("1186.00", 18);
@@ -134,6 +135,10 @@ class Data {
     this.umswapFactory = umswapFactory;
     this.addContract(umswapFactory, "UmswapFactory");
   }
+  async setUmswap(umswap) {
+    this.umswap = umswap;
+    this.addContract(umswap, "Umswap");
+  }
   async setWeth(weth) {
     this.weth = weth;
     this.addContract(weth, "WETH");
@@ -158,6 +163,9 @@ class Data {
     console.log("          Account                                  ETH " + this.padRight(await this.erc721Mock.symbol() + " (" + totalSupply + ")", 26) );
     console.log("          -------------------- ----------------------- -------------------------");
     const checkAccounts = [this.deployer, this.user0, this.user1, this.user2, this.integrator];
+    if (this.umswap != null) {
+      checkAccounts.push(this.umswap.address);
+    }
     for (let i = 0; i < checkAccounts.length; i++) {
       const ownerData = owners[checkAccounts[i]] || [];
       const balance = await ethers.provider.getBalance(checkAccounts[i]);
