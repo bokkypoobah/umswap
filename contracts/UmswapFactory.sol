@@ -335,7 +335,8 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
     uint public swappedIn;
     uint public swappedOut;
 
-    event ThankYou(address integrator, uint tipIntegrator, uint tipRemainder);
+    event Swapped(uint[] _inTokenIds, uint[] _outTokenIds, uint timestamp);
+    event ThankYou(address integrator, uint tipIntegrator, uint tipRemainder, uint timestamp);
 
     error InvalidTokenId(uint tokenId);
 
@@ -403,6 +404,7 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
         }
         swappedIn += _inTokenIds.length;
         swappedOut += _outTokenIds.length;
+        emit Swapped(_inTokenIds, _outTokenIds, block.timestamp);
         handleTips(integrator);
     }
 
@@ -419,7 +421,7 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
             if (tipRemainder > 0) {
                 payable(owner).transfer(tipRemainder);
             }
-            emit ThankYou(integrator, tipIntegrator, tipRemainder);
+            emit ThankYou(integrator, tipIntegrator, tipRemainder, block.timestamp);
         }
     }
     receive() external payable {
