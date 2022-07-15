@@ -387,17 +387,23 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
         if (_outTokenIds.length > _inTokenIds.length) {
             _burn(msg.sender, (_outTokenIds.length - _inTokenIds.length) * 10 ** 18);
         }
-        for (uint i = 0; i < _inTokenIds.length; i++) {
+        for (uint i = 0; i < _inTokenIds.length;) {
             if (!isTokenIdOK(_inTokenIds[i])) {
                 revert InvalidTokenId(_inTokenIds[i]);
             }
             collection.transferFrom(msg.sender, address(this), _inTokenIds[i]);
+            unchecked {
+                i++;
+            }
         }
-        for (uint i = 0; i < _outTokenIds.length; i++) {
+        for (uint i = 0; i < _outTokenIds.length;) {
             if (!isTokenIdOK(_outTokenIds[i])) {
                 revert InvalidTokenId(_outTokenIds[i]);
             }
             collection.transferFrom(address(this), msg.sender, _outTokenIds[i]);
+            unchecked {
+                i++;
+            }
         }
         if (_outTokenIds.length < _inTokenIds.length) {
             _mint(msg.sender, (_inTokenIds.length - _outTokenIds.length) * 10 ** 18);
@@ -458,12 +464,17 @@ contract UmswapFactory is Owned, CloneFactory {
         uint i;
         uint j;
         uint num;
-        for (i = 0; i < UMSYMBOLPREFIX.length; i++) {
+        for (i = 0; i < UMSYMBOLPREFIX.length;) {
             b[j++] = UMSYMBOLPREFIX[i];
+            unchecked {
+                i++;
+            }
         }
         i = 6;
         do {
-            i--;
+            unchecked {
+                i--;
+            }
             num = id / 10 ** i;
             b[j++] = bytes1(uint8(num % 10 + ZERO));
         } while (i > 0);
@@ -475,9 +486,12 @@ contract UmswapFactory is Owned, CloneFactory {
             revert NotERC721();
         }
         if (_tokenIds.length > 0) {
-            for (uint i = 1; i < _tokenIds.length; i++) {
+            for (uint i = 1; i < _tokenIds.length;) {
                 if (_tokenIds[i - 1] >= _tokenIds[i]) {
                     revert TokenIdsMustBeSortedWithNoDuplicates();
+                }
+                unchecked {
+                    i++;
                 }
             }
         }
