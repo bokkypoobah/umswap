@@ -120,12 +120,12 @@ describe("umswap", function () {
     const approval1Tx = await data.erc721Mock.connect(data.user0Signer).setApprovalForAll(umswapAddress, true);
     await data.printEvents("approval1Tx", await approval1Tx.wait());
 
-    const depositNft1Tx = await umswap.connect(data.user0Signer).depositNft([111, 222]);
+    const depositNft1Tx = await umswap.connect(data.user0Signer).depositNft([111, 333]);
     await data.printEvents("depositNft1Tx", await depositNft1Tx.wait());
 
     await data.printState("NFT Deposited");
 
-    const withdrawNft1Tx = await umswap.connect(data.user0Signer).withdrawNft([111, 222]);
+    const withdrawNft1Tx = await umswap.connect(data.user0Signer).withdrawNft([111, 333]);
     await data.printEvents("withdrawNft1Tx", await withdrawNft1Tx.wait());
 
     await data.printState("NFT Withdrawn");

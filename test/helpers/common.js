@@ -147,11 +147,11 @@ class Data {
   async printState(prefix) {
     console.log("        --- " + prefix + " ---");
 
-    let totalSupply = 0;
+    let erc721TotalSupply = 0;
     const owners = {};
     if (this.erc721Mock != null) {
-      totalSupply = await this.erc721Mock.totalSupply();
-      for (let i = 0; i < totalSupply; i++) {
+      erc721TotalSupply = await this.erc721Mock.totalSupply();
+      for (let i = 0; i < erc721TotalSupply; i++) {
         const tokenId = await this.erc721Mock.tokenByIndex(i);
         const ownerOf = await this.erc721Mock.ownerOf(tokenId);
         if (!owners[ownerOf]) {
@@ -160,7 +160,14 @@ class Data {
         owners[ownerOf].push(parseInt(tokenId));
       }
     }
-    console.log("          Account                                  ETH " + this.padRight(await this.erc721Mock.symbol() + " (" + totalSupply + ")", 26) );
+    let umswapSymbol = "?";
+    let umswapTotalSupply = 0;
+    if (this.umswap != null) {
+      umswapSymbol = await this.umswap.symbol();
+      umswapTotalSupply = await this.umswap.totalSupply();
+    }
+
+    console.log("          Account                                  ETH " + this.padRight(await this.erc721Mock.symbol() + " (" + erc721TotalSupply + ")", 26) + " " + umswapSymbol + " " + ethers.utils.formatEther(umswapTotalSupply));
     console.log("          -------------------- ----------------------- -------------------------");
     const checkAccounts = [this.deployer, this.user0, this.user1, this.user2, this.integrator];
     if (this.umswap != null) {

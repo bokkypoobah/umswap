@@ -334,6 +334,8 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
 
     event ThankYou(uint tip);
 
+    error InvalidTokenId(uint tokenId);
+
     function initUmswap(IERC721Partial _collection, string memory _symbol, string memory _name, uint[] memory _tokenIds) public {
         collection = _collection;
         super.initToken(msg.sender, _symbol, _name, 18);
@@ -372,7 +374,7 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
     function depositNft(uint[] memory _tokenIds) public payable reentrancyGuard {
         for (uint i = 0; i < _tokenIds.length; i++) {
             if (!isTokenIdOK(_tokenIds[i])) {
-                // revert TokenIdNotFound(orderIndexes[i], tokenIds[j]);
+                revert InvalidTokenId(_tokenIds[i]);
             }
             // emit SafeTransferFrom(address(collection), msg.sender, address(this), _tokenIds[i]);
             collection.safeTransferFrom(msg.sender, address(this), _tokenIds[i]);
@@ -383,7 +385,7 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
     function withdrawNft(uint[] memory _tokenIds) public payable reentrancyGuard {
         for (uint i = 0; i < _tokenIds.length; i++) {
             if (!isTokenIdOK(_tokenIds[i])) {
-                // revert TokenIdNotFound(orderIndexes[i], tokenIds[j]);
+                revert InvalidTokenId(_tokenIds[i]);
             }
             _burn(msg.sender, 1 * 10 ** 18);
             collection.safeTransferFrom(address(this), msg.sender, _tokenIds[i]);
@@ -424,7 +426,7 @@ contract UmswapFactory is Owned, CloneFactory {
         for (i = 0; i < UMSYMBOLPREFIX.length; i++) {
             b[j++] = UMSYMBOLPREFIX[i];
         }
-        i = 7;
+        i = 6;
         do {
             i--;
             num = id / 10 ** i;
