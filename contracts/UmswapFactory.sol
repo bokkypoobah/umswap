@@ -341,18 +341,27 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
         collection = _collection;
         super.initToken(msg.sender, _symbol, _name, 18);
         uint maxTokenId;
-        for (uint i = 0; i < _tokenIds.length; i++) {
+        for (uint i = 0; i < _tokenIds.length;) {
             if (_tokenIds[i] > maxTokenId) {
                 maxTokenId = _tokenIds[i];
             }
+            unchecked {
+                i++;
+            }
         }
         if (maxTokenId < 2 ** 16) {
-            for (uint i = 0; i < _tokenIds.length; i++) {
+            for (uint i = 0; i < _tokenIds.length;) {
                 tokenIds16.push(uint16(_tokenIds[i]));
+                unchecked {
+                    i++;
+                }
             }
         } else if (maxTokenId < 2 ** 32) {
-            for (uint i = 0; i < _tokenIds.length; i++) {
+            for (uint i = 0; i < _tokenIds.length;) {
                 tokenIds32.push(uint32(_tokenIds[i]));
+                unchecked {
+                    i++;
+                }
             }
         } else {
             tokenIds256 = _tokenIds;
