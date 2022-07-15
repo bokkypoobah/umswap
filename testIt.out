@@ -6,7 +6,7 @@ Compiled 1 Solidity file successfully
         --- Setup Accounts, NFT and Umswap Contracts - Assuming gasPrice: 20.0 gwei, ethUsd: 1186.0 ---
         > Deployed ERC721Mock - gasUsed: 2722226 ~ ETH 0.05444452 ~ USD 64
         erc721Mock deployed
-        > Deployed UmswapFactory - gasUsed: 3798156 ~ ETH 0.07596312 ~ USD 90
+        > Deployed UmswapFactory - gasUsed: 3933571 ~ ETH 0.07867142 ~ USD 93
         UmswapFactory deployed
         --- Setup Completed ---
         > Minted ERC721Mock - gasUsed: 141088 ~ ETH 0.00282176 ~ USD 3
@@ -23,7 +23,7 @@ Compiled 1 Solidity file successfully
           + ERC721Mock:0x5FbD 8.0 Transfer(from: null:0x0000, to: user1:0x3C44, tokenId: 666)
           Account                                  ETH ERC721MOCK (6)            
           -------------------- ----------------------- -------------------------
-          deployer:0xf39F      9999.986785908282136096 []                       
+          deployer:0xf39F      9999.986543559856424957 []                       
           user0:0x7099                         10000.0 [111,222,333]            
           user1:0x3C44                         10000.0 [444,555,666]            
           user2:0x90F7                         10000.0 []                       
@@ -36,7 +36,7 @@ Compiled 1 Solidity file successfully
         umswapTotalSupply: 0
         > approval1Tx - gasUsed: 46692 ~ ETH 0.00093384 ~ USD 1
           + ERC721Mock:0x5FbD 10.0 ApprovalForAll(owner: user0:0x7099, operator: Umswap:0x9f1a, approved: true)
-        > depositNft1Tx - gasUsed: 221107 ~ ETH 0.00442214 ~ USD 5
+        > depositNft1Tx - gasUsed: 243334 ~ ETH 0.00486668 ~ USD 5
           + ERC721Mock:0x5FbD 11.0 Approval(owner: user0:0x7099, approved: null:0x0000, tokenId: 111)
           + ERC721Mock:0x5FbD 11.1 Transfer(from: user0:0x7099, to: Umswap:0x9f1a, tokenId: 111)
           + Umswap:0x9f1a 11.2 ERC721Received(collection: Umswap:0x9f1a, from: user0:0x7099, tokenId: 111)
@@ -45,7 +45,32 @@ Compiled 1 Solidity file successfully
           + ERC721Mock:0x5FbD 11.5 Transfer(from: user0:0x7099, to: Umswap:0x9f1a, tokenId: 222)
           + Umswap:0x9f1a 11.6 ERC721Received(collection: Umswap:0x9f1a, from: user0:0x7099, tokenId: 222)
           + Umswap:0x9f1a 11.7 Transfer(from: null:0x0000, to: user0:0x7099, tokens: 1.0)
-    ✔ 00. Test 00 (133ms)
+        --- NFT Deposited ---
+          Account                                  ETH ERC721MOCK (6)            
+          -------------------- ----------------------- -------------------------
+          deployer:0xf39F      9999.986142040975441413 []                       
+          user0:0x7099         9999.999636437248137676 [333]                    
+          user1:0x3C44                         10000.0 [444,555,666]            
+          user2:0x90F7                         10000.0 []                       
+          integrator:0x15d3                    10000.0 []                       
+
+        > withdrawNft1Tx - gasUsed: 161898 ~ ETH 0.00323796 ~ USD 3
+          + Umswap:0x9f1a 12.0 Transfer(from: user0:0x7099, to: null:0x0000, tokens: 1.0)
+          + ERC721Mock:0x5FbD 12.1 Approval(owner: Umswap:0x9f1a, approved: null:0x0000, tokenId: 111)
+          + ERC721Mock:0x5FbD 12.2 Transfer(from: Umswap:0x9f1a, to: user0:0x7099, tokenId: 111)
+          + Umswap:0x9f1a 12.3 Transfer(from: user0:0x7099, to: null:0x0000, tokens: 1.0)
+          + ERC721Mock:0x5FbD 12.4 Approval(owner: Umswap:0x9f1a, approved: null:0x0000, tokenId: 222)
+          + ERC721Mock:0x5FbD 12.5 Transfer(from: Umswap:0x9f1a, to: user0:0x7099, tokenId: 222)
+        --- NFT Withdrawn ---
+          Account                                  ETH ERC721MOCK (6)            
+          -------------------- ----------------------- -------------------------
+          deployer:0xf39F      9999.986142040975441413 []                       
+          user0:0x7099          9999.99943934417359672 [111,222,333]            
+          user1:0x3C44                         10000.0 [444,555,666]            
+          user2:0x90F7                         10000.0 []                       
+          integrator:0x15d3                    10000.0 []                       
+
+    ✔ 00. Test 00 (301ms)
     - 01. Test 01
 
 

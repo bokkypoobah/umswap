@@ -138,26 +138,6 @@ class Data {
     this.weth = weth;
     this.addContract(weth, "WETH");
   }
-  async setRoyaltyEngine(royaltyEngine) {
-    this.royaltyEngine = royaltyEngine;
-    this.addContract(royaltyEngine, "RoyaltyEngine");
-  }
-  async setNFTA(nftA) {
-    this.nftA = nftA;
-    this.addContract(nftA, "NFTA");
-  }
-  async setNFTB(nftB) {
-    this.nftB = nftB;
-    this.addContract(nftB, "NFTB");
-  }
-  async setNix(nix) {
-    this.nix = nix;
-    this.addContract(nix, "Nix");
-  }
-  async setNixHelper(nixHelper) {
-    this.nixHelper = nixHelper;
-    this.addContract(nixHelper, "NixHelper");
-  }
 
   async printState(prefix) {
     console.log("        --- " + prefix + " ---");

@@ -300,6 +300,12 @@ contract BasicToken is IERC20, Owned {
         emit Transfer(address(0), tokenOwner, tokens);
         return true;
     }
+    function _burn(address tokenOwner, uint tokens) internal returns (bool success) {
+        balances[tokenOwner] -= tokens;
+        _totalSupply -= tokens;
+        emit Transfer(tokenOwner, address(0), tokens);
+        return true;
+    }
 }
 
 
@@ -363,7 +369,7 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
     }
 
     // event SafeTransferFrom(address collection, address from, address to, uint tokenId);
-    function depositNft(uint[] memory _tokenIds) public {
+    function depositNft(uint[] memory _tokenIds) public payable reentrancyGuard {
         for (uint i = 0; i < _tokenIds.length; i++) {
             if (!isTokenIdOK(_tokenIds[i])) {
                 // revert TokenIdNotFound(orderIndexes[i], tokenIds[j]);
@@ -374,11 +380,12 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
         }
     }
 
-    function withdrawNft(uint[] memory _tokenIds) public {
+    function withdrawNft(uint[] memory _tokenIds) public payable reentrancyGuard {
         for (uint i = 0; i < _tokenIds.length; i++) {
             if (!isTokenIdOK(_tokenIds[i])) {
                 // revert TokenIdNotFound(orderIndexes[i], tokenIds[j]);
             }
+            _burn(msg.sender, 1 * 10 ** 18);
             collection.safeTransferFrom(address(this), msg.sender, _tokenIds[i]);
         }
     }
