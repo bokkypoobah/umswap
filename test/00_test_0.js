@@ -102,7 +102,7 @@ describe("umswap", function () {
   });
 
   it("00. Test 00", async function () {
-    console.log("      00. Test 00 - Happy 00");
+    console.log("      00. Test 00 - Happy Path 00");
 
     const tokenIds = [111, 333, 555];
     const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "Odd TokenIds", tokenIds);
