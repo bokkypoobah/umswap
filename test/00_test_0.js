@@ -153,12 +153,20 @@ describe("umswap", function () {
 
     const generateRange = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
 
-    const tokenIds = generateRange(0, 100, 1);
+    let rangeStart = 0;
+    let tokenIds = generateRange(rangeStart, parseInt(rangeStart) + 1000, 1);
+    const newUmswap16Tx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "16 bit tokenId collection", tokenIds, { value: ethers.utils.parseEther("0") });
+    await data.printEvents("newUmswap16", await newUmswap16Tx.wait());
 
+    rangeStart = 65535;
+    tokenIds = generateRange(rangeStart, parseInt(rangeStart) + 1000, 1);
+    const newUmswap32Tx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "32 bit tokenId collection", tokenIds, { value: ethers.utils.parseEther("0") });
+    await data.printEvents("newUmswap32", await newUmswap32Tx.wait());
 
-    // function newUmswap(IERC721Partial _collection, string memory _name, uint[] memory _tokenIds) public {
-    const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "Name", tokenIds, { value: ethers.utils.parseEther("0") });
-    await data.printEvents("newUmswap", await newUmswapTx.wait());
+    rangeStart = 6553565535;
+    tokenIds = generateRange(rangeStart, parseInt(rangeStart) + 1000, 1);
+    const newUmswap256Tx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "256 bit tokenId collection", tokenIds, { value: ethers.utils.parseEther("0") });
+    await data.printEvents("newUmswap256", await newUmswap256Tx.wait());
 
   //   console.log("        --- Maker Add Orders ---");
   //   const addOrder1Tx = await data.nix.connect(data.maker0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ANY, [ 3, 4, 5 ], ethers.utils.parseEther("11"), 0, 5, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") });

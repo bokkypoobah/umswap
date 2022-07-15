@@ -281,6 +281,8 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
 
     IERC721Partial public collection;
     uint16[] public tokenIds16;
+    uint32[] public tokenIds32;
+    uint[] public tokenIds256;
 
     event ThankYou(uint tip);
 
@@ -293,11 +295,21 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
                 maxTokenId = _tokenIds[i];
             }
         }
+        if (maxTokenId < 2 ** 16) {
+            for (uint i = 0; i < _tokenIds.length; i++) {
+                tokenIds16.push(uint16(_tokenIds[i]));
+            }
+        } else if (maxTokenId < 2 ** 32) {
+            for (uint i = 0; i < _tokenIds.length; i++) {
+                tokenIds32.push(uint32(_tokenIds[i]));
+            }
+        } else {
+            for (uint i = 0; i < _tokenIds.length; i++) {
+                tokenIds256.push(_tokenIds[i]);
+            }
+        }
         // TODO: Store as 16 bits or 32 bits or 256 bits?
         // tokenIds = _tokenIds;
-        for (uint i = 0; i < _tokenIds.length; i++) {
-            tokenIds16.push(uint16(_tokenIds[i]));
-        }
     }
 
     function onERC721Received(address /*_operator*/, address /*_from*/, uint _tokenId, bytes memory /*_data*/) external override returns(bytes4) {
