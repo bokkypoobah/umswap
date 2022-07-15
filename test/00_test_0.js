@@ -124,6 +124,11 @@ describe("umswap", function () {
     await data.printEvents("swapOut1Tx", await swapOut1Tx.wait());
 
     await data.printState("NFT Swapped Out");
+
+    const withdrawal1Tx = await data.umswapFactory.withdraw(ZERO_ADDRESS, 0, 0);
+    await data.printEvents("withdrawal1Tx", await withdrawal1Tx.wait());
+
+    await data.printState("Owner Withdrawn");
   });
 
   it.skip("01. Test 01", async function () {
