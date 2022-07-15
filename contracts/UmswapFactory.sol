@@ -332,6 +332,8 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
     uint16[] public tokenIds16;
     uint32[] public tokenIds32;
     uint[] public tokenIds256;
+    uint public swappedIn;
+    uint public swappedOut;
 
     event ThankYou(uint tip);
 
@@ -399,6 +401,8 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
         if (_outTokenIds.length < _inTokenIds.length) {
             _mint(msg.sender, (_inTokenIds.length - _outTokenIds.length) * 10 ** 18);
         }
+        swappedIn += _inTokenIds.length;
+        swappedOut += _outTokenIds.length;
         handleTips(integrator);
     }
 
