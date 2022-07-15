@@ -1,4 +1,4 @@
-const { ZERO_ADDRESS, BUYORSELL, ANYORALL, BUYORSELLSTRING, ANYORALLSTRING, Data } = require('./helpers/common');
+const { ZERO_ADDRESS, BUYORSELL, ANYORALL, BUYORSELLSTRING, ANYORALLSTRING, Data, generateRange } = require('./helpers/common');
 const { singletons, expectRevert } = require("@openzeppelin/test-helpers");
 const { expect, assert } = require("chai");
 const { BigNumber } = require("ethers");
@@ -134,8 +134,6 @@ describe("umswap", function () {
 
   it("00. Test 00", async function () {
     console.log("      00. Test 00 - New Umswaps with 16, 32 and 256 bit tokenId collections");
-
-    const generateRange = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
 
     for (let numberOfTokenIds of [10, 100, 1000]) {
       for (let rangeStart of [0, 65535, 6553565535]) {

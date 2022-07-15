@@ -285,6 +285,8 @@ class Data {
   }
 }
 
+const generateRange = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
+
 /* Exporting the module */
 module.exports = {
     ZERO_ADDRESS,
@@ -292,5 +294,6 @@ module.exports = {
     ANYORALL,
     BUYORSELLSTRING,
     ANYORALLSTRING,
-    Data
+    Data,
+    generateRange
 }
