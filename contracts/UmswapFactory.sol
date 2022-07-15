@@ -165,7 +165,6 @@ interface IERC20 {
     event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
 }
 
-
 interface IERC165 {
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }
