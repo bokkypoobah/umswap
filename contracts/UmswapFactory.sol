@@ -412,7 +412,9 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
         return this.onERC721Received.selector;
     }
 
-    function getTokenIds() public view returns (uint[] memory _tokenIds, uint _swappedIn, uint _swappedOut) {
+    function getInfo() public view returns (string memory __symbol, string memory __name, uint[] memory _tokenIds, uint _swappedIn, uint _swappedOut, uint __totalSupply) {
+        __symbol = _symbol;
+        __name = _name;
         if (tokenIds16.length > 0) {
             _tokenIds = new uint[](tokenIds16.length);
             for (uint i = 0; i < tokenIds16.length; ) {
@@ -442,6 +444,7 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
         }
         _swappedIn = swappedIn;
         _swappedOut = swappedOut;
+        __totalSupply = _totalSupply;
     }
 }
 
@@ -543,18 +546,24 @@ contract UmswapFactory is Owned, CloneFactory {
 
     function getUmswaps(uint[] memory indices) public view returns (
         Umswap[] memory _umswaps,
+        string[] memory _symbols,
+        string[] memory _names,
         uint[][] memory _tokenIds,
         uint[] memory _swappedIns,
-        uint[] memory _swappedOuts
+        uint[] memory _swappedOuts,
+        uint[] memory _totalSupplies
     ) {
         uint length = indices.length;
         _umswaps = new Umswap[](length);
+        _symbols = new string[](length);
+        _names = new string[](length);
         _tokenIds = new uint[][](length);
         _swappedIns = new uint[](length);
         _swappedOuts = new uint[](length);
+        _totalSupplies = new uint[](length);
         for (uint i = 0; i < length;) {
             _umswaps[i] = umswaps[i];
-            (_tokenIds[i], _swappedIns[i], _swappedOuts[i]) = umswaps[i].getTokenIds();
+            (_symbols[i], _names[i], _tokenIds[i], _swappedIns[i], _swappedOuts[i], _totalSupplies[i]) = umswaps[i].getInfo();
             unchecked {
                 i++;
             }

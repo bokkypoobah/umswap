@@ -129,14 +129,6 @@ describe("umswap", function () {
     await data.printEvents("withdrawal1Tx", await withdrawal1Tx.wait());
 
     await data.printState("Owner Withdrawn");
-
-    const getUmswapsLength = await data.umswapFactory.getUmswapsLength();
-    console.log("      getUmswapsLength: " + getUmswapsLength);
-    let indices = generateRange(0, getUmswapsLength - 1, 1);
-    const getUmswaps = await data.umswapFactory.getUmswaps(indices);
-    for (let i = 0; i < getUmswaps[0].length; i++) {
-      console.log("      " + i + " " + JSON.stringify(getUmswaps[0][i]) + " " + JSON.stringify(getUmswaps[1][i].map((x) => { return parseInt(x.toString()); })) + " " + getUmswaps[2][i] + " " + getUmswaps[3][i]);
-    }
   });
 
   it("01. Test 01", async function () {
@@ -150,6 +142,7 @@ describe("umswap", function () {
         await data.printEvents(name, await newUmswapTx.wait());
       }
     }
+    await data.printState("End");
   });
 
   it("02. Test 02", async function () {
@@ -163,14 +156,7 @@ describe("umswap", function () {
         await data.printEvents(name, await newUmswapTx.wait());
       }
     }
-
-    const getUmswapsLength = await data.umswapFactory.getUmswapsLength();
-    console.log("      getUmswapsLength: " + getUmswapsLength);
-    let indices = generateRange(0, getUmswapsLength - 1, 1);
-    const getUmswaps = await data.umswapFactory.getUmswaps(indices);
-    for (let i = 0; i < getUmswaps[0].length; i++) {
-      console.log("      " + i + " " + JSON.stringify(getUmswaps[0][i]) + " " + JSON.stringify(getUmswaps[1][i].map((x) => { return parseInt(x.toString()); })) + " " + getUmswaps[2][i] + " " + getUmswaps[3][i]);
-    }
+    await data.printState("End");
   });
 
   // it("01. Maker BuyAll Test", async function () {

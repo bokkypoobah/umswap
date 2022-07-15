@@ -184,6 +184,15 @@ class Data {
     }
     console.log();
 
+    const getUmswapsLength = await this.umswapFactory.getUmswapsLength();
+    console.log("      getUmswaps - Length: " + getUmswapsLength);
+    let indices = generateRange(0, getUmswapsLength - 1, 1);
+    const getUmswaps = await this.umswapFactory.getUmswaps(indices);
+    for (let i = 0; i < getUmswaps[0].length; i++) {
+      console.log("        " + i + " " + JSON.stringify(getUmswaps[0][i]) + " " + getUmswaps[1][i] + " " + getUmswaps[2][i] + " " + JSON.stringify(getUmswaps[3][i].map((x) => { return parseInt(x.toString()); })) + " " + getUmswaps[4][i] + " " + getUmswaps[5][i] + " " + getUmswaps[6][i]);
+    }
+    console.log();
+
     if (false) {
     if (this.nix != null) {
       const tokensLength = (await this.nix.getLengths())[0];
