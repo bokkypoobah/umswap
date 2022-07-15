@@ -416,7 +416,7 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
 contract UmswapFactory is Owned, CloneFactory {
 
     uint8 constant ZERO = 48;
-    bytes constant UMSYMBOLPREFIX = "Ums";
+    bytes constant UMSYMBOLPREFIX = "UMS";
     bytes4 constant ERC721_INTERFACE = 0x80ac58cd;
 
     Umswap public template;
