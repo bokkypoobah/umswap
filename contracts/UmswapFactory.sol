@@ -469,6 +469,13 @@ contract UmswapFactory is Owned, CloneFactory {
         template = new Umswap();
     }
 
+    function isERC721(address token) internal view returns (bool b) {
+        try IERC721Partial(token).supportsInterface(ERC721_INTERFACE) returns (bool _b) {
+            b = _b;
+        } catch {
+        }
+    }
+
     function genSymbol(uint id) internal pure returns (string memory s) {
         bytes memory b = new bytes(20);
         uint i;
@@ -543,13 +550,6 @@ contract UmswapFactory is Owned, CloneFactory {
         umswap.initUmswap(_collection, genSymbol(umswaps.length), _name, _tokenIds);
         umswaps.push(umswap);
         emit NewUmswap(umswap, _collection, _name, _tokenIds, block.timestamp);
-    }
-
-    function isERC721(address token) internal view returns (bool b) {
-        try IERC721Partial(token).supportsInterface(ERC721_INTERFACE) returns (bool _b) {
-            b = _b;
-        } catch {
-        }
     }
 
     function withdraw(address token, uint tokens, uint tokenId) public onlyOwner {
