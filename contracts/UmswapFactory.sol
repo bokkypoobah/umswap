@@ -300,12 +300,12 @@ contract BasicToken is IERC20, Owned {
 /// @title ERC-721 pool
 contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
 
-    IERC721Partial public collection;
-    uint16[] public tokenIds16;
-    uint32[] public tokenIds32;
-    uint[] public tokenIds256;
-    uint public swappedIn;
-    uint public swappedOut;
+    IERC721Partial private collection;
+    uint16[] private tokenIds16;
+    uint32[] private tokenIds32;
+    uint[] private tokenIds256;
+    uint private swappedIn;
+    uint private swappedOut;
 
     event Swapped(uint[] _inTokenIds, uint[] _outTokenIds, uint timestamp);
     event ThankYou(address integrator, uint tipIntegrator, uint tipRemainder, uint timestamp);
@@ -560,5 +560,5 @@ contract UmswapFactory is Owned, CloneFactory {
             }
         }
     }
-    
+
 }
