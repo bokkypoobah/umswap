@@ -370,25 +370,44 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
         }
     }
 
-    // event SafeTransferFrom(address collection, address from, address to, uint tokenId);
-    function depositNft(uint[] memory _tokenIds) public payable reentrancyGuard {
-        for (uint i = 0; i < _tokenIds.length; i++) {
-            if (!isTokenIdOK(_tokenIds[i])) {
-                revert InvalidTokenId(_tokenIds[i]);
-            }
-            // emit SafeTransferFrom(address(collection), msg.sender, address(this), _tokenIds[i]);
-            collection.safeTransferFrom(msg.sender, address(this), _tokenIds[i]);
-            _mint(msg.sender, 1 * 10 ** 18);
-        }
-    }
+    // function depositNft(uint[] memory _tokenIds) public payable reentrancyGuard {
+    //     for (uint i = 0; i < _tokenIds.length; i++) {
+    //         if (!isTokenIdOK(_tokenIds[i])) {
+    //             revert InvalidTokenId(_tokenIds[i]);
+    //         }
+    //         collection.safeTransferFrom(msg.sender, address(this), _tokenIds[i]);
+    //         _mint(msg.sender, 1 * 10 ** 18);
+    //     }
+    // }
 
-    function withdrawNft(uint[] memory _tokenIds) public payable reentrancyGuard {
-        for (uint i = 0; i < _tokenIds.length; i++) {
-            if (!isTokenIdOK(_tokenIds[i])) {
-                revert InvalidTokenId(_tokenIds[i]);
+    // function withdrawNft(uint[] memory _tokenIds) public payable reentrancyGuard {
+    //     for (uint i = 0; i < _tokenIds.length; i++) {
+    //         if (!isTokenIdOK(_tokenIds[i])) {
+    //             revert InvalidTokenId(_tokenIds[i]);
+    //         }
+    //         _burn(msg.sender, 1 * 10 ** 18);
+    //         collection.safeTransferFrom(address(this), msg.sender, _tokenIds[i]);
+    //     }
+    // }
+
+    function swap(uint[] memory _inTokenIds, uint[] memory _outTokenIds) public payable reentrancyGuard {
+        if (_outTokenIds.length > _inTokenIds.length) {
+            _burn(msg.sender, (_outTokenIds.length - _inTokenIds.length) * 10 ** 18);
+        }
+        for (uint i = 0; i < _inTokenIds.length; i++) {
+            if (!isTokenIdOK(_inTokenIds[i])) {
+                revert InvalidTokenId(_inTokenIds[i]);
             }
-            _burn(msg.sender, 1 * 10 ** 18);
-            collection.safeTransferFrom(address(this), msg.sender, _tokenIds[i]);
+            collection.safeTransferFrom(msg.sender, address(this), _inTokenIds[i]);
+        }
+        for (uint i = 0; i < _outTokenIds.length; i++) {
+            if (!isTokenIdOK(_outTokenIds[i])) {
+                revert InvalidTokenId(_outTokenIds[i]);
+            }
+            collection.safeTransferFrom(address(this), msg.sender, _outTokenIds[i]);
+        }
+        if (_outTokenIds.length < _inTokenIds.length) {
+            _mint(msg.sender, (_inTokenIds.length - _outTokenIds.length) * 10 ** 18);
         }
     }
 
