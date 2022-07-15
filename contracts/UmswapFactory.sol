@@ -504,4 +504,50 @@ contract UmswapFactory is Owned, CloneFactory {
 
     receive() external payable {
     }
+
+    function getUmswapsLength() public view returns (uint _length) {
+        return umswaps.length;
+    }
+
+    function getUmswaps(uint[] memory indices) public view returns (Umswap[] memory _umswaps) {
+        uint length = indices.length;
+        _umswaps = new Umswap[](length);
+        for (uint i = 0; i < length;) {
+            _umswaps[i] = umswaps[i];
+            unchecked {
+                i++;
+            }
+        }
+    }
+
+    //
+    // function getTokens(
+    //     uint[] memory tokensIndices
+    // ) public view returns (
+    //     address[] memory tokens,
+    //     uint[] memory ordersLengthList,
+    //     uint[] memory executedList,
+    //     uint[] memory volumeTokenList,
+    //     uint[] memory volumeWethList
+    // ) {
+    //     uint length = tokensIndices.length;
+    //     tokens = new address[](length);
+    //     ordersLengthList = new uint[](length);
+    //     executedList = new uint[](length);
+    //     volumeTokenList = new uint[](length);
+    //     volumeWethList = new uint[](length);
+    //     (uint tokensLength,) = nix.getLengths();
+    //     for (uint i = 0; i < length; i++) {
+    //         uint tokenIndex = tokensIndices[i];
+    //         if (tokenIndex < tokensLength) {
+    //             (address token, uint64 ordersLength, uint64 executed, uint64 volumeToken, uint volumeWeth) = nix.getToken(tokenIndex);
+    //             tokens[i] = token;
+    //             ordersLengthList[i] = ordersLength;
+    //             executedList[i] = executed;
+    //             volumeTokenList[i] = volumeToken;
+    //             volumeWethList[i] = volumeWeth;
+    //         }
+    //     }
+    // }
+
 }

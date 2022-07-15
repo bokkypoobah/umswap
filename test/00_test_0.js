@@ -101,7 +101,7 @@ describe("umswap", function () {
     await data.printState("Setup Completed");
   });
 
-  it("00. Test 00", async function () {
+  it.skip("00. Test 00", async function () {
     console.log("      00. Test 00 - Happy Path 00");
 
     const tokenIds = [111, 333, 555];
@@ -142,6 +142,26 @@ describe("umswap", function () {
         await data.printEvents(name, await newUmswapTx.wait());
       }
     }
+  });
+
+  it("02. Test 02", async function () {
+    console.log("      02. Test 02 - Get Data");
+    for (let numberOfTokenIds of [10, 20, 30]) {
+      for (let rangeStart of [0, 65]) {
+        // console.log("numberOfTokenIds: " + numberOfTokenIds + ", rangeStart: " + rangeStart);
+        let tokenIds = generateRange(rangeStart, parseInt(rangeStart) + numberOfTokenIds, 1);
+        const name = "Collection size " + numberOfTokenIds + " starting " + rangeStart;
+        const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, name, tokenIds, { value: ethers.utils.parseEther("0") });
+        await data.printEvents(name, await newUmswapTx.wait());
+      }
+    }
+
+    const getUmswapsLength = await data.umswapFactory.getUmswapsLength();
+    console.log("      getUmswapsLength: " + getUmswapsLength);
+    let indices = generateRange(0, getUmswapsLength - 1, 1);
+    console.log("      indices: " + JSON.stringify(indices));
+    const getUmswaps = await data.umswapFactory.getUmswaps(indices);
+    console.log("      getUmswaps: " + JSON.stringify(getUmswaps, null, 2));
   });
 
   // it("01. Maker BuyAll Test", async function () {
