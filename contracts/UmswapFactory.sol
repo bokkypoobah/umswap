@@ -185,6 +185,19 @@ interface ERC721TokenReceiver {
 
 bytes4 constant ERC721_INTERFACE = 0x80ac58cd;
 
+contract ReentrancyGuard {
+    error ReentrancyAttempted();
+    uint private _executing;
+    modifier reentrancyGuard() {
+        if (_executing == 1) {
+            revert ReentrancyAttempted();
+        }
+        _executing = 1;
+        _;
+        _executing = 2;
+    }
+}
+
 contract Owned {
     bool initialised;
     address public owner;
@@ -213,6 +226,10 @@ contract Owned {
         emit OwnershipTransferred(owner, _newOwner);
         owner = _newOwner;
     }
+}
+
+contract OwnedWithWithdraw is Owned {
+    event Withdrawn(address indexed token, uint tokens, uint tokenId);
 
     function isERC721(address token) internal view returns (bool b) {
         try IERC721Partial(token).supportsInterface(ERC721_INTERFACE) returns (bool _b) {
@@ -220,11 +237,6 @@ contract Owned {
         } catch {
         }
     }
-}
-
-contract OwnedWithWithdraw is Owned {
-    event Withdrawn(address indexed token, uint tokens, uint tokenId);
-
     function withdraw(address token, uint tokens, uint tokenId) public onlyOwner {
         if (token == address(0)) {
             if (tokens == 0) {
@@ -244,6 +256,7 @@ contract OwnedWithWithdraw is Owned {
         emit Withdrawn(token, tokens, tokenId);
     }
 }
+
 
 /// @notice Basic token = ERC20 + symbol + name + decimals + mint + ownership
 contract BasicToken is IERC20, Owned {
@@ -309,20 +322,6 @@ contract BasicToken is IERC20, Owned {
         _totalSupply -= tokens;
         emit Transfer(tokenOwner, address(0), tokens);
         return true;
-    }
-}
-
-
-contract ReentrancyGuard {
-    error ReentrancyAttempted();
-    uint private _executing;
-    modifier reentrancyGuard() {
-        if (_executing == 1) {
-            revert ReentrancyAttempted();
-        }
-        _executing = 1;
-        _;
-        _executing = 2;
     }
 }
 
