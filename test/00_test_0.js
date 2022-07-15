@@ -102,8 +102,50 @@ describe("umswap", function () {
   });
 
   it("00. Test 00", async function () {
-    console.log("      00. Test 00 - New Umswaps with 16, 32 and 256 bit tokenId collections");
+    console.log("      00. Test 00 - Happy 00");
 
+    const tokenIds = [111, 333, 555];
+    const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "Odd TokenIds", tokenIds);
+    await data.printEvents("Odd TokenIds", await newUmswapTx.wait());
+
+    const umswapAddress = await data.umswapFactory.umswaps(0);
+    // data.addAccount(umswapAddress, "Umswap");
+    console.log("        umswapAddress: " + umswapAddress);
+    const umswap  = await ethers.getContractAt("Umswap", umswapAddress);
+    data.addContract(umswap, "Umswap");
+
+    const umswapTotalSupply  = await umswap.totalSupply();
+    console.log("        umswapTotalSupply: " + umswapTotalSupply);
+
+    const approval1Tx = await data.erc721Mock.connect(data.user0Signer).setApprovalForAll(umswapAddress, true);
+    await data.printEvents("approval1Tx", await approval1Tx.wait());
+
+    const depositNft1Tx = await umswap.connect(data.user0Signer).depositNft([111, 222]);
+    await data.printEvents("depositNft1Tx", await depositNft1Tx.wait());
+
+    // function depositNft(uint[] memory _tokenIds) public {
+    // data.erc721Mock.connect(data.user0Signer).setApprovalForAll(umswapAddress, true);
+    // await data.printEvents("approval1Tx", await approval1Tx.wait());
+
+    // const setup5 = [];
+    // setup5.push(data.nftA.connect(data.user0Signer).setApprovalForAll(nix.address, true));
+    // setup5.push(data.nftA.connect(data.maker1Signer).setApprovalForAll(nix.address, true));
+    // setup5.push(data.nftA.connect(data.taker0Signer).setApprovalForAll(nix.address, true));
+    // setup5.push(data.nftA.connect(data.taker1Signer).setApprovalForAll(nix.address, true));
+    // const [approve0Tx, approve1Tx, approve2Tx, approve3Tx] = await Promise.all(setup5);
+    // if (DETAILS > 0) {
+    //   [approve0Tx, approve1Tx, approve2Tx, approve3Tx].forEach( async function (a) {
+    //     await data.printEvents("NFTA.approved(nix)", await a.wait());
+    //   });
+    // }
+    // // console.log("bytecode ~" + JSON.stringify(nix.deployTransaction.data.length/2, null, 2));
+    // await data.printState("Setup Completed. Nix bytecode ~" + nix.deployTransaction.data.length/2 + ", NixHelper bytecode ~" + nixHelper.deployTransaction.data.length/2);
+
+
+  });
+
+  it.skip("01. Test 01", async function () {
+    console.log("      01. Test 01 - New Umswaps with 16, 32 and 256 bit tokenId collections");
     for (let numberOfTokenIds of [10, 100, 1000]) {
       for (let rangeStart of [0, 65535, 6553565535]) {
         // console.log("numberOfTokenIds: " + numberOfTokenIds + ", rangeStart: " + rangeStart);

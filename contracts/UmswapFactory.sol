@@ -294,7 +294,7 @@ contract BasicToken is IERC20, Owned {
     function allowance(address tokenOwner, address spender) override external view returns (uint remaining) {
         return allowed[tokenOwner][spender];
     }
-    function mint(address tokenOwner, uint tokens) external onlyOwner returns (bool success) {
+    function _mint(address tokenOwner, uint tokens) internal returns (bool success) {
         balances[tokenOwner] += tokens;
         _totalSupply += tokens;
         emit Transfer(address(0), tokenOwner, tokens);
@@ -362,12 +362,15 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
         }
     }
 
+    // event SafeTransferFrom(address collection, address from, address to, uint tokenId);
     function depositNft(uint[] memory _tokenIds) public {
         for (uint i = 0; i < _tokenIds.length; i++) {
             if (!isTokenIdOK(_tokenIds[i])) {
                 // revert TokenIdNotFound(orderIndexes[i], tokenIds[j]);
             }
+            // emit SafeTransferFrom(address(collection), msg.sender, address(this), _tokenIds[i]);
             collection.safeTransferFrom(msg.sender, address(this), _tokenIds[i]);
+            _mint(msg.sender, 1 * 10 ** 18);
         }
     }
 
@@ -380,8 +383,10 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
         }
     }
 
-    function onERC721Received(address /*_operator*/, address /*_from*/, uint _tokenId, bytes memory /*_data*/) external override returns(bytes4) {
-        emit ThankYou(_tokenId);
+    event ERC721Received(address collection, address from, uint tokenId);
+    function onERC721Received(address /*_operator*/, address _from, uint _tokenId, bytes memory /*_data*/) external override returns(bytes4) {
+        // emit ThankYou(_tokenId);
+        emit ERC721Received(address(this), _from, _tokenId);
         return this.onERC721Received.selector;
     }
 }
