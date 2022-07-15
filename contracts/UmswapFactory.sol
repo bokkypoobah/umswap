@@ -183,8 +183,6 @@ interface ERC721TokenReceiver {
 }
 
 
-bytes4 constant ERC721_INTERFACE = 0x80ac58cd;
-
 contract ReentrancyGuard {
     error ReentrancyAttempted();
     uint private _executing;
@@ -197,6 +195,7 @@ contract ReentrancyGuard {
         _executing = 2;
     }
 }
+
 
 contract Owned {
     bool initialised;
@@ -344,7 +343,7 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
         }
     }
 
-    function isTokenIdOK(uint _tokenId) public view returns (bool _isOk) {
+    function validTokenId(uint _tokenId) public view returns (bool _isOk) {
         if (tokenIds16.length > 0) {
             return ArrayUtils.includes16(tokenIds16, _tokenId);
         } else if (tokenIds32.length > 0) {
@@ -361,7 +360,7 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
             _burn(msg.sender, (_outTokenIds.length - _inTokenIds.length) * 10 ** 18);
         }
         for (uint i = 0; i < _inTokenIds.length;) {
-            if (!isTokenIdOK(_inTokenIds[i])) {
+            if (!validTokenId(_inTokenIds[i])) {
                 revert InvalidTokenId(_inTokenIds[i]);
             }
             collection.transferFrom(msg.sender, address(this), _inTokenIds[i]);
@@ -370,7 +369,7 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
             }
         }
         for (uint i = 0; i < _outTokenIds.length;) {
-            if (!isTokenIdOK(_outTokenIds[i])) {
+            if (!validTokenId(_outTokenIds[i])) {
                 revert InvalidTokenId(_outTokenIds[i]);
             }
             collection.transferFrom(address(this), msg.sender, _outTokenIds[i]);
@@ -418,6 +417,7 @@ contract UmswapFactory is Owned, CloneFactory {
 
     uint8 constant ZERO = 48;
     bytes constant UMSYMBOLPREFIX = "Um";
+    bytes4 constant ERC721_INTERFACE = 0x80ac58cd;
 
     Umswap public template;
     Umswap[] public umswaps;
