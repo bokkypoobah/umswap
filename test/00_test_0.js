@@ -150,6 +150,16 @@ describe("umswap", function () {
 
   it("00. Test 00", async function () {
     console.log("      00. Test 00");
+
+    const generateRange = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
+
+    const tokenIds = generateRange(0, 100, 1);
+
+
+    // function newUmswap(IERC721Partial _collection, string memory _name, uint[] memory _tokenIds) public {
+    const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "Name", tokenIds, { value: ethers.utils.parseEther("0") });
+    await data.printEvents("newUmswap", await newUmswapTx.wait());
+
   //   console.log("        --- Maker Add Orders ---");
   //   const addOrder1Tx = await data.nix.connect(data.maker0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ANY, [ 3, 4, 5 ], ethers.utils.parseEther("11"), 0, 5, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") });
   //   await data.printEvents("Maker Added Order #0 - BuyAny Max 5 NFTA:{3|4|5} for 11e", await addOrder1Tx.wait());

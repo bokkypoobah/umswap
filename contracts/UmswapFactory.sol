@@ -280,15 +280,24 @@ contract ReentrancyGuard {
 contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
 
     IERC721Partial public collection;
-    uint[] public tokenIds;
+    uint16[] public tokenIds16;
 
     event ThankYou(uint tip);
 
     function initUmswap(IERC721Partial _collection, string memory _symbol, string memory _name, uint[] memory _tokenIds) public {
         collection = _collection;
         super.initToken(msg.sender, _symbol, _name, 18);
+        uint maxTokenId;
+        for (uint i = 0; i < _tokenIds.length; i++) {
+            if (_tokenIds[i] > maxTokenId) {
+                maxTokenId = _tokenIds[i];
+            }
+        }
         // TODO: Store as 16 bits or 32 bits or 256 bits?
-        tokenIds = _tokenIds;
+        // tokenIds = _tokenIds;
+        for (uint i = 0; i < _tokenIds.length; i++) {
+            tokenIds16.push(uint16(_tokenIds[i]));
+        }
     }
 
     function onERC721Received(address /*_operator*/, address /*_from*/, uint _tokenId, bytes memory /*_data*/) external override returns(bytes4) {
