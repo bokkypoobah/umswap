@@ -228,35 +228,6 @@ contract Owned {
     }
 }
 
-contract OwnedWithWithdraw is Owned {
-    event Withdrawn(address indexed token, uint tokens, uint tokenId);
-
-    function isERC721(address token) internal view returns (bool b) {
-        try IERC721Partial(token).supportsInterface(ERC721_INTERFACE) returns (bool _b) {
-            b = _b;
-        } catch {
-        }
-    }
-    function withdraw(address token, uint tokens, uint tokenId) public onlyOwner {
-        if (token == address(0)) {
-            if (tokens == 0) {
-                tokens = address(this).balance;
-            }
-            payable(owner).transfer(tokens);
-        } else {
-            if (isERC721(token)) {
-                IERC721Partial(token).safeTransferFrom(address(this), owner, tokenId);
-            } else {
-                if (tokens == 0) {
-                    tokens = IERC20(token).balanceOf(address(this));
-                }
-                IERC20(token).transfer(owner, tokens);
-            }
-        }
-        emit Withdrawn(token, tokens, tokenId);
-    }
-}
-
 
 /// @notice Basic token = ERC20 + symbol + name + decimals + mint + ownership
 contract BasicToken is IERC20, Owned {
@@ -443,7 +414,10 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
     }
 }
 
-contract UmswapFactory is OwnedWithWithdraw, CloneFactory {
+contract UmswapFactory is Owned, CloneFactory {
+
+    uint8 constant ZERO = 48;
+    bytes constant UMSYMBOLPREFIX = "Um";
 
     Umswap public template;
     Umswap[] public umswaps;
@@ -453,14 +427,13 @@ contract UmswapFactory is OwnedWithWithdraw, CloneFactory {
 
     event NewUmswap(Umswap _umswap, IERC721Partial _collection, string _name, uint[] _tokenIds, uint timestamp);
     event ThankYou(uint tip);
+    event Withdrawn(address indexed token, uint tokens, uint tokenId);
 
     constructor() {
         super.initOwned(msg.sender);
         template = new Umswap();
     }
 
-    uint8 constant ZERO = 48;
-    bytes constant UMSYMBOLPREFIX = "Um";
     function genSymbol(uint id) internal pure returns (string memory s) {
         bytes memory b = new bytes(20);
         uint i;
@@ -501,6 +474,32 @@ contract UmswapFactory is OwnedWithWithdraw, CloneFactory {
         umswap.initUmswap(_collection, genSymbol(umswaps.length), _name, _tokenIds);
         umswaps.push(umswap);
         emit NewUmswap(umswap, _collection, _name, _tokenIds, block.timestamp);
+    }
+
+    function isERC721(address token) internal view returns (bool b) {
+        try IERC721Partial(token).supportsInterface(ERC721_INTERFACE) returns (bool _b) {
+            b = _b;
+        } catch {
+        }
+    }
+
+    function withdraw(address token, uint tokens, uint tokenId) public onlyOwner {
+        if (token == address(0)) {
+            if (tokens == 0) {
+                tokens = address(this).balance;
+            }
+            payable(owner).transfer(tokens);
+        } else {
+            if (isERC721(token)) {
+                IERC721Partial(token).safeTransferFrom(address(this), owner, tokenId);
+            } else {
+                if (tokens == 0) {
+                    tokens = IERC20(token).balanceOf(address(this));
+                }
+                IERC20(token).transfer(owner, tokens);
+            }
+        }
+        emit Withdrawn(token, tokens, tokenId);
     }
 
     receive() external payable {
