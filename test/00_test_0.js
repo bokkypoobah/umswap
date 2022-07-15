@@ -149,43 +149,19 @@ describe("umswap", function () {
   });
 
   it("00. Test 00", async function () {
-    console.log("      00. Test 00");
+    console.log("      00. Test 00 - New Umswaps with 16, 32 and 256 bit tokenId collections");
 
     const generateRange = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
 
-    let rangeStart = 0;
-    let tokenIds = generateRange(rangeStart, parseInt(rangeStart) + 1000, 1);
-    const newUmswap16Tx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "16 bit tokenId collection", tokenIds, { value: ethers.utils.parseEther("0") });
-    await data.printEvents("newUmswap16", await newUmswap16Tx.wait());
-
-    rangeStart = 65535;
-    tokenIds = generateRange(rangeStart, parseInt(rangeStart) + 1000, 1);
-    const newUmswap32Tx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "32 bit tokenId collection", tokenIds, { value: ethers.utils.parseEther("0") });
-    await data.printEvents("newUmswap32", await newUmswap32Tx.wait());
-
-    rangeStart = 6553565535;
-    tokenIds = generateRange(rangeStart, parseInt(rangeStart) + 1000, 1);
-    const newUmswap256Tx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "256 bit tokenId collection", tokenIds, { value: ethers.utils.parseEther("0") });
-    await data.printEvents("newUmswap256", await newUmswap256Tx.wait());
-
-  //   console.log("        --- Maker Add Orders ---");
-  //   const addOrder1Tx = await data.nix.connect(data.maker0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ANY, [ 3, 4, 5 ], ethers.utils.parseEther("11"), 0, 5, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") });
-  //   await data.printEvents("Maker Added Order #0 - BuyAny Max 5 NFTA:{3|4|5} for 11e", await addOrder1Tx.wait());
-  //   const expiry2 = parseInt(new Date() / 1000) + (60 * 60 * 24);
-  //   const addOrder2Tx = await data.nix.connect(data.maker0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ANY, [ ], ethers.utils.parseEther("0.0011"), expiry2, 5, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") });
-  //   await data.printEvents("Maker Added Order #1 - BuyAny Max 5 NFTA:* for 0.0011e", await addOrder2Tx.wait());
-  //   const addOrder3Tx = await data.nix.connect(data.maker0Signer).addOrder(data.nftB.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ANY, [ 3, 4, 5 ], ethers.utils.parseEther("22"), 0, 50, 75, data.integrator, { value: ethers.utils.parseEther("0.000001") });
-  //   await data.printEvents("Maker Added Order #0 - BuyAny Max 50 NFTB:{3|4|5} for 22e", await addOrder3Tx.wait());
-  //   await data.printState("After Maker Added Orders");
-  //   console.log("        --- Taker Execute Orders ---");
-  //   const executeOrder1Tx = await data.nix.connect(data.taker0Signer).executeOrders([data.nftA.address, data.nftA.address], [0, 1], [[ 3, 5 ], [4]], ethers.utils.parseEther("22.0011").mul(7).div(10), 100, data.integrator, { value: ethers.utils.parseEther("0.000001") });
-  //   await data.printEvents("Taker Execute Orders" , await executeOrder1Tx.wait());
-  //   await data.printState("After Taker Executed Orders");
-  //
-  //   console.log("        --- Owner Withdraw Tips ---");
-  //   const ownerWithdrawTips0Tx = await data.nix.connect(data.deployerSigner).withdraw(ZERO_ADDRESS, 0, 0);
-  //   await data.printEvents("Owner Withdrawn Tips" , await ownerWithdrawTips0Tx.wait());
-  //   await data.printState("After Owner Withdrawn Tips");
+    for (let numberOfTokenIds of [10, 100, 1000]) {
+      for (let rangeStart of [0, 65535, 6553565535]) {
+        console.log("numberOfTokenIds: " + numberOfTokenIds + ", rangeStart: " + rangeStart);
+        let tokenIds = generateRange(rangeStart, parseInt(rangeStart) + 1000, 1);
+        const name = "Collection size " + numberOfTokenIds + " starting " + rangeStart;
+        const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, name, tokenIds, { value: ethers.utils.parseEther("0") });
+        await data.printEvents(name, await newUmswapTx.wait());
+      }
+    }
   });
 
   // it("01. Maker BuyAll Test", async function () {
