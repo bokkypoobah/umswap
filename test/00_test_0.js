@@ -17,14 +17,6 @@ describe("umswap", function () {
     await data.init();
 
     console.log("        --- Setup Accounts, NFT and Umswap Contracts - Assuming gasPrice: " + ethers.utils.formatUnits(data.gasPrice, "gwei") + " gwei, ethUsd: " + ethers.utils.formatUnits(data.ethUsd, 18) + " ---");
-    // const erc1820Registry = await singletons.ERC1820Registry(data.deployer);
-    // await data.addAccount(erc1820Registry.address, "ERC1820Registry");
-    //
-    // const fixedSupply = ethers.utils.parseEther("500");
-    // const weth = await TestERC20.deploy("WETH", "Wrapped ETH", 18, fixedSupply);
-    // await weth.deployed();
-    // await data.setWeth(weth);
-    //
 
     const erc721Mock = await ERC721Mock.deploy("ERC721Mock", "ERC721MOCK");
     await erc721Mock.deployed();
@@ -57,48 +49,7 @@ describe("umswap", function () {
         await data.printEvents("Minted ERC721Mock", await a.wait());
       });
     }
-    //
-    // const setup3 = [];
-    // setup3.push(data.nftB.mint(data.user0));
-    // setup3.push(data.nftB.mint(data.user0));
-    // setup3.push(data.nftB.mint(data.user0));
-    // setup3.push(data.nftB.mint(data.taker0));
-    // setup3.push(data.nftB.mint(data.taker0));
-    // setup3.push(data.nftB.mint(data.taker0));
-    // const mintBTxs = await Promise.all(setup3);
-    // if (DETAILS > 0) {
-    //   mintBTxs.forEach( async function (a) {
-    //     await data.printEvents("Minted NFTB", await a.wait());
-    //   });
-    // }
-    //
-    // const setup4 = [];
-    // setup4.push(weth.connect(data.deployerSigner).approve(nix.address, ethers.utils.parseEther("100")));
-    // setup4.push(weth.connect(data.user0Signer).approve(nix.address, ethers.utils.parseEther("100")));
-    // setup4.push(weth.connect(data.maker1Signer).approve(nix.address, ethers.utils.parseEther("100")));
-    // setup4.push(weth.connect(data.taker0Signer).approve(nix.address, ethers.utils.parseEther("100")));
-    // setup4.push(weth.connect(data.taker1Signer).approve(nix.address, ethers.utils.parseEther("100")));
-    // const [wethApproveNix0Tx, wethApproveNix1Tx, wethApproveNix2Tx, wethApproveNix3Tx, wethApproveNix4Tx] = await Promise.all(setup4);
-    // if (DETAILS > 0) {
-    //   [wethApproveNix0Tx, wethApproveNix1Tx, wethApproveNix2Tx, wethApproveNix3Tx, wethApproveNix4Tx].forEach( async function (a) {
-    //     await data.printEvents("WETH.approve(nix)", await a.wait());
-    //   });
-    // }
-    //
-    // const setup5 = [];
-    // setup5.push(data.nftA.connect(data.user0Signer).setApprovalForAll(nix.address, true));
-    // setup5.push(data.nftA.connect(data.maker1Signer).setApprovalForAll(nix.address, true));
-    // setup5.push(data.nftA.connect(data.taker0Signer).setApprovalForAll(nix.address, true));
-    // setup5.push(data.nftA.connect(data.taker1Signer).setApprovalForAll(nix.address, true));
-    // const [approve0Tx, approve1Tx, approve2Tx, approve3Tx] = await Promise.all(setup5);
-    // if (DETAILS > 0) {
-    //   [approve0Tx, approve1Tx, approve2Tx, approve3Tx].forEach( async function (a) {
-    //     await data.printEvents("NFTA.approved(nix)", await a.wait());
-    //   });
-    // }
-    // // console.log("bytecode ~" + JSON.stringify(nix.deployTransaction.data.length/2, null, 2));
-    // await data.printState("Setup Completed. Nix bytecode ~" + nix.deployTransaction.data.length/2 + ", NixHelper bytecode ~" + nixHelper.deployTransaction.data.length/2);
-    await data.printState("Setup Completed");
+    await data.printState("Setup Completed. UmswapFactory bytecode ~" + JSON.stringify(data.umswapFactory.deployTransaction.data.length/2, null, 2));
   });
 
   it("00. Test 00", async function () {

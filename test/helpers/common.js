@@ -139,10 +139,6 @@ class Data {
     this.umswap = umswap;
     this.addContract(umswap, "Umswap");
   }
-  async setWeth(weth) {
-    this.weth = weth;
-    this.addContract(weth, "WETH");
-  }
 
   async printState(prefix) {
     console.log("        --- " + prefix + " ---");
@@ -160,15 +156,17 @@ class Data {
         owners[ownerOf].push(parseInt(tokenId));
       }
     }
-    let umswapSymbol = "?";
+    let umswapSymbol = "??????";
     let umswapTotalSupply = 0;
     if (this.umswap != null) {
       umswapSymbol = await this.umswap.symbol();
-      umswapTotalSupply = await this.umswap.totalSupply();
+      umswapTotalSupply = ethers.utils.formatEther(await this.umswap.totalSupply());
     }
+    let umswapTitle = umswapSymbol.toString().substring(0, 10) + " " + umswapTotalSupply;
+    umswapTitle = " ".repeat(25 - umswapTitle.length) + umswapTitle;
 
-    console.log("          Account                                   ETH " + this.padRight(await this.erc721Mock.symbol() + " (" + erc721TotalSupply + ")", 25) + " " + umswapSymbol + " " + this.padLeft(ethers.utils.formatEther(umswapTotalSupply), 14));
-    console.log("          -------------------- ------------------------ ------------------------- -----------------------");
+    console.log("          Account                                   ETH " + umswapTitle + " " + this.padRight(await this.erc721Mock.symbol() + " (" + erc721TotalSupply + ")", 25));
+    console.log("          -------------------- ------------------------ ----------------------- ---------------------------------------------");
     const checkAccounts = [this.deployer, this.user0, this.user1, this.user2, this.integrator];
     if (this.umswapFactory != null) {
       checkAccounts.push(this.umswapFactory.address);
@@ -180,7 +178,7 @@ class Data {
       const ownerData = owners[checkAccounts[i]] || [];
       const erc721Balance = await ethers.provider.getBalance(checkAccounts[i]);
       const umswapBalance = this.umswap != null ? await this.umswap.balanceOf(checkAccounts[i]) : 0;
-      console.log("          " + this.padRight(this.getShortAccountName(checkAccounts[i]), 20) + " " + this.padLeft(ethers.utils.formatEther(erc721Balance), 24) + " " + this.padRight(JSON.stringify(ownerData), 25) + " " + this.padLeft(ethers.utils.formatEther(umswapBalance), 23));
+      console.log("          " + this.padRight(this.getShortAccountName(checkAccounts[i]), 20) + " " + this.padLeft(ethers.utils.formatEther(erc721Balance), 24) + " " + this.padLeft(ethers.utils.formatEther(umswapBalance), 23) + " " + this.padRight(JSON.stringify(ownerData), 25));
     }
     console.log();
 
