@@ -83,9 +83,9 @@ describe("umswap", function () {
   });
 
   it("01. Test 01", async function () {
-    console.log("      01. Test 01 - New Umswaps with 16, 32 and 256 bit tokenId collections");
-    for (let numberOfTokenIds of [10, 100, 1000]) {
-      for (let rangeStart of [0, 65535, 6553565535]) {
+    console.log("      01. Test 01 - Get Data");
+    for (let numberOfTokenIds of [10, 20, 30]) {
+      for (let rangeStart of [0, 65]) {
         // console.log("numberOfTokenIds: " + numberOfTokenIds + ", rangeStart: " + rangeStart);
         let tokenIds = generateRange(rangeStart, parseInt(rangeStart) + numberOfTokenIds, 1);
         const name = "Collection size " + numberOfTokenIds + " starting " + rangeStart;
@@ -97,9 +97,9 @@ describe("umswap", function () {
   });
 
   it("02. Test 02", async function () {
-    console.log("      02. Test 02 - Get Data");
-    for (let numberOfTokenIds of [10, 20, 30]) {
-      for (let rangeStart of [0, 65]) {
+    console.log("      02. Test 02 - New Umswaps with 16, 32 and 256 bit tokenId collections");
+    for (let numberOfTokenIds of [10, 100, 1000]) {
+      for (let rangeStart of [0, 65535, 6553565535]) {
         // console.log("numberOfTokenIds: " + numberOfTokenIds + ", rangeStart: " + rangeStart);
         let tokenIds = generateRange(rangeStart, parseInt(rangeStart) + numberOfTokenIds, 1);
         const name = "Collection size " + numberOfTokenIds + " starting " + rangeStart;
