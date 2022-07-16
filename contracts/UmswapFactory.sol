@@ -336,7 +336,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard, ERC721TokenReceiverI
     uint private swappedIn;
     uint private swappedOut;
 
-    event Swapped(address account, uint[] _inTokenIds, uint[] _outTokenIds, uint timestamp);
+    event Swapped(address account, uint[] _inTokenIds, uint[] _outTokenIds, uint swappedIn, uint swappedOut, uint timestamp);
 
     error InvalidTokenId(uint tokenId);
 
@@ -410,7 +410,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard, ERC721TokenReceiverI
         }
         swappedIn += _inTokenIds.length;
         swappedOut += _outTokenIds.length;
-        emit Swapped(msg.sender, _inTokenIds, _outTokenIds, block.timestamp);
+        emit Swapped(msg.sender, _inTokenIds, _outTokenIds, swappedIn, swappedOut, block.timestamp);
         handleTips(integrator, owner);
     }
 
