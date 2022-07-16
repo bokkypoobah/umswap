@@ -295,9 +295,18 @@ contract BasicToken is IERC20, Owned {
 }
 
 
+contract ERC721TokenReceiverImplementation is ERC721TokenReceiver{
+    event ERC721Received(address collection, address from, uint tokenId);
+
+    function onERC721Received(address /*_operator*/, address _from, uint _tokenId, bytes memory /*_data*/) external override returns(bytes4) {
+        emit ERC721Received(address(this), _from, _tokenId);
+        return this.onERC721Received.selector;
+    }
+}
+
 /// @author BokkyPooBah, Bok Consulting Pty Ltd
 /// @title ERC-721 pool
-contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
+contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiverImplementation {
 
     IERC721Partial private collection;
     uint16[] private tokenIds16;
@@ -405,12 +414,6 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
         handleTips(address(0));
     }
 
-    event ERC721Received(address collection, address from, uint tokenId);
-    function onERC721Received(address /*_operator*/, address _from, uint _tokenId, bytes memory /*_data*/) external override returns(bytes4) {
-        emit ERC721Received(address(this), _from, _tokenId);
-        return this.onERC721Received.selector;
-    }
-
     function getInfo() public view returns (string memory __symbol, string memory __name, uint[] memory _tokenIds, uint _swappedIn, uint _swappedOut, uint __totalSupply) {
         __symbol = _symbol;
         __name = _name;
@@ -447,7 +450,7 @@ contract Umswap is BasicToken, ReentrancyGuard, ERC721TokenReceiver {
     }
 }
 
-contract UmswapFactory is Owned, CloneFactory {
+contract UmswapFactory is Owned, CloneFactory, ERC721TokenReceiverImplementation {
 
     uint8 constant ZERO = 48;
     bytes constant UMSYMBOLPREFIX = "UMS";
@@ -603,5 +606,4 @@ contract UmswapFactory is Owned, CloneFactory {
             }
         }
     }
-
 }
