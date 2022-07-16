@@ -56,7 +56,7 @@ describe("umswap", function () {
     console.log("      00. Test 00 - Happy Path 00");
 
     const tokenIds = [111, 333, 555];
-    const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "Odd TokenIds", tokenIds);
+    const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "Odd TokenIds", tokenIds, data.integrator, { value: ethers.utils.parseEther("0.1111") });
     await data.printEvents("Odd TokenIds", await newUmswapTx.wait());
 
     const umswapAddress = await data.umswapFactory.umswaps(0);
@@ -66,12 +66,12 @@ describe("umswap", function () {
     const approval1Tx = await data.erc721Mock.connect(data.user0Signer).setApprovalForAll(umswapAddress, true);
     await data.printEvents("approval1Tx", await approval1Tx.wait());
 
-    const swapIn1Tx = await umswap.connect(data.user0Signer).swap([111, 333], [], data.integrator, { value: ethers.utils.parseEther("0.1111") });
+    const swapIn1Tx = await umswap.connect(data.user0Signer).swap([111, 333], [], data.integrator, { value: ethers.utils.parseEther("0.2222") });
     await data.printEvents("swapIn1Tx", await swapIn1Tx.wait());
 
     await data.printState("NFT Swapped In");
 
-    const swapOut1Tx = await umswap.connect(data.user0Signer).swap([], [111, 333], data.integrator, { value: ethers.utils.parseEther("0.2222") });
+    const swapOut1Tx = await umswap.connect(data.user0Signer).swap([], [111, 333], data.integrator, { value: ethers.utils.parseEther("0.3333") });
     await data.printEvents("swapOut1Tx", await swapOut1Tx.wait());
 
     await data.printState("NFT Swapped Out");
@@ -89,7 +89,7 @@ describe("umswap", function () {
         // console.log("numberOfTokenIds: " + numberOfTokenIds + ", rangeStart: " + rangeStart);
         let tokenIds = generateRange(rangeStart, parseInt(rangeStart) + numberOfTokenIds, 1);
         const name = "Collection size " + numberOfTokenIds + " starting " + rangeStart;
-        const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, name, tokenIds, { value: ethers.utils.parseEther("0") });
+        const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, name, tokenIds, data.integrator, { value: ethers.utils.parseEther("0.1111") });
         await data.printEvents(name, await newUmswapTx.wait());
       }
     }
@@ -103,7 +103,7 @@ describe("umswap", function () {
         // console.log("numberOfTokenIds: " + numberOfTokenIds + ", rangeStart: " + rangeStart);
         let tokenIds = generateRange(rangeStart, parseInt(rangeStart) + numberOfTokenIds, 1);
         const name = "Collection size " + numberOfTokenIds + " starting " + rangeStart;
-        const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, name, tokenIds, { value: ethers.utils.parseEther("0") });
+        const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, name, tokenIds, data.integrator, { value: ethers.utils.parseEther("0.1111") });
         await data.printEvents(name, await newUmswapTx.wait());
       }
     }
