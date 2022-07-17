@@ -217,6 +217,10 @@ function withdraw(address token, uint tokens, uint tokenId) public onlyOwner
 
 ## Testing
 
+See [test/00_test_0.js](test/00_test_0.js) for the testing scripts and [testIt.out](testIt.out) for the results.
+
+<br />
+
 ### UmswapFactory
 * [ ] Owned
   * [ ] Can only initialise once `AlreadyInitialised()`
