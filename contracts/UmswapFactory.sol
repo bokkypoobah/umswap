@@ -516,23 +516,19 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
             return false;
         }
         bytes1 lastChar = b[0];
-        for (uint i; i < b.length;) {
+        for (uint i; i < b.length; i = unsafeIncrement(i)) {
             bytes1 char = b[i];
              // Cannot contain continous spaces
             if (char == 0x20 && lastChar == 0x20) {
                 return false;
             }
-            // 9-0, A-Z, a-z, space
-            if (!(char >= 0x30 && char <= 0x39) &&
-                !(char >= 0x41 && char <= 0x5A) &&
+            // 9-0, A-Z, a-z, space, +, -, :
+            if (!(char >= 0x30 && char <= 0x39) && !(char >= 0x41 && char <= 0x5A) &&
                 !(char >= 0x61 && char <= 0x7A) &&
-                !(char == 0x20)) {
+                !(char == 0x20) && !(char == 0x2B) && !(char == 0x2D) && !(char == 0x3A)) {
                 return false;
             }
             lastChar = char;
-            unchecked {
-                i++;
-            }
         }
         return true;
     }
