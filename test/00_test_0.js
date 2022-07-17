@@ -122,29 +122,43 @@ describe("umswap", function () {
 
 
   it("03. Test 03", async function () {
-    console.log("      03. Test 03 - Exceptions");
+    console.log("      03. Test 03 - UmswapFactory Exceptions");
 
-    console.log("        Testing for error NotERC721");
+    const tx1 = await data.umswapFactory.transferOwnership(data.user0);
+    await expect(
+      data.umswapFactory.transferOwnership(data.user0)
+    ).to.be.revertedWithCustomError(data.umswapFactory, "NotOwner");
+    console.log("        Tested transferOwnership(...) for NotOwner");
+
     await expect(
       data.umswapFactory.newUmswap(data.user0, "name", [1, 2, 3], data.integrator, { value: ethers.utils.parseEther("0.1111") })
     ).to.be.revertedWithCustomError(data.umswapFactory, "NotERC721");
+    console.log("        Tested newUmswap(...) for NotERC721");
 
-    console.log("        Testing for error InvalidName");
     await expect(
       data.umswapFactory.newUmswap(data.erc721Mock.address, "name%", [1, 2, 3], data.integrator, { value: ethers.utils.parseEther("0.1111") })
     ).to.be.revertedWithCustomError(data.umswapFactory, "InvalidName");
+    console.log("        Tested newUmswap(...) for InvalidName");
 
-    console.log("        Testing for error TokenIdsMustBeSortedWithNoDuplicates");
     await expect(
       data.umswapFactory.newUmswap(data.erc721Mock.address, "name", [2, 2, 3], data.integrator, { value: ethers.utils.parseEther("0.1111") })
     ).to.be.revertedWithCustomError(data.umswapFactory, "TokenIdsMustBeSortedWithNoDuplicates");
+    console.log("        Tested newUmswap(...) for TokenIdsMustBeSortedWithNoDuplicates");
 
-    console.log("        Testing for error DuplicateSet");
-    const firstTx = data.umswapFactory.newUmswap(data.erc721Mock.address, "name", [1, 2, 3], data.integrator, { value: ethers.utils.parseEther("0.1111") });
+    const firstTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "name", [1, 2, 3], data.integrator, { value: ethers.utils.parseEther("0.1111") });
     await expect(
       data.umswapFactory.newUmswap(data.erc721Mock.address, "name", [1, 2, 3], data.integrator, { value: ethers.utils.parseEther("0.1111") })
     ).to.be.revertedWithCustomError(data.umswapFactory, "DuplicateSet");
+    console.log("        Tested newUmswap(...) for DuplicateSet");
 
+    // const sendTip1Tx = await data.user0Signer.sendTransaction({ to: data.umswapFactory.address, value: ethers.utils.parseEther("0.888") });
+    // await data.printState("1");
+    // const withdraw1Tx = await data.umswapFactory.withdraw(ZERO_ADDRESS, 0, 0);
+    // await data.printState("2");
+    await expect(
+      data.umswapFactory.connect(data.user1Signer).withdraw(ZERO_ADDRESS, 0, 0)
+    ).to.be.revertedWithCustomError(data.umswapFactory, "NotOwner");
+    console.log("        Tested withdraw(...) for NotOwner() exception");
   });
 
   // it("01. Maker BuyAll Test", async function () {
