@@ -135,6 +135,8 @@ describe("umswap", function () {
       data.umswapFactory.connect(data.user0Signer).withdraw(ZERO_ADDRESS, 0, 0)
     ).to.emit(data.umswapFactory, "Withdrawn").withArgs(ZERO_ADDRESS, ethers.utils.parseEther("0.888"), 0);
     console.log("        Tested withdraw(ZERO_ADDRESS, ...) for success");
+
+    console.log("      TODO: Test withdrawal of ERC-20s and ERC-721s");
   });
 
 
@@ -177,4 +179,14 @@ describe("umswap", function () {
     ).to.be.revertedWithCustomError(data.umswapFactory, "NotOwner");
     console.log("        Tested withdraw(...) for error 'NotOwner'");
   });
+
+
+  it("05. Test 05", async function () {
+    console.log("      05. Test 05 - TODO: Umswap Secondary/ERC-20 Functions");
+  });
+
+  it("06. Test 06", async function () {
+    console.log("      06. Test 06 - TODO: Umswap Exceptions");
+  });
+
 });
