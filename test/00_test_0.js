@@ -108,6 +108,15 @@ describe("umswap", function () {
         await data.printEvents(name, await newUmswapTx.wait());
       }
     }
+    console.log("      02. Test 02 - New Umswaps with 16 bit tokenId collections. Note < 2 ** 16 x 3800 close to the current 30m block gas limit");
+    for (let numberOfTokenIds of [3800]) {
+      for (let rangeStart of [0]) {
+        let tokenIds = generateRange(rangeStart, parseInt(rangeStart) + numberOfTokenIds, 1);
+        const name = "Set size " + numberOfTokenIds + " starting " + rangeStart;
+        const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, name, tokenIds, data.integrator, { value: ethers.utils.parseEther("0.1111") });
+        await data.printEvents(name, await newUmswapTx.wait());
+      }
+    }
     await data.printState("End");
   });
 

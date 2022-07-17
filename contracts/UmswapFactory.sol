@@ -316,15 +316,6 @@ contract BasicToken is IERC20, Owned {
 }
 
 
-contract ERC721TokenReceiver is IERC721TokenReceiver {
-    event ERC721Received(address collection, address from, uint tokenId);
-
-    function onERC721Received(address /*_operator*/, address _from, uint _tokenId, bytes memory /*_data*/) external override returns(bytes4) {
-        emit ERC721Received(address(this), _from, _tokenId);
-        return this.onERC721Received.selector;
-    }
-}
-
 contract TipHandler {
     event ThankYou(address tipper, address integrator, uint tipIntegrator, uint tipRemainder, uint timestamp);
 
@@ -348,7 +339,7 @@ contract TipHandler {
 
 /// @author BokkyPooBah, Bok Consulting Pty Ltd
 /// @title ERC-721 pool
-contract Umswap is BasicToken, TipHandler, ReentrancyGuard /*, ERC721TokenReceiver */ {
+contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
 
     IERC721Partial private collection;
     uint16[] private tokenIds16;
@@ -493,7 +484,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard /*, ERC721TokenReceiv
     }
 }
 
-contract UmswapFactory is Owned, TipHandler, CloneFactory /*, ERC721TokenReceiver */ {
+contract UmswapFactory is Owned, TipHandler, CloneFactory {
 
     uint8 constant ZERO = 48;
     bytes constant UMSYMBOLPREFIX = "UMS";
