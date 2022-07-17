@@ -467,9 +467,11 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
 
     Umswap public template;
     Umswap[] public umswaps;
+    mapping(bytes32 => bool) exists;
 
     error NotERC721();
     error InvalidName();
+    error DuplicateSet();
     error TokenIdsMustBeSortedWithNoDuplicates();
 
     event NewUmswap(address creator, Umswap _umswap, IERC721Partial _collection, string _name, uint[] _tokenIds, uint timestamp);
@@ -547,6 +549,11 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
                 }
             }
         }
+        bytes32 key = keccak256(abi.encodePacked(_collection, _name, _tokenIds));
+        if (exists[key]) {
+            revert DuplicateSet();
+        }
+        exists[key] = true;
         Umswap umswap = Umswap(payable(createClone(address(template))));
         umswap.initUmswap(_collection, genSymbol(umswaps.length), _name, _tokenIds);
         umswaps.push(umswap);

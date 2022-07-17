@@ -57,7 +57,7 @@ describe("umswap", function () {
     console.log("      00. Test 00 - Happy Path 00");
 
     const tokenIds = [111, 333, 555];
-    const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "Odd TokenIds: - + test", tokenIds, data.integrator, { value: ethers.utils.parseEther("0.1111") });
+    const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "Odd TokenIds: - test", tokenIds, data.integrator, { value: ethers.utils.parseEther("0.1111") });
     await data.printEvents("Odd TokenIds", await newUmswapTx.wait());
 
     const umswapAddress = await data.umswapFactory.umswaps(0);
