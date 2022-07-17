@@ -54,7 +54,7 @@ class Data {
         return n + ":" + address.substring(0, 6);
       }
     }
-    return address;
+    return address.substring(0, 20);
   }
   addContract(contract, contractName) {
     const address = contract.address;
@@ -184,13 +184,12 @@ class Data {
 
     if (this.umswapFactory != null) {
       const getUmswapsLength = await this.umswapFactory.getUmswapsLength();
-      console.log("      getUmswaps - Length: " + getUmswapsLength);
       let indices = generateRange(0, getUmswapsLength - 1, 1);
       const getUmswaps = await this.umswapFactory.getUmswaps(indices);
-      console.log("            # Umswap                                     Symbol   Name                             In  Out     TotalSupply TokenIds                      ");
-      console.log("          --- ------------------------------------------ -------- ------------------------------ ---- ---- --------------- ------------------------------");
+      console.log("            # Address              Creator              Symbol   Name                             In  Out     TotalSupply TokenIds                      ");
+      console.log("          --- -------------------- -------------------- -------- ------------------------------ ---- ---- --------------- ------------------------------");
       for (let i = 0; i < getUmswaps[0].length; i++) {
-        console.log("          " + this.padLeft(i, 3) + " " + getUmswaps[0][i] + " " + getUmswaps[1][i] + " " + this.padRight(getUmswaps[2][i], 30) + " " + this.padLeft(getUmswaps[4][i], 4) + " " + this.padLeft(getUmswaps[5][i], 4) + " " + this.padLeft(ethers.utils.formatEther(getUmswaps[6][i]), 15) + " " + this.padRight(JSON.stringify(getUmswaps[3][i].map((x) => { return parseInt(x.toString()); })), 30));
+        console.log("          " + this.padLeft(i, 3) + " " + this.padRight(this.getShortAccountName(getUmswaps[0][i]), 20) + " " + this.padRight(this.getShortAccountName(getUmswaps[1][i]), 20) + " " + getUmswaps[2][i] + " " + this.padRight(getUmswaps[3][i], 30) + " " + this.padLeft(getUmswaps[5][i], 4) + " " + this.padLeft(getUmswaps[6][i], 4) + " " + this.padLeft(ethers.utils.formatEther(getUmswaps[7][i]), 15) + " " + this.padRight(JSON.stringify(getUmswaps[4][i].map((x) => { return parseInt(x.toString()); })), 30));
       }
       console.log();
     }

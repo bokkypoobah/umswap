@@ -346,6 +346,7 @@ contract TipHandler {
 /// @title ERC-721 pool
 contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
 
+    address private creator;
     IERC721Partial private collection;
     uint16[] private tokenIds16;
     uint32[] private tokenIds32;
@@ -358,7 +359,8 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
 
     error InvalidTokenId(uint tokenId);
 
-    function initUmswap(IERC721Partial _collection, string calldata _symbol, string calldata _name, uint[] calldata _tokenIds) public {
+    function initUmswap(address _creator, IERC721Partial _collection, string calldata _symbol, string calldata _name, uint[] calldata _tokenIds) public {
+        creator = _creator;
         collection = _collection;
         super.initToken(msg.sender, _symbol, _name, 18);
         uint maxTokenId;
@@ -427,7 +429,8 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         handleTips(address(0), owner);
     }
 
-    function getInfo() public view returns (string memory __symbol, string memory __name, uint[] memory _tokenIds, uint _swappedIn, uint _swappedOut, uint __totalSupply) {
+    function getInfo() public view returns (address _creator, string memory __symbol, string memory __name, uint[] memory _tokenIds, uint _swappedIn, uint _swappedOut, uint __totalSupply) {
+        _creator = creator;
         __symbol = _symbol;
         __name = _name;
         if (tokenIds16.length > 0) {
@@ -555,7 +558,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
         }
         exists[key] = true;
         Umswap umswap = Umswap(payable(createClone(address(template))));
-        umswap.initUmswap(_collection, genSymbol(umswaps.length), _name, _tokenIds);
+        umswap.initUmswap(msg.sender, _collection, genSymbol(umswaps.length), _name, _tokenIds);
         umswaps.push(umswap);
         emit NewUmswap(msg.sender, umswap, _collection, _name, _tokenIds, block.timestamp);
         handleTips(integrator, address(this));
@@ -589,6 +592,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
 
     function getUmswaps(uint[] memory indices) public view returns (
         Umswap[] memory _umswaps,
+        address[] memory _creators,
         string[] memory _symbols,
         string[] memory _names,
         uint[][] memory _tokenIds,
@@ -598,6 +602,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
     ) {
         uint length = indices.length;
         _umswaps = new Umswap[](length);
+        _creators = new address[](length);
         _symbols = new string[](length);
         _names = new string[](length);
         _tokenIds = new uint[][](length);
@@ -606,7 +611,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
         _totalSupplies = new uint[](length);
         for (uint i = 0; i < length; i = unsafeIncrement(i)) {
             _umswaps[i] = umswaps[i];
-            (_symbols[i], _names[i], _tokenIds[i], _swappedIns[i], _swappedOuts[i], _totalSupplies[i]) = umswaps[i].getInfo();
+            (_creators[i], _symbols[i], _names[i], _tokenIds[i], _swappedIns[i], _swappedOuts[i], _totalSupplies[i]) = umswaps[i].getInfo();
         }
     }
 }
