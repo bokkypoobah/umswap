@@ -52,6 +52,7 @@ describe("umswap", function () {
     await data.printState("Setup Completed. UmswapFactory bytecode ~" + JSON.stringify(data.umswapFactory.deployTransaction.data.length/2, null, 2));
   });
 
+
   it("00. Test 00", async function () {
     console.log("      00. Test 00 - Happy Path 00");
 
@@ -82,13 +83,13 @@ describe("umswap", function () {
     await data.printState("Owner Withdrawn");
   });
 
+
   it("01. Test 01", async function () {
     console.log("      01. Test 01 - Get Data");
     for (let numberOfTokenIds of [10, 20, 30]) {
       for (let rangeStart of [0, 65]) {
-        // console.log("numberOfTokenIds: " + numberOfTokenIds + ", rangeStart: " + rangeStart);
         let tokenIds = generateRange(rangeStart, parseInt(rangeStart) + numberOfTokenIds, 1);
-        const name = "Collection size " + numberOfTokenIds + " starting " + rangeStart;
+        const name = "Set size " + numberOfTokenIds + " starting " + rangeStart;
         const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, name, tokenIds, data.integrator, { value: ethers.utils.parseEther("0.1111") });
         await data.printEvents(name, await newUmswapTx.wait());
       }
@@ -96,19 +97,20 @@ describe("umswap", function () {
     await data.printState("End");
   });
 
+
   it("02. Test 02", async function () {
-    console.log("      02. Test 02 - New Umswaps with 16, 32 and 256 bit tokenId collections");
-    for (let numberOfTokenIds of [10, 100, 1000]) {
-      for (let rangeStart of [0, 65535, 6553565535]) {
-        // console.log("numberOfTokenIds: " + numberOfTokenIds + ", rangeStart: " + rangeStart);
+    console.log("      02. Test 02 - New Umswaps with 16, 32, 48 and 256 bit tokenId collections. Note > 2 ** 48 x 1200 close to the current 30m block gas limit");
+    for (let numberOfTokenIds of [10, 100, 1200]) {
+      for (let rangeStart of [0, 2 ** 16, 2 ** 32, 2 ** 48]) {
         let tokenIds = generateRange(rangeStart, parseInt(rangeStart) + numberOfTokenIds, 1);
-        const name = "Collection size " + numberOfTokenIds + " starting " + rangeStart;
+        const name = "Set size " + numberOfTokenIds + " starting " + rangeStart;
         const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, name, tokenIds, data.integrator, { value: ethers.utils.parseEther("0.1111") });
         await data.printEvents(name, await newUmswapTx.wait());
       }
     }
     await data.printState("End");
   });
+
 
   // it("01. Maker BuyAll Test", async function () {
   //   console.log("      01. Maker BuyAll Test");

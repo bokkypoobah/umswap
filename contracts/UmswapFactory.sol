@@ -124,6 +124,27 @@ library ArrayUtils {
         }
         return false;
     }
+    function includes48(uint48[] memory self, uint256 target) internal pure returns (bool) {
+        if (self.length > 0) {
+            uint256 left;
+            uint256 right = self.length - 1;
+            uint256 mid;
+            while (left <= right) {
+                mid = (left + right) / 2;
+                if (uint256(self[mid]) < target) {
+                    left = mid + 1;
+                } else if (uint256(self[mid]) > target) {
+                    if (mid < 1) {
+                        break;
+                    }
+                    right = mid - 1;
+                } else {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
     function includes256(uint256[] memory self, uint256 target) internal pure returns (bool) {
         if (self.length > 0) {
             uint256 left;
@@ -177,7 +198,7 @@ interface IERC721Partial is IERC165 {
     function safeTransferFrom(address from, address to, uint tokenId) external payable;
 }
 
-interface ERC721TokenReceiver {
+interface IERC721TokenReceiver {
     function onERC721Received(address operator, address from, uint tokenId, bytes memory data) external returns(bytes4);
 }
 
@@ -295,7 +316,7 @@ contract BasicToken is IERC20, Owned {
 }
 
 
-contract ERC721TokenReceiverImplementation is ERC721TokenReceiver{
+contract ERC721TokenReceiver is IERC721TokenReceiver {
     event ERC721Received(address collection, address from, uint tokenId);
 
     function onERC721Received(address /*_operator*/, address _from, uint _tokenId, bytes memory /*_data*/) external override returns(bytes4) {
@@ -305,7 +326,7 @@ contract ERC721TokenReceiverImplementation is ERC721TokenReceiver{
 }
 
 contract TipHandler {
-    event ThankYou(address integrator, uint tipIntegrator, uint tipRemainder, uint timestamp);
+    event ThankYou(address tipper, address integrator, uint tipIntegrator, uint tipRemainder, uint timestamp);
 
     function handleTips(address integrator, address remainder) internal {
         if (msg.value > 0) {
@@ -320,18 +341,19 @@ contract TipHandler {
             if (tipRemainder > 0 && remainder != address(this)) {
                 payable(remainder).transfer(tipRemainder);
             }
-            emit ThankYou(integrator, tipIntegrator, tipRemainder, block.timestamp);
+            emit ThankYou(msg.sender, integrator, tipIntegrator, tipRemainder, block.timestamp);
         }
     }
 }
 
 /// @author BokkyPooBah, Bok Consulting Pty Ltd
 /// @title ERC-721 pool
-contract Umswap is BasicToken, TipHandler, ReentrancyGuard, ERC721TokenReceiverImplementation {
+contract Umswap is BasicToken, TipHandler, ReentrancyGuard /*, ERC721TokenReceiver */ {
 
     IERC721Partial private collection;
     uint16[] private tokenIds16;
     uint32[] private tokenIds32;
+    uint48[] private tokenIds48;
     uint[] private tokenIds256;
     uint private swappedIn;
     uint private swappedOut;
@@ -340,7 +362,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard, ERC721TokenReceiverI
 
     error InvalidTokenId(uint tokenId);
 
-    function initUmswap(IERC721Partial _collection, string memory _symbol, string memory _name, uint[] memory _tokenIds) public {
+    function initUmswap(IERC721Partial _collection, string calldata _symbol, string calldata _name, uint[] calldata _tokenIds) public {
         collection = _collection;
         super.initToken(msg.sender, _symbol, _name, 18);
         uint maxTokenId;
@@ -366,6 +388,13 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard, ERC721TokenReceiverI
                     i++;
                 }
             }
+        } else if (maxTokenId < 2 ** 48) {
+            for (uint i = 0; i < _tokenIds.length;) {
+                tokenIds48.push(uint48(_tokenIds[i]));
+                unchecked {
+                    i++;
+                }
+            }
         } else {
             tokenIds256 = _tokenIds;
         }
@@ -376,6 +405,8 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard, ERC721TokenReceiverI
             return ArrayUtils.includes16(tokenIds16, _tokenId);
         } else if (tokenIds32.length > 0) {
             return ArrayUtils.includes32(tokenIds32, _tokenId);
+        } else if (tokenIds48.length > 0) {
+            return ArrayUtils.includes48(tokenIds48, _tokenId);
         } else if (tokenIds256.length > 0) {
             return ArrayUtils.includes256(tokenIds256, _tokenId);
         } else {
@@ -383,7 +414,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard, ERC721TokenReceiverI
         }
     }
 
-    function swap(uint[] memory _inTokenIds, uint[] memory _outTokenIds, address integrator) public payable reentrancyGuard {
+    function swap(uint[] calldata _inTokenIds, uint[] calldata _outTokenIds, address integrator) public payable reentrancyGuard {
         if (_outTokenIds.length > _inTokenIds.length) {
             _burn(msg.sender, (_outTokenIds.length - _inTokenIds.length) * 10 ** 18);
         }
@@ -437,6 +468,14 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard, ERC721TokenReceiverI
                     i++;
                 }
             }
+        } else if (tokenIds48.length > 0) {
+            _tokenIds = new uint[](tokenIds48.length);
+            for (uint i = 0; i < tokenIds48.length; ) {
+                _tokenIds[i] = tokenIds48[i];
+                unchecked {
+                    i++;
+                }
+            }
         } else if (tokenIds256.length > 0) {
             _tokenIds = new uint[](tokenIds256.length);
             for (uint i = 0; i < tokenIds256.length; ) {
@@ -454,7 +493,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard, ERC721TokenReceiverI
     }
 }
 
-contract UmswapFactory is Owned, TipHandler, CloneFactory, ERC721TokenReceiverImplementation {
+contract UmswapFactory is Owned, TipHandler, CloneFactory /*, ERC721TokenReceiver */ {
 
     uint8 constant ZERO = 48;
     bytes constant UMSYMBOLPREFIX = "UMS";
@@ -468,7 +507,6 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory, ERC721TokenReceiverIm
     error TokenIdsMustBeSortedWithNoDuplicates();
 
     event NewUmswap(address creator, Umswap _umswap, IERC721Partial _collection, string _name, uint[] _tokenIds, uint timestamp);
-    event ThankYou(uint tip);
     event Withdrawn(address indexed token, uint tokens, uint tokenId);
 
     constructor() {
@@ -536,7 +574,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory, ERC721TokenReceiverIm
         return true;
     }
 
-    function newUmswap(IERC721Partial _collection, string memory _name, uint[] memory _tokenIds, address integrator) public payable {
+    function newUmswap(IERC721Partial _collection, string calldata _name, uint[] calldata _tokenIds, address integrator) public payable {
         if (!isERC721(address(_collection))) {
             revert NotERC721();
         }
