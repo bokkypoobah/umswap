@@ -169,6 +169,11 @@ library ArrayUtils {
 }
 
 
+function unsafeIncrement(uint x) pure returns (uint) {
+    unchecked { return x + 1; }
+}
+
+
 /// @notice ERC20 https://eips.ethereum.org/EIPS/eip-20 with optional symbol, name and decimals
 interface IERC20 {
     function totalSupply() external view returns (uint);
@@ -357,34 +362,22 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         collection = _collection;
         super.initToken(msg.sender, _symbol, _name, 18);
         uint maxTokenId;
-        for (uint i = 0; i < _tokenIds.length;) {
+        for (uint i = 0; i < _tokenIds.length; i = unsafeIncrement(i)) {
             if (_tokenIds[i] > maxTokenId) {
                 maxTokenId = _tokenIds[i];
             }
-            unchecked {
-                i++;
-            }
         }
         if (maxTokenId < 2 ** 16) {
-            for (uint i = 0; i < _tokenIds.length;) {
+            for (uint i = 0; i < _tokenIds.length; i = unsafeIncrement(i)) {
                 tokenIds16.push(uint16(_tokenIds[i]));
-                unchecked {
-                    i++;
-                }
             }
         } else if (maxTokenId < 2 ** 32) {
-            for (uint i = 0; i < _tokenIds.length;) {
+            for (uint i = 0; i < _tokenIds.length; i = unsafeIncrement(i)) {
                 tokenIds32.push(uint32(_tokenIds[i]));
-                unchecked {
-                    i++;
-                }
             }
         } else if (maxTokenId < 2 ** 48) {
-            for (uint i = 0; i < _tokenIds.length;) {
+            for (uint i = 0; i < _tokenIds.length; i = unsafeIncrement(i)) {
                 tokenIds48.push(uint48(_tokenIds[i]));
-                unchecked {
-                    i++;
-                }
             }
         } else {
             tokenIds256 = _tokenIds;
@@ -409,23 +402,17 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         if (_outTokenIds.length > _inTokenIds.length) {
             _burn(msg.sender, (_outTokenIds.length - _inTokenIds.length) * 10 ** 18);
         }
-        for (uint i = 0; i < _inTokenIds.length;) {
+        for (uint i = 0; i < _inTokenIds.length; i = unsafeIncrement(i)) {
             if (!validTokenId(_inTokenIds[i])) {
                 revert InvalidTokenId(_inTokenIds[i]);
             }
             collection.transferFrom(msg.sender, address(this), _inTokenIds[i]);
-            unchecked {
-                i++;
-            }
         }
-        for (uint i = 0; i < _outTokenIds.length;) {
+        for (uint i = 0; i < _outTokenIds.length; i = unsafeIncrement(i)) {
             if (!validTokenId(_outTokenIds[i])) {
                 revert InvalidTokenId(_outTokenIds[i]);
             }
             collection.transferFrom(address(this), msg.sender, _outTokenIds[i]);
-            unchecked {
-                i++;
-            }
         }
         if (_outTokenIds.length < _inTokenIds.length) {
             _mint(msg.sender, (_inTokenIds.length - _outTokenIds.length) * 10 ** 18);
@@ -445,35 +432,23 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         __name = _name;
         if (tokenIds16.length > 0) {
             _tokenIds = new uint[](tokenIds16.length);
-            for (uint i = 0; i < tokenIds16.length; ) {
+            for (uint i = 0; i < tokenIds16.length; i = unsafeIncrement(i)) {
                 _tokenIds[i] = tokenIds16[i];
-                unchecked {
-                    i++;
-                }
             }
         } else if (tokenIds32.length > 0) {
             _tokenIds = new uint[](tokenIds32.length);
-            for (uint i = 0; i < tokenIds32.length; ) {
+            for (uint i = 0; i < tokenIds32.length; i = unsafeIncrement(i)) {
                 _tokenIds[i] = tokenIds32[i];
-                unchecked {
-                    i++;
-                }
             }
         } else if (tokenIds48.length > 0) {
             _tokenIds = new uint[](tokenIds48.length);
-            for (uint i = 0; i < tokenIds48.length; ) {
+            for (uint i = 0; i < tokenIds48.length; i = unsafeIncrement(i)) {
                 _tokenIds[i] = tokenIds48[i];
-                unchecked {
-                    i++;
-                }
             }
         } else if (tokenIds256.length > 0) {
             _tokenIds = new uint[](tokenIds256.length);
-            for (uint i = 0; i < tokenIds256.length; ) {
+            for (uint i = 0; i < tokenIds256.length; i = unsafeIncrement(i)) {
                 _tokenIds[i] = tokenIds256[i];
-                unchecked {
-                    i++;
-                }
             }
         } else {
             _tokenIds = new uint[](0);
@@ -517,11 +492,8 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
         uint i;
         uint j;
         uint num;
-        for (i = 0; i < UMSYMBOLPREFIX.length;) {
+        for (i = 0; i < UMSYMBOLPREFIX.length; i = unsafeIncrement(i)) {
             b[j++] = UMSYMBOLPREFIX[i];
-            unchecked {
-                i++;
-            }
         }
         i = 5;
         do {
@@ -573,12 +545,9 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
             revert InvalidName();
         }
         if (_tokenIds.length > 0) {
-            for (uint i = 1; i < _tokenIds.length;) {
+            for (uint i = 1; i < _tokenIds.length; i = unsafeIncrement(i)) {
                 if (_tokenIds[i - 1] >= _tokenIds[i]) {
                     revert TokenIdsMustBeSortedWithNoDuplicates();
-                }
-                unchecked {
-                    i++;
                 }
             }
         }
@@ -632,12 +601,9 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
         _swappedIns = new uint[](length);
         _swappedOuts = new uint[](length);
         _totalSupplies = new uint[](length);
-        for (uint i = 0; i < length;) {
+        for (uint i = 0; i < length; i = unsafeIncrement(i)) {
             _umswaps[i] = umswaps[i];
             (_symbols[i], _names[i], _tokenIds[i], _swappedIns[i], _swappedOuts[i], _totalSupplies[i]) = umswaps[i].getInfo();
-            unchecked {
-                i++;
-            }
         }
     }
 }
