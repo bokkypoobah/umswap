@@ -10,6 +10,7 @@ describe("umswap", function () {
   const DETAILS = 1;
 
   beforeEach(async function () {
+    console.log();
     console.log("      beforeEach");
     const ERC721Mock  = await ethers.getContractFactory("ERC721Mock");
     const UmswapFactory  = await ethers.getContractFactory("UmswapFactory");
@@ -122,34 +123,50 @@ describe("umswap", function () {
 
 
   it("03. Test 03", async function () {
-    console.log("      03. Test 03 - UmswapFactory Exceptions");
+    console.log("      03. Test 03 - UmswapFactory Secondary Functions");
+
+    const tx1 = await data.umswapFactory.transferOwnership(data.user0);
+    const newOwner = await data.umswapFactory.owner();
+    expect(await data.umswapFactory.owner()).to.equal(data.user0);
+    console.log("        Tested transferOwnership(...) for success");
+
+    const sendTip1Tx = await data.user0Signer.sendTransaction({ to: data.umswapFactory.address, value: ethers.utils.parseEther("0.888") });
+    await expect(
+      data.umswapFactory.connect(data.user0Signer).withdraw(ZERO_ADDRESS, 0, 0)
+    ).to.emit(data.umswapFactory, "Withdrawn").withArgs(ZERO_ADDRESS, ethers.utils.parseEther("0.888"), 0);
+    console.log("        Tested withdraw(ZERO_ADDRESS, ...) for success");
+  });
+
+
+  it("04. Test 04", async function () {
+    console.log("      04. Test 04 - UmswapFactory Exceptions");
 
     const tx1 = await data.umswapFactory.transferOwnership(data.user0);
     await expect(
       data.umswapFactory.transferOwnership(data.user0)
     ).to.be.revertedWithCustomError(data.umswapFactory, "NotOwner");
-    console.log("        Tested transferOwnership(...) for NotOwner");
+    console.log("        Tested transferOwnership(...) for error 'NotOwner'");
 
     await expect(
       data.umswapFactory.newUmswap(data.user0, "name", [1, 2, 3], data.integrator, { value: ethers.utils.parseEther("0.1111") })
     ).to.be.revertedWithCustomError(data.umswapFactory, "NotERC721");
-    console.log("        Tested newUmswap(...) for NotERC721");
+    console.log("        Tested newUmswap(...) for error 'NotERC721'");
 
     await expect(
       data.umswapFactory.newUmswap(data.erc721Mock.address, "name%", [1, 2, 3], data.integrator, { value: ethers.utils.parseEther("0.1111") })
     ).to.be.revertedWithCustomError(data.umswapFactory, "InvalidName");
-    console.log("        Tested newUmswap(...) for InvalidName");
+    console.log("        Tested newUmswap(...) for error 'InvalidName'");
 
     await expect(
       data.umswapFactory.newUmswap(data.erc721Mock.address, "name", [2, 2, 3], data.integrator, { value: ethers.utils.parseEther("0.1111") })
     ).to.be.revertedWithCustomError(data.umswapFactory, "TokenIdsMustBeSortedWithNoDuplicates");
-    console.log("        Tested newUmswap(...) for TokenIdsMustBeSortedWithNoDuplicates");
+    console.log("        Tested newUmswap(...) for error 'TokenIdsMustBeSortedWithNoDuplicates'");
 
     const firstTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "name", [1, 2, 3], data.integrator, { value: ethers.utils.parseEther("0.1111") });
     await expect(
       data.umswapFactory.newUmswap(data.erc721Mock.address, "name", [1, 2, 3], data.integrator, { value: ethers.utils.parseEther("0.1111") })
     ).to.be.revertedWithCustomError(data.umswapFactory, "DuplicateSet");
-    console.log("        Tested newUmswap(...) for DuplicateSet");
+    console.log("        Tested newUmswap(...) for error 'DuplicateSet'");
 
     // const sendTip1Tx = await data.user0Signer.sendTransaction({ to: data.umswapFactory.address, value: ethers.utils.parseEther("0.888") });
     // await data.printState("1");
@@ -158,171 +175,6 @@ describe("umswap", function () {
     await expect(
       data.umswapFactory.connect(data.user1Signer).withdraw(ZERO_ADDRESS, 0, 0)
     ).to.be.revertedWithCustomError(data.umswapFactory, "NotOwner");
-    console.log("        Tested withdraw(...) for NotOwner() exception");
+    console.log("        Tested withdraw(...) for error 'NotOwner'");
   });
-
-  // it("01. Maker BuyAll Test", async function () {
-  //   console.log("      01. Maker BuyAll Test");
-  //   console.log("        --- Maker Add Orders ---");
-  //   const addOrder1Tx = await data.nix.connect(data.user0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ALL, [ 3, 4, 5 ], ethers.utils.parseEther("11"), 0, 1, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") });
-  //   await data.printEvents("Maker Added Order #0 - BuyAll Max 1 NFTA:{3,4,5} for 11e", await addOrder1Tx.wait());
-  //   await data.printState("After Maker Added Orders");
-  //   console.log("        --- Taker Execute Orders ---");
-  //   const executeOrder1Tx = await data.nix.connect(data.taker0Signer).executeOrders([data.nftA.address], [0], [[ 3, 4, 5 ]], ethers.utils.parseEther("11").mul(7).div(10), 100, data.integrator, { value: ethers.utils.parseEther("0.000001") });
-  //   await data.printEvents("Taker Execute Orders", await executeOrder1Tx.wait());
-  //   await data.printState("After Taker Executed Orders");
-  // });
-
-  // it("02. Maker SellAny Test", async function () {
-  //   console.log("      02. Maker SellAny Test");
-  //   console.log("        --- Maker Add Orders ---");
-  //   const addOrder1Tx = await data.nix.connect(data.user0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.SELL, ANYORALL.ANY, [ 0, 1, 2 ], ethers.utils.parseEther("12.3456"), 0, 5, 100, data.integrator, { value: ethers.utils.parseEther("0.000000001") });
-  //   await data.printEvents("Maker Added Order #0 - SellAny Max 5 NFTA:{0|1|2} for 12.3456e", await addOrder1Tx.wait());
-  //   await data.printState("After Maker Added Orders");
-  //   console.log("        --- Taker Execute Against Orders ---");
-  //   const executeOrder1Tx = await data.nix.connect(data.taker0Signer).executeOrders([data.nftA.address], [0], [[ 1, 2 ]], ethers.utils.parseEther("-24.6912"), 100, data.integrator, { value: ethers.utils.parseEther("0.000000001") });
-  //   await data.printEvents("Taker Execute Orders", await executeOrder1Tx.wait());
-  //   await data.printState("After Taker Executed Orders");
-  // });
-
-  // it("03. Maker SellAll Test", async function () {
-  //   console.log("      03. Maker SellAll Test");
-  //   console.log("        --- Maker Add Orders ---");
-  //   const addOrder1Tx = await data.nix.connect(data.user0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.SELL, ANYORALL.ALL, [ 0, 1, 2 ], ethers.utils.parseEther("12.3456"), 0, 1, 100, data.integrator, { value: ethers.utils.parseEther("0.000000001") });
-  //   await data.printEvents("Maker Added Order #0 - SellAll Max 1 NFTA:{0,1,2} for 12.3456e", await addOrder1Tx.wait());
-  //   await data.printState("After Maker Added Orders");
-  //   console.log("        --- Taker Execute Against Orders ---");
-  //   const executeOrder1Tx = await data.nix.connect(data.taker0Signer).executeOrders([data.nftA.address], [0], [[ 0, 1, 2 ]], ethers.utils.parseEther("-12.3456"), 100, data.integrator, { value: ethers.utils.parseEther("0.000000001") });
-  //   await data.printEvents("Taker Execute Orders", await executeOrder1Tx.wait());
-  //   await data.printState("After Taker Executed Orders");
-  // });
-
-  // it("10. Test Add And Execute Order Exceptions", async function () {
-  //   console.log("      10. Test Add And Execute Order Exceptions");
-  //
-  //   await expect(data.nix.connect(data.user0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ANY, [ 3, 3 ], ethers.utils.parseEther("11"), 0, 5, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("TokenIdsMustBeSortedWithNoDuplicates()");
-  //   await expect(data.nix.connect(data.user0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ANY, [ 4, 3 ], ethers.utils.parseEther("11"), 0, 5, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("TokenIdsMustBeSortedWithNoDuplicates()");
-  //   await expect(data.nix.connect(data.user0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ANY, [ 3, 5, 4 ], ethers.utils.parseEther("11"), 0, 5, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("TokenIdsMustBeSortedWithNoDuplicates()");
-  //   await expect(data.nix.connect(data.user0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ALL, [ ], ethers.utils.parseEther("11"), 0, 5, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("TokenIdsMustBeSpecifiedForBuyOrSellAll()");
-  //   await expect(data.nix.connect(data.user0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ALL, [ 3, 4, 5 ], ethers.utils.parseEther("11"), 0, 5, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("TradeMaxMustBeZeroOrOneForBuyOrSellAll()");
-  //   await expect(data.nix.connect(data.user0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ALL, [ 3, 4, 5 ], ethers.utils.parseEther("11"), 0, 1, 10000, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("RoyaltyOverMax(10000, 1000)");
-  //   await expect(data.nix.connect(data.user0Signer).addOrder(data.user0Signer.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ALL, [ 3, 4, 5 ], ethers.utils.parseEther("11"), 0, 1, 1000, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("function returned an unexpected amount of data");
-  //   await expect(data.nix.connect(data.user0Signer).addOrder(data.nix.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ALL, [ 3, 4, 5 ], ethers.utils.parseEther("11"), 0, 1, 1000, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("NotERC165()");
-  //
-  //   console.log("        --- Maker Add Orders ---");
-  //   // No Expiry
-  //   const addOrder0Tx = await data.nix.connect(data.user0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ANY, [ 3, 4, 5, 6 ], ethers.utils.parseEther("11"), 0, 5, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") });
-  //   await data.printEvents("Maker Added Order #0 - No Expiry - BuyAny Max 5 NFTA:{3|4|5|6} for 11e", await addOrder0Tx.wait());
-  //   // Disabled
-  //   const addOrder1Tx = await data.nix.connect(data.user0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ANY, [ 3, 4, 5 ], ethers.utils.parseEther("11"), 1, 5, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") });
-  //   await data.printEvents("Maker Added Order #1 - Disabled - BuyAny Max 5 NFTA:{3|4|5} for 11e", await addOrder1Tx.wait());
-  //   // Expired
-  //   const expiry2 = parseInt(new Date() / 1000) - (60 * 60 * 24);
-  //   const addOrder2Tx = await data.nix.connect(data.user0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ANY, [ 3, 4, 5 ], ethers.utils.parseEther("11"), expiry2, 5, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") });
-  //   await data.printEvents("Maker Added Order #2 - Expired - BuyAny Max 5 NFTA:{3|4|5} for 11e", await addOrder2Tx.wait());
-  //   // UnExpired
-  //   const expiry3 = parseInt(new Date() / 1000) + (60 * 60 * 24);
-  //   const addOrder3Tx = await data.nix.connect(data.user0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ANY, [ 3, 4, 5 ], ethers.utils.parseEther("11"), expiry3, 5, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") });
-  //   await data.printEvents("Maker Added Order #3 - Un Expired - BuyAny Max 5 NFTA:{3|4|5} for 11e", await addOrder3Tx.wait());
-  //   // Un Expired for taker1
-  //   const expiry4 = parseInt(new Date() / 1000) + (60 * 60 * 24);
-  //   const addOrder4Tx = await data.nix.connect(data.user0Signer).addOrder(data.nftA.address, data.taker1Signer.address, BUYORSELL.BUY, ANYORALL.ANY, [ 3, 4, 5 ], ethers.utils.parseEther("11"), expiry4, 5, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") });
-  //   await data.printEvents("Maker Added Order #4 - Un Expired - BuyAny Max 5 NFTA:{3|4|5} for 11e", await addOrder4Tx.wait());
-  //   // All, No Expiry
-  //   const addOrder5Tx = await data.nix.connect(data.user0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ALL, [ 3, 4, 5 ], ethers.utils.parseEther("11"), 0, 1, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") });
-  //   await data.printEvents("Maker Added Order #5 - No Expiry - BuyAll Max 1 NFTA:{3,4,5} for 11e", await addOrder5Tx.wait());
-  //   // All, UnExpired, Maxxed
-  //   const addOrder6Tx = await data.nix.connect(data.user0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ALL, [ 3, 4, 5 ], ethers.utils.parseEther("11"), expiry3, 0, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") });
-  //   await data.printEvents("Maker Added Order #5 - No Expiry - BuyAll Max 0 NFTA:{3,4,5} for 11e", await addOrder6Tx.wait());
-  //
-  //   await data.printState("After Maker Added Orders");
-  //
-  //   console.log("        --- Taker Execute Orders ---");
-  //   await expect(data.nix.connect(data.user0Signer).executeOrders([data.nftA.address, data.nftA.address], [0, 1], [[ 3, 5 ], [4]], ethers.utils.parseEther("22.0011").mul(7).div(10), 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("CannotExecuteOwnOrder()");
-  //   await expect(data.nix.connect(data.taker0Signer).executeOrders([data.nftA.address, data.nftA.address], [1], [[4]], ethers.utils.parseEther("22.0011").mul(7).div(10), 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("InputArraysMismatch");
-  //   await expect(data.nix.connect(data.taker0Signer).executeOrders([data.nftA.address], [1, 2], [[4]], ethers.utils.parseEther("22.0011").mul(7).div(10), 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("InputArraysMismatch");
-  //   await expect(data.nix.connect(data.taker0Signer).executeOrders([data.nftA.address], [1], [[4], [3]], ethers.utils.parseEther("22.0011").mul(7).div(10), 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("InputArraysMismatch");
-  //   await expect(data.nix.connect(data.taker0Signer).executeOrders([data.nftA.address], [1], [[4]], ethers.utils.parseEther("22.0011").mul(7).div(10), 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("OrderExpired(1, 1)");
-  //   await expect(data.nix.connect(data.taker0Signer).executeOrders([data.nftA.address], [2], [[4]], ethers.utils.parseEther("22.0011").mul(7).div(10), 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("OrderExpired(2");
-  //   await expect(data.nix.connect(data.taker0Signer).executeOrders([data.nftA.address], [0], [[]], ethers.utils.parseEther("11").mul(7).div(10), 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("TokenIdsNotSpecified");
-  //   await expect(data.nix.connect(data.taker0Signer).executeOrders([data.nftA.address], [0], [[]], ethers.utils.parseEther("11").mul(7).div(10), 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("TokenIdsNotSpecified");
-  //   await expect(data.nix.connect(data.taker0Signer).executeOrders([data.nftA.address], [4], [[4]], ethers.utils.parseEther("11").mul(7).div(10), 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("OrderCanOnlyBeExecutedBySpecifiedTaker(4,");
-  //   await expect(data.nix.connect(data.taker0Signer).executeOrders([data.nftA.address], [0], [[6]], ethers.utils.parseEther("11").mul(7).div(10), 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("ERC721: operator query for nonexistent token");
-  //   await expect(data.nix.connect(data.taker0Signer).executeOrders([data.nftA.address], [0], [[7]], ethers.utils.parseEther("11").mul(7).div(10), 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("TokenIdNotFound(0, 7)");
-  //   await expect(data.nix.connect(data.taker0Signer).executeOrders([data.nftA.address], [0], [[2]], ethers.utils.parseEther("11").mul(7).div(10), 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("TokenIdNotFound(0, 2)");
-  //   await expect(data.nix.connect(data.taker0Signer).executeOrders([data.nftA.address], [5], [[3, 4]], ethers.utils.parseEther("11").mul(7).div(10), 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("TokenIdsMismatch(5, [3, 4, 5], [3, 4])");
-  //   await expect(data.nix.connect(data.taker0Signer).executeOrders([data.nftA.address], [5], [[3, 4, 5, 6]], ethers.utils.parseEther("11").mul(7).div(10), 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("TokenIdsMismatch(5, [3, 4, 5], [3, 4, 5, 6])");
-  //   await expect(data.nix.connect(data.taker0Signer).executeOrders([data.nftA.address], [6], [[3, 4, 5]], ethers.utils.parseEther("11").mul(7).div(10), 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("OrderMaxxed(6, 1, 0)");
-  // });
-
-  // it("20. Test Update Order Exceptions", async function () {
-  //   console.log("      20. Test Update Order Exceptions");
-  //
-  //   console.log("        --- Maker Add Orders ---");
-  //   // No Expiry
-  //   const addOrder0Tx = await data.nix.connect(data.user0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ANY, [ 3, 4, 5 ], ethers.utils.parseEther("11"), 0, 5, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") });
-  //   await data.printEvents("Maker Added Order #0 - No Expiry - BuyAny Max 5 NFTA:{3|4|5} for 11e", await addOrder0Tx.wait());
-  //   // All, No Expiry
-  //   const addOrder5Tx = await data.nix.connect(data.user0Signer).addOrder(data.nftA.address, ZERO_ADDRESS, BUYORSELL.BUY, ANYORALL.ALL, [ 3, 4, 5 ], ethers.utils.parseEther("11"), 0, 1, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") });
-  //   await data.printEvents("Maker Added Order #5 - No Expiry - BuyAll Max 1 NFTA:{3,4,5} for 11e", await addOrder5Tx.wait());
-  //
-  //   await data.printState("After Maker Added Orders");
-  //
-  //   console.log("        --- Update Order Price And Expiry ---");
-  //   await expect(data.nix.connect(data.maker1Signer).updateOrderPriceAndExpiry(data.nftA.address, 0, ethers.utils.parseEther("11"), 0, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("NotMaker()");
-  //
-  //   const updateOrderPriceAndExpiry0Tx = await data.nix.connect(data.user0Signer).updateOrderPriceAndExpiry(data.nftA.address, 0, ethers.utils.parseEther("22"), 1, data.integrator, { value: ethers.utils.parseEther("0.000001") });
-  //   await data.printEvents("Maker Update Order Price And Expiry", await updateOrderPriceAndExpiry0Tx.wait());
-  //
-  //   await data.printState("After Maker Update Order Price And Expiry");
-  //
-  //   const expiry3 = parseInt(new Date() / 1000) + (60 * 60 * 24);
-  //   await expect(data.nix.connect(data.maker1Signer).updateOrder(data.nftA.address, 0, ZERO_ADDRESS, [], ethers.utils.parseEther("33"), expiry3, 0, 200, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("NotMaker()");
-  //   await expect(data.nix.connect(data.user0Signer).updateOrder(data.nftA.address, 0, ZERO_ADDRESS, [], ethers.utils.parseEther("33"), expiry3, 0, 2000, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("RoyaltyOverMax(2000, 1000)");
-  //   await expect(data.nix.connect(data.user0Signer).updateOrder(data.nftA.address, 0, ZERO_ADDRESS, [ 4, 3 ], ethers.utils.parseEther("33"), expiry3, 0, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("TokenIdsMustBeSortedWithNoDuplicates");
-  //   await expect(data.nix.connect(data.user0Signer).updateOrder(data.nftA.address, 0, ZERO_ADDRESS, [ 3, 4, 4 ], ethers.utils.parseEther("33"), expiry3, 0, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("TokenIdsMustBeSortedWithNoDuplicates");
-  //   await expect(data.nix.connect(data.user0Signer).updateOrder(data.nftA.address, 0, ZERO_ADDRESS, [ 3, 5, 4 ], ethers.utils.parseEther("33"), expiry3, 0, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("TokenIdsMustBeSortedWithNoDuplicates");
-  //   await expect(data.nix.connect(data.user0Signer).updateOrder(data.nftA.address, 1, ZERO_ADDRESS, [], ethers.utils.parseEther("33"), expiry3, 0, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("TokenIdsMustBeSpecifiedForBuyOrSellAll");
-  //   await expect(data.nix.connect(data.user0Signer).updateOrder(data.nftA.address, 1, ZERO_ADDRESS, [ 2, 3 ], ethers.utils.parseEther("33"), expiry3, 1, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") })).to.be.revertedWith("TradeMaxMustBeZeroOrOneForBuyOrSellAll");
-  //
-  //   const updateOrder0Tx = await data.nix.connect(data.user0Signer).updateOrder(data.nftA.address, 0, ZERO_ADDRESS, [], ethers.utils.parseEther("33"), expiry3, -3, 100, data.integrator, { value: ethers.utils.parseEther("0.000001") });
-  //   await data.printEvents("Maker Update Order Price And Expiry", await updateOrder0Tx.wait());
-  //   const updateOrder1Tx = await data.nix.connect(data.user0Signer).updateOrder(data.nftA.address, 1, data.taker0Signer.address, [ 3, 4 ], ethers.utils.parseEther("44"), expiry3, 0, 200, data.integrator, { value: ethers.utils.parseEther("0.000001") });
-  //   await data.printEvents("Maker Update Order Price And Expiry", await updateOrder1Tx.wait());
-  //
-  //   await data.printState("After Maker Update Order");
-  // });
-
-  // it("99. Admin Test", async function () {
-  //   console.log("      99. Admin Test");
-  //   console.log("        --- Send Nix ETH, WETH & NFT Tips ---");
-  //   const sendNixTip0Tx = await data.deployerSigner.sendTransaction({ to: data.nix.address, value: ethers.utils.parseEther("0.888") });
-  //   await data.printEvents("Send Nix ETH Tip" , await sendNixTip0Tx.wait());
-  //   const sendNixWETHTip0Tx = await data.weth.connect(data.taker0Signer).transfer(data.nix.address, ethers.utils.parseEther("3.33"));
-  //   await data.printEvents("Send Nix WETH Tip" , await sendNixWETHTip0Tx.wait());
-  //   const takerTransferNFTToNixTx = await data.nftA.connect(data.taker0Signer)["safeTransferFrom(address,address,uint256)"](data.taker0, data.nix.address, 3);
-  //   await data.printEvents("Taker0 Transfer NFTA To Nix For Donation" , await takerTransferNFTToNixTx.wait());
-  //   await data.printState("After Send Nix ETH, WETH & NFT Tips");
-  //
-  //   console.log("        --- Non-Owner Withdraw ETH, WETH & NFT Tips ---");
-  //   await expect(data.nix.connect(data.taker0Signer).withdraw(ZERO_ADDRESS, 0, 0)).to.be.revertedWith("NotOwner()");
-  //   await expect(data.nix.connect(data.taker0Signer).withdraw(data.weth.address, 0, 0)).to.be.revertedWith("NotOwner()");
-  //   await expect(data.nix.connect(data.taker0Signer).withdraw(data.nftA.address, 0, 0)).to.be.revertedWith("NotOwner()");
-  //
-  //   console.log("        --- Owner Withdraw ETH, WETH & NFT Tips ---");
-  //   const ownerWithdrawETHTips0Tx = await data.nix.connect(data.deployerSigner).withdraw(ZERO_ADDRESS, 0, 0);
-  //   await data.printEvents("Owner Withdrawn ETH Tips" , await ownerWithdrawETHTips0Tx.wait());
-  //   const ownerWithdrawWETHTips0Tx = await data.nix.connect(data.deployerSigner).withdraw(data.weth.address, 0, 0);
-  //   await data.printEvents("Owner Withdrawn WETH Tips" , await ownerWithdrawWETHTips0Tx.wait());
-  //   const ownerWithdrawNFTTips0Tx = await data.nix.connect(data.deployerSigner).withdraw(data.nftA.address, 0, 3);
-  //   await data.printEvents("Owner Withdrawn Tips" , await ownerWithdrawNFTTips0Tx.wait());
-  //   await data.printState("After Owner Withdrawn ETH, WETH & NFT Tips");
-  //
-  //   console.log("        --- Non-Owner Transfer Ownership ---");
-  //   await expect(data.nix.connect(data.taker0Signer).transferOwnership(ZERO_ADDRESS)).to.be.revertedWith("NotOwner()");
-  //   const ownerTransferOwnershipTx = await data.nix.connect(data.deployerSigner).transferOwnership(data.taker0Signer.address);
-  //   await data.printEvents("Transfer Ownership" , await ownerTransferOwnershipTx.wait());
-  //   expect(await data.nix.owner()).to.equal(data.taker0Signer.address);
-  // });
-
 });
