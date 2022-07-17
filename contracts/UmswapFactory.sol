@@ -340,6 +340,7 @@ contract TipHandler {
     }
 }
 
+
 /// @author BokkyPooBah, Bok Consulting Pty Ltd
 /// @title ERC-721 pool
 contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
@@ -460,6 +461,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
     }
 }
 
+
 contract UmswapFactory is Owned, TipHandler, CloneFactory {
 
     uint8 constant ZERO = 48;
@@ -511,7 +513,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
         s = string(b);
     }
 
-    function validateName(string memory str) public pure returns (bool) {
+    function isValidName(string memory str) public pure returns (bool) {
         bytes memory b = bytes(str);
         if (b.length < 1 || b.length > 48) {
             return false;
@@ -527,10 +529,10 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
             if (char == 0x20 && lastChar == 0x20) {
                 return false;
             }
-            // 9-0, A-Z, a-z, space, +, -, :
-            if (!(char >= 0x30 && char <= 0x39) && !(char >= 0x41 && char <= 0x5A) &&
-                !(char >= 0x61 && char <= 0x7A) &&
-                !(char == 0x20) && !(char == 0x2B) && !(char == 0x2D) && !(char == 0x3A)) {
+            // 0-9, A-Z, a-z, space, +, -, :
+            if (!(char >= 0x30 && char <= 0x39) && !(char >= 0x41 && char <= 0x5a) &&
+                !(char >= 0x61 && char <= 0x7a) &&
+                !(char == 0x20) && !(char == 0x2b) && !(char == 0x2d) && !(char == 0x3a)) {
                 return false;
             }
             lastChar = char;
@@ -542,7 +544,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
         if (!isERC721(address(_collection))) {
             revert NotERC721();
         }
-        if (!validateName(_name)) {
+        if (!isValidName(_name)) {
             revert InvalidName();
         }
         if (_tokenIds.length > 0) {
@@ -564,6 +566,9 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
         handleTips(integrator, address(this));
     }
 
+    receive() external payable {
+    }
+
     function withdraw(address token, uint tokens, uint tokenId) public onlyOwner {
         if (token == address(0)) {
             if (tokens == 0) {
@@ -581,9 +586,6 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
             }
         }
         emit Withdrawn(token, tokens, tokenId);
-    }
-
-    receive() external payable {
     }
 
     function getUmswapsLength() public view returns (uint _length) {

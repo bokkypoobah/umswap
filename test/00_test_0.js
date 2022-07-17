@@ -126,7 +126,6 @@ describe("umswap", function () {
     console.log("      03. Test 03 - UmswapFactory Secondary Functions");
 
     const tx1 = await data.umswapFactory.transferOwnership(data.user0);
-    const newOwner = await data.umswapFactory.owner();
     expect(await data.umswapFactory.owner()).to.equal(data.user0);
     console.log("        Tested transferOwnership(...) for success");
 
@@ -150,30 +149,26 @@ describe("umswap", function () {
     console.log("        Tested transferOwnership(...) for error 'NotOwner'");
 
     await expect(
-      data.umswapFactory.newUmswap(data.user0, "name", [1, 2, 3], data.integrator, { value: ethers.utils.parseEther("0.1111") })
+      data.umswapFactory.newUmswap(data.user0, "name", [111, 222, 333], data.integrator, { value: ethers.utils.parseEther("0.1111") })
     ).to.be.revertedWithCustomError(data.umswapFactory, "NotERC721");
     console.log("        Tested newUmswap(...) for error 'NotERC721'");
 
     await expect(
-      data.umswapFactory.newUmswap(data.erc721Mock.address, "name%", [1, 2, 3], data.integrator, { value: ethers.utils.parseEther("0.1111") })
+      data.umswapFactory.newUmswap(data.erc721Mock.address, "name%", [111, 222, 333], data.integrator, { value: ethers.utils.parseEther("0.1111") })
     ).to.be.revertedWithCustomError(data.umswapFactory, "InvalidName");
     console.log("        Tested newUmswap(...) for error 'InvalidName'");
 
     await expect(
-      data.umswapFactory.newUmswap(data.erc721Mock.address, "name", [2, 2, 3], data.integrator, { value: ethers.utils.parseEther("0.1111") })
+      data.umswapFactory.newUmswap(data.erc721Mock.address, "name", [222, 222, 333], data.integrator, { value: ethers.utils.parseEther("0.1111") })
     ).to.be.revertedWithCustomError(data.umswapFactory, "TokenIdsMustBeSortedWithNoDuplicates");
     console.log("        Tested newUmswap(...) for error 'TokenIdsMustBeSortedWithNoDuplicates'");
 
-    const firstTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "name", [1, 2, 3], data.integrator, { value: ethers.utils.parseEther("0.1111") });
+    const firstTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "name", [111, 222, 333], data.integrator, { value: ethers.utils.parseEther("0.1111") });
     await expect(
-      data.umswapFactory.newUmswap(data.erc721Mock.address, "name", [1, 2, 3], data.integrator, { value: ethers.utils.parseEther("0.1111") })
+      data.umswapFactory.newUmswap(data.erc721Mock.address, "name", [111, 222, 333], data.integrator, { value: ethers.utils.parseEther("0.1111") })
     ).to.be.revertedWithCustomError(data.umswapFactory, "DuplicateSet");
     console.log("        Tested newUmswap(...) for error 'DuplicateSet'");
 
-    // const sendTip1Tx = await data.user0Signer.sendTransaction({ to: data.umswapFactory.address, value: ethers.utils.parseEther("0.888") });
-    // await data.printState("1");
-    // const withdraw1Tx = await data.umswapFactory.withdraw(ZERO_ADDRESS, 0, 0);
-    // await data.printState("2");
     await expect(
       data.umswapFactory.connect(data.user1Signer).withdraw(ZERO_ADDRESS, 0, 0)
     ).to.be.revertedWithCustomError(data.umswapFactory, "NotOwner");
@@ -183,7 +178,20 @@ describe("umswap", function () {
 
   it("05. Test 05", async function () {
     console.log("      05. Test 05 - TODO: Umswap Secondary/ERC-20 Functions");
+    const newUmswapTx = await data.umswapFactory.connect(data.user1Signer).newUmswap(data.erc721Mock.address, "name", [111, 222, 333], data.integrator, { value: ethers.utils.parseEther("0.1111") });
+    await data.printEvents("newUmswapTx", await newUmswapTx.wait());
+    const umswapsLength = await data.umswapFactory.getUmswapsLength();
+    expect(await data.umswapFactory.getUmswapsLength()).to.equal(1);
+    console.log("        Tested newUmswap(...) for success");
+
+    const umswapAddress = await data.umswapFactory.umswaps(0);
+    const umswap  = await ethers.getContractAt("Umswap", umswapAddress);
+    data.setUmswap(umswap);
+
+    await data.printState("End");
+
   });
+
 
   it("06. Test 06", async function () {
     console.log("      06. Test 06 - TODO: Umswap Exceptions");
