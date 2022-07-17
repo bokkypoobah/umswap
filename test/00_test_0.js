@@ -103,7 +103,7 @@ describe("umswap", function () {
     for (let numberOfTokenIds of [10, 100, 1200]) {
       for (let rangeStart of [0, 2 ** 16, 2 ** 32, 2 ** 48]) {
         let tokenIds = generateRange(rangeStart, parseInt(rangeStart) + numberOfTokenIds, 1);
-        const name = "Set size " + numberOfTokenIds + " starting " + rangeStart;
+        const name = numberOfTokenIds + " items from " + rangeStart;
         const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, name, tokenIds, data.integrator, { value: ethers.utils.parseEther("0.1111") });
         await data.printEvents(name, await newUmswapTx.wait());
       }
@@ -112,7 +112,7 @@ describe("umswap", function () {
     for (let numberOfTokenIds of [3800]) {
       for (let rangeStart of [0]) {
         let tokenIds = generateRange(rangeStart, parseInt(rangeStart) + numberOfTokenIds, 1);
-        const name = "Set size " + numberOfTokenIds + " starting " + rangeStart;
+        const name = numberOfTokenIds + " items from " + rangeStart;
         const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, name, tokenIds, data.integrator, { value: ethers.utils.parseEther("0.1111") });
         await data.printEvents(name, await newUmswapTx.wait());
       }
