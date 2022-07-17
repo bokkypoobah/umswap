@@ -86,7 +86,7 @@ function approve(address spender, uint tokens) override external returns (bool s
 
 <br />
 
-#### swap
+#### receive
 
 ```receive
 receive() external payable
