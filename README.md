@@ -68,7 +68,7 @@ function symbol() override external view returns (string memory)
 
 <br />
 
-#### symbol
+#### totalSupply
 
 ```javascript
 function totalSupply() override external view returns (uint)
