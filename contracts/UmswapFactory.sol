@@ -203,14 +203,12 @@ interface IERC721Partial is IERC165 {
     function safeTransferFrom(address from, address to, uint tokenId) external payable;
 }
 
-interface IERC721TokenReceiver {
-    function onERC721Received(address operator, address from, uint tokenId, bytes memory data) external returns(bytes4);
-}
-
 
 contract ReentrancyGuard {
-    error ReentrancyAttempted();
     uint private _executing;
+
+    error ReentrancyAttempted();
+
     modifier reentrancyGuard() {
         if (_executing == 1) {
             revert ReentrancyAttempted();
