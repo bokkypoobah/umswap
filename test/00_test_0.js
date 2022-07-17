@@ -121,6 +121,32 @@ describe("umswap", function () {
   });
 
 
+  it("03. Test 03", async function () {
+    console.log("      03. Test 03 - Exceptions");
+
+    console.log("        Testing for error NotERC721");
+    await expect(
+      data.umswapFactory.newUmswap(data.user0, "name", [1, 2, 3], data.integrator, { value: ethers.utils.parseEther("0.1111") })
+    ).to.be.revertedWithCustomError(data.umswapFactory, "NotERC721");
+
+    console.log("        Testing for error InvalidName");
+    await expect(
+      data.umswapFactory.newUmswap(data.erc721Mock.address, "name%", [1, 2, 3], data.integrator, { value: ethers.utils.parseEther("0.1111") })
+    ).to.be.revertedWithCustomError(data.umswapFactory, "InvalidName");
+
+    console.log("        Testing for error TokenIdsMustBeSortedWithNoDuplicates");
+    await expect(
+      data.umswapFactory.newUmswap(data.erc721Mock.address, "name", [2, 2, 3], data.integrator, { value: ethers.utils.parseEther("0.1111") })
+    ).to.be.revertedWithCustomError(data.umswapFactory, "TokenIdsMustBeSortedWithNoDuplicates");
+
+    console.log("        Testing for error DuplicateSet");
+    const firstTx = data.umswapFactory.newUmswap(data.erc721Mock.address, "name", [1, 2, 3], data.integrator, { value: ethers.utils.parseEther("0.1111") });
+    await expect(
+      data.umswapFactory.newUmswap(data.erc721Mock.address, "name", [1, 2, 3], data.integrator, { value: ethers.utils.parseEther("0.1111") })
+    ).to.be.revertedWithCustomError(data.umswapFactory, "DuplicateSet");
+
+  });
+
   // it("01. Maker BuyAll Test", async function () {
   //   console.log("      01. Maker BuyAll Test");
   //   console.log("        --- Maker Add Orders ---");

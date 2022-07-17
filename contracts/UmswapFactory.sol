@@ -486,9 +486,11 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
     }
 
     function isERC721(address token) internal view returns (bool b) {
-        try IERC721Partial(token).supportsInterface(ERC721_INTERFACE) returns (bool _b) {
-            b = _b;
-        } catch {
+        if (token.code.length > 0) {
+            try IERC721Partial(token).supportsInterface(ERC721_INTERFACE) returns (bool _b) {
+                b = _b;
+            } catch {
+            }
         }
     }
 
