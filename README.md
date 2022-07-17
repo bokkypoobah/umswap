@@ -8,7 +8,119 @@
 
 ---
 
-## Functions
+## Umswap Functions
+
+### Umswap Read Functions
+
+#### allowance
+
+```javascript
+function allowance(address tokenOwner, address spender) override external view returns (uint remaining)
+```
+
+<br />
+
+#### balanceOf
+
+```javascript
+function balanceOf(address tokenOwner) override external view returns (uint balance)
+```
+
+<br />
+
+#### decimals
+
+```javascript
+function decimals() override external view returns (uint8)
+```
+
+<br />
+
+#### getInfo
+
+```javascript
+function getInfo() public view returns (address _creator, string memory __symbol, string memory __name, uint[] memory _tokenIds, uint _swappedIn, uint _swappedOut, uint __totalSupply)
+```
+
+<br />
+
+#### isValidTokenId
+
+```javascript
+function isValidTokenId(uint _tokenId) public view returns (bool)
+```
+
+<br />
+
+#### name
+
+```javascript
+function name() override external view returns (string memory)
+```
+
+<br />
+
+#### symbol
+
+```javascript
+function symbol() override external view returns (string memory)
+```
+
+<br />
+
+#### symbol
+
+```javascript
+function totalSupply() override external view returns (uint)
+```
+
+<br />
+
+### Umswap Write Functions
+
+#### approve
+
+```javascript
+function approve(address spender, uint tokens) override external returns (bool success)
+```
+
+<br />
+
+#### swap
+
+```receive
+receive() external payable
+```
+
+<br />
+
+#### swap
+
+```javascript
+function swap(uint[] calldata _inTokenIds, uint[] calldata _outTokenIds, address integrator) public payable reentrancyGuard
+```
+
+<br />
+
+#### transfer
+
+```javascript
+function transfer(address to, uint tokens) override external returns (bool success)
+```
+
+<br />
+
+#### transferFrom
+
+```javascript
+function transferFrom(address from, address to, uint tokens) override external returns (bool success)
+```
+
+<br />
+
+---
+
+## UmswapFactory Functions
 
 ### UmswapFactory Read Functions
 

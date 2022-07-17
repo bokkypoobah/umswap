@@ -385,7 +385,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         }
     }
 
-    function validTokenId(uint _tokenId) public view returns (bool _isOk) {
+    function isValidTokenId(uint _tokenId) public view returns (bool) {
         if (tokenIds16.length > 0) {
             return ArrayUtils.includes16(tokenIds16, _tokenId);
         } else if (tokenIds32.length > 0) {
@@ -404,13 +404,13 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
             _burn(msg.sender, (_outTokenIds.length - _inTokenIds.length) * 10 ** 18);
         }
         for (uint i = 0; i < _inTokenIds.length; i = unsafeIncrement(i)) {
-            if (!validTokenId(_inTokenIds[i])) {
+            if (!isValidTokenId(_inTokenIds[i])) {
                 revert InvalidTokenId(_inTokenIds[i]);
             }
             collection.transferFrom(msg.sender, address(this), _inTokenIds[i]);
         }
         for (uint i = 0; i < _outTokenIds.length; i = unsafeIncrement(i)) {
-            if (!validTokenId(_outTokenIds[i])) {
+            if (!isValidTokenId(_outTokenIds[i])) {
                 revert InvalidTokenId(_outTokenIds[i]);
             }
             collection.transferFrom(address(this), msg.sender, _outTokenIds[i]);
