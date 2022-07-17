@@ -345,6 +345,8 @@ contract TipHandler {
 /// @title ERC-721 pool
 contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
 
+    uint8 constant DECIMALS = 18;
+
     address private creator;
     IERC721Partial private collection;
     uint16[] private tokenIds16;
@@ -361,7 +363,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
     function initUmswap(address _creator, IERC721Partial _collection, string calldata _symbol, string calldata _name, uint[] calldata _tokenIds) public {
         creator = _creator;
         collection = _collection;
-        super.initToken(msg.sender, _symbol, _name, 18);
+        super.initToken(msg.sender, _symbol, _name, DECIMALS);
         uint maxTokenId;
         for (uint i = 0; i < _tokenIds.length; i = unsafeIncrement(i)) {
             if (_tokenIds[i] > maxTokenId) {
