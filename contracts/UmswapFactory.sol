@@ -169,11 +169,6 @@ library ArrayUtils {
 }
 
 
-function unsafeIncrement(uint x) pure returns (uint) {
-    unchecked { return x + 1; }
-}
-
-
 /// @notice ERC20 https://eips.ethereum.org/EIPS/eip-20 with optional symbol, name and decimals
 interface IERC20 {
     function totalSupply() external view returns (uint);
@@ -201,6 +196,11 @@ interface IERC721Partial is IERC165 {
     function isApprovedForAll(address owner, address operator) external view returns (bool);
     function transferFrom(address from, address to, uint tokenId) external payable;
     function safeTransferFrom(address from, address to, uint tokenId) external payable;
+}
+
+
+function onePlus(uint x) pure returns (uint) {
+    unchecked { return 1 + x; }
 }
 
 
@@ -259,14 +259,14 @@ contract BasicToken is IERC20, Owned {
     uint _decimals;
     uint _totalSupply;
 
-    mapping(address => uint) balances;
-    mapping(address => mapping(address => uint)) allowed;
+    mapping(address => uint) _balances;
+    mapping(address => mapping(address => uint)) _allowed;
 
-    function initBasicToken(address tokenOwner, string memory __symbol, string memory __name, uint __decimals) internal {
+    function initBasicToken(address tokenOwner, string memory symbol_, string memory name_, uint decimals_) internal {
         super.initOwned(tokenOwner);
-        _symbol = __symbol;
-        _name = __name;
-        _decimals = __decimals;
+        _symbol = symbol_;
+        _name = name_;
+        _decimals = decimals_;
     }
     function symbol() override external view returns (string memory) {
         return _symbol;
@@ -278,40 +278,40 @@ contract BasicToken is IERC20, Owned {
         return uint8(_decimals);
     }
     function totalSupply() override external view returns (uint) {
-        return _totalSupply - balances[address(0)];
+        return _totalSupply - _balances[address(0)];
     }
     function balanceOf(address tokenOwner) override external view returns (uint balance) {
-        return balances[tokenOwner];
+        return _balances[tokenOwner];
     }
     function transfer(address to, uint tokens) override external returns (bool success) {
-        balances[msg.sender] -= tokens;
-        balances[to] += tokens;
+        _balances[msg.sender] -= tokens;
+        _balances[to] += tokens;
         emit Transfer(msg.sender, to, tokens);
         return true;
     }
     function approve(address spender, uint tokens) override external returns (bool success) {
-        allowed[msg.sender][spender] = tokens;
+        _allowed[msg.sender][spender] = tokens;
         emit Approval(msg.sender, spender, tokens);
         return true;
     }
     function transferFrom(address from, address to, uint tokens) override external returns (bool success) {
-        balances[from] -= tokens;
-        allowed[from][msg.sender] -= tokens;
-        balances[to] += tokens;
+        _balances[from] -= tokens;
+        _allowed[from][msg.sender] -= tokens;
+        _balances[to] += tokens;
         emit Transfer(from, to, tokens);
         return true;
     }
     function allowance(address tokenOwner, address spender) override external view returns (uint remaining) {
-        return allowed[tokenOwner][spender];
+        return _allowed[tokenOwner][spender];
     }
     function _mint(address tokenOwner, uint tokens) internal returns (bool success) {
-        balances[tokenOwner] += tokens;
+        _balances[tokenOwner] += tokens;
         _totalSupply += tokens;
         emit Transfer(address(0), tokenOwner, tokens);
         return true;
     }
     function _burn(address tokenOwner, uint tokens) internal returns (bool success) {
-        balances[tokenOwner] -= tokens;
+        _balances[tokenOwner] -= tokens;
         _totalSupply -= tokens;
         emit Transfer(tokenOwner, address(0), tokens);
         return true;
@@ -365,21 +365,21 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         collection = _collection;
         super.initBasicToken(msg.sender, _symbol, _name, DECIMALS);
         uint maxTokenId;
-        for (uint i = 0; i < _tokenIds.length; i = unsafeIncrement(i)) {
+        for (uint i = 0; i < _tokenIds.length; i = onePlus(i)) {
             if (_tokenIds[i] > maxTokenId) {
                 maxTokenId = _tokenIds[i];
             }
         }
         if (maxTokenId < 2 ** 16) {
-            for (uint i = 0; i < _tokenIds.length; i = unsafeIncrement(i)) {
+            for (uint i = 0; i < _tokenIds.length; i = onePlus(i)) {
                 tokenIds16.push(uint16(_tokenIds[i]));
             }
         } else if (maxTokenId < 2 ** 32) {
-            for (uint i = 0; i < _tokenIds.length; i = unsafeIncrement(i)) {
+            for (uint i = 0; i < _tokenIds.length; i = onePlus(i)) {
                 tokenIds32.push(uint32(_tokenIds[i]));
             }
         } else if (maxTokenId < 2 ** 48) {
-            for (uint i = 0; i < _tokenIds.length; i = unsafeIncrement(i)) {
+            for (uint i = 0; i < _tokenIds.length; i = onePlus(i)) {
                 tokenIds48.push(uint48(_tokenIds[i]));
             }
         } else {
@@ -405,13 +405,13 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         if (_outTokenIds.length > _inTokenIds.length) {
             _burn(msg.sender, (_outTokenIds.length - _inTokenIds.length) * 10 ** 18);
         }
-        for (uint i = 0; i < _inTokenIds.length; i = unsafeIncrement(i)) {
+        for (uint i = 0; i < _inTokenIds.length; i = onePlus(i)) {
             if (!isValidTokenId(_inTokenIds[i])) {
                 revert InvalidTokenId(_inTokenIds[i]);
             }
             collection.transferFrom(msg.sender, address(this), _inTokenIds[i]);
         }
-        for (uint i = 0; i < _outTokenIds.length; i = unsafeIncrement(i)) {
+        for (uint i = 0; i < _outTokenIds.length; i = onePlus(i)) {
             if (!isValidTokenId(_outTokenIds[i])) {
                 revert InvalidTokenId(_outTokenIds[i]);
             }
@@ -430,36 +430,36 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         handleTips(address(0), owner);
     }
 
-    function getInfo() public view returns (address _creator, string memory __symbol, string memory __name, uint[] memory _tokenIds, uint _swappedIn, uint _swappedOut, uint __totalSupply) {
+    function getInfo() public view returns (address _creator, string memory symbol_, string memory name_, uint[] memory tokenIds_, uint swappedIn_, uint swappedOut_, uint totalSupply_) {
         _creator = creator;
-        __symbol = _symbol;
-        __name = _name;
+        symbol_ = _symbol;
+        name_ = _name;
         if (tokenIds16.length > 0) {
-            _tokenIds = new uint[](tokenIds16.length);
-            for (uint i = 0; i < tokenIds16.length; i = unsafeIncrement(i)) {
-                _tokenIds[i] = tokenIds16[i];
+            tokenIds_ = new uint[](tokenIds16.length);
+            for (uint i = 0; i < tokenIds16.length; i = onePlus(i)) {
+                tokenIds_[i] = tokenIds16[i];
             }
         } else if (tokenIds32.length > 0) {
-            _tokenIds = new uint[](tokenIds32.length);
-            for (uint i = 0; i < tokenIds32.length; i = unsafeIncrement(i)) {
-                _tokenIds[i] = tokenIds32[i];
+            tokenIds_ = new uint[](tokenIds32.length);
+            for (uint i = 0; i < tokenIds32.length; i = onePlus(i)) {
+                tokenIds_[i] = tokenIds32[i];
             }
         } else if (tokenIds48.length > 0) {
-            _tokenIds = new uint[](tokenIds48.length);
-            for (uint i = 0; i < tokenIds48.length; i = unsafeIncrement(i)) {
-                _tokenIds[i] = tokenIds48[i];
+            tokenIds_ = new uint[](tokenIds48.length);
+            for (uint i = 0; i < tokenIds48.length; i = onePlus(i)) {
+                tokenIds_[i] = tokenIds48[i];
             }
         } else if (tokenIds256.length > 0) {
-            _tokenIds = new uint[](tokenIds256.length);
-            for (uint i = 0; i < tokenIds256.length; i = unsafeIncrement(i)) {
-                _tokenIds[i] = tokenIds256[i];
+            tokenIds_ = new uint[](tokenIds256.length);
+            for (uint i = 0; i < tokenIds256.length; i = onePlus(i)) {
+                tokenIds_[i] = tokenIds256[i];
             }
         } else {
-            _tokenIds = new uint[](0);
+            tokenIds_ = new uint[](0);
         }
-        _swappedIn = swappedIn;
-        _swappedOut = swappedOut;
-        __totalSupply = _totalSupply;
+        swappedIn_ = swappedIn;
+        swappedOut_ = swappedOut;
+        totalSupply_ = _totalSupply;
     }
 }
 
@@ -501,7 +501,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
         uint i;
         uint j;
         uint num;
-        for (i = 0; i < UMSYMBOLPREFIX.length; i = unsafeIncrement(i)) {
+        for (i = 0; i < UMSYMBOLPREFIX.length; i = onePlus(i)) {
             b[j++] = UMSYMBOLPREFIX[i];
         }
         i = 5;
@@ -525,7 +525,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
             return false;
         }
         bytes1 lastChar = b[0];
-        for (uint i; i < b.length; i = unsafeIncrement(i)) {
+        for (uint i; i < b.length; i = onePlus(i)) {
             bytes1 char = b[i];
              // Cannot contain continous spaces
             if (char == 0x20 && lastChar == 0x20) {
@@ -550,7 +550,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
             revert InvalidName();
         }
         if (_tokenIds.length > 0) {
-            for (uint i = 1; i < _tokenIds.length; i = unsafeIncrement(i)) {
+            for (uint i = 1; i < _tokenIds.length; i = onePlus(i)) {
                 if (_tokenIds[i - 1] >= _tokenIds[i]) {
                     revert TokenIdsMustBeSortedWithNoDuplicates();
                 }
@@ -613,7 +613,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
         _swappedIns = new uint[](length);
         _swappedOuts = new uint[](length);
         _totalSupplies = new uint[](length);
-        for (uint i = 0; i < length; i = unsafeIncrement(i)) {
+        for (uint i = 0; i < length; i = onePlus(i)) {
             _umswaps[i] = umswaps[i];
             (_creators[i], _symbols[i], _names[i], _tokenIds[i], _swappedIns[i], _swappedOuts[i], _totalSupplies[i]) = umswaps[i].getInfo();
         }
