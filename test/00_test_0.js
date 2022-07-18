@@ -68,6 +68,8 @@ describe("umswap", function () {
     const approval1Tx = await data.erc721Mock.connect(data.user0Signer).setApprovalForAll(umswapAddress, true);
     await data.printEvents("approval1Tx", await approval1Tx.wait());
 
+    await data.printState("Before Any Umswaps");
+
     const swapIn1Tx = await umswap.connect(data.user0Signer).swap([111, 333], [], data.integrator, { value: ethers.utils.parseEther("0.2222") });
     await data.printEvents("swapIn1Tx", await swapIn1Tx.wait());
 
