@@ -14,6 +14,8 @@
 
 #### allowance
 
+Standard [ERC-20](https://eips.ethereum.org/EIPS/eip-20) function.
+
 ```javascript
 function allowance(address tokenOwner, address spender) override external view returns (uint remaining)
 ```
@@ -22,6 +24,8 @@ function allowance(address tokenOwner, address spender) override external view r
 
 #### balanceOf
 
+Standard [ERC-20](https://eips.ethereum.org/EIPS/eip-20) function.
+
 ```javascript
 function balanceOf(address tokenOwner) override external view returns (uint balance)
 ```
@@ -29,6 +33,8 @@ function balanceOf(address tokenOwner) override external view returns (uint bala
 <br />
 
 #### decimals
+
+Standard [ERC-20](https://eips.ethereum.org/EIPS/eip-20) function. Set to 18 decimals.
 
 ```javascript
 function decimals() override external view returns (uint8)
@@ -54,6 +60,8 @@ function isValidTokenId(uint _tokenId) public view returns (bool)
 
 #### name
 
+Standard [ERC-20](https://eips.ethereum.org/EIPS/eip-20) function.
+
 ```javascript
 function name() override external view returns (string memory)
 ```
@@ -62,6 +70,8 @@ function name() override external view returns (string memory)
 
 #### symbol
 
+Standard [ERC-20](https://eips.ethereum.org/EIPS/eip-20) function.
+
 ```javascript
 function symbol() override external view returns (string memory)
 ```
@@ -69,6 +79,8 @@ function symbol() override external view returns (string memory)
 <br />
 
 #### totalSupply
+
+Standard [ERC-20](https://eips.ethereum.org/EIPS/eip-20) function.
 
 ```javascript
 function totalSupply() override external view returns (uint)
@@ -79,6 +91,8 @@ function totalSupply() override external view returns (uint)
 ### Umswap Write Functions
 
 #### approve
+
+Standard [ERC-20](https://eips.ethereum.org/EIPS/eip-20) function.
 
 ```javascript
 function approve(address spender, uint tokens) override external returns (bool success)
@@ -104,6 +118,8 @@ function swap(uint[] calldata _inTokenIds, uint[] calldata _outTokenIds, address
 
 #### transfer
 
+Standard [ERC-20](https://eips.ethereum.org/EIPS/eip-20) function.
+
 ```javascript
 function transfer(address to, uint tokens) override external returns (bool success)
 ```
@@ -111,6 +127,8 @@ function transfer(address to, uint tokens) override external returns (bool succe
 <br />
 
 #### transferFrom
+
+Standard [ERC-20](https://eips.ethereum.org/EIPS/eip-20) function.
 
 ```javascript
 function transferFrom(address from, address to, uint tokens) override external returns (bool success)
