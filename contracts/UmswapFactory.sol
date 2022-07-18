@@ -262,7 +262,7 @@ contract BasicToken is IERC20, Owned {
     mapping(address => uint) balances;
     mapping(address => mapping(address => uint)) allowed;
 
-    function initToken(address tokenOwner, string memory __symbol, string memory __name, uint __decimals) internal {
+    function initBasicToken(address tokenOwner, string memory __symbol, string memory __name, uint __decimals) internal {
         super.initOwned(tokenOwner);
         _symbol = __symbol;
         _name = __name;
@@ -363,7 +363,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
     function initUmswap(address _creator, IERC721Partial _collection, string calldata _symbol, string calldata _name, uint[] calldata _tokenIds) public {
         creator = _creator;
         collection = _collection;
-        super.initToken(msg.sender, _symbol, _name, DECIMALS);
+        super.initBasicToken(msg.sender, _symbol, _name, DECIMALS);
         uint maxTokenId;
         for (uint i = 0; i < _tokenIds.length; i = unsafeIncrement(i)) {
             if (_tokenIds[i] > maxTokenId) {
