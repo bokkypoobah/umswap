@@ -82,16 +82,16 @@ library ArrayUtils {
     /// @param self the given sorted array
     /// @param target the targeted item to the array
     /// @return true - if exists, false - not found
-    function includes16(uint16[] memory self, uint256 target) internal pure returns (bool) {
+    function includes16(uint16[] memory self, uint target) internal pure returns (bool) {
         if (self.length > 0) {
-            uint256 left;
-            uint256 right = self.length - 1;
-            uint256 mid;
+            uint left;
+            uint right = self.length - 1;
+            uint mid;
             while (left <= right) {
                 mid = (left + right) / 2;
-                if (uint256(self[mid]) < target) {
+                if (uint(self[mid]) < target) {
                     left = mid + 1;
-                } else if (uint256(self[mid]) > target) {
+                } else if (uint(self[mid]) > target) {
                     if (mid < 1) {
                         break;
                     }
@@ -103,16 +103,16 @@ library ArrayUtils {
         }
         return false;
     }
-    function includes32(uint32[] memory self, uint256 target) internal pure returns (bool) {
+    function includes32(uint32[] memory self, uint target) internal pure returns (bool) {
         if (self.length > 0) {
-            uint256 left;
-            uint256 right = self.length - 1;
-            uint256 mid;
+            uint left;
+            uint right = self.length - 1;
+            uint mid;
             while (left <= right) {
                 mid = (left + right) / 2;
-                if (uint256(self[mid]) < target) {
+                if (uint(self[mid]) < target) {
                     left = mid + 1;
-                } else if (uint256(self[mid]) > target) {
+                } else if (uint(self[mid]) > target) {
                     if (mid < 1) {
                         break;
                     }
@@ -124,16 +124,16 @@ library ArrayUtils {
         }
         return false;
     }
-    function includes48(uint48[] memory self, uint256 target) internal pure returns (bool) {
+    function includes48(uint48[] memory self, uint target) internal pure returns (bool) {
         if (self.length > 0) {
-            uint256 left;
-            uint256 right = self.length - 1;
-            uint256 mid;
+            uint left;
+            uint right = self.length - 1;
+            uint mid;
             while (left <= right) {
                 mid = (left + right) / 2;
-                if (uint256(self[mid]) < target) {
+                if (uint(self[mid]) < target) {
                     left = mid + 1;
-                } else if (uint256(self[mid]) > target) {
+                } else if (uint(self[mid]) > target) {
                     if (mid < 1) {
                         break;
                     }
@@ -145,11 +145,11 @@ library ArrayUtils {
         }
         return false;
     }
-    function includes256(uint256[] memory self, uint256 target) internal pure returns (bool) {
+    function includes256(uint[] memory self, uint target) internal pure returns (bool) {
         if (self.length > 0) {
-            uint256 left;
-            uint256 right = self.length - 1;
-            uint256 mid;
+            uint left;
+            uint right = self.length - 1;
+            uint mid;
             while (left <= right) {
                 mid = (left + right) / 2;
                 if (self[mid] < target) {
