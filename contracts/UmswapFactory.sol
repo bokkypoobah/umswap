@@ -262,8 +262,8 @@ contract BasicToken is IERC20, Owned {
     mapping(address => uint) _balances;
     mapping(address => mapping(address => uint)) _allowed;
 
-    function initBasicToken(address tokenOwner, string memory symbol_, string memory name_, uint decimals_) internal {
-        super.initOwned(tokenOwner);
+    function initBasicToken(address factory, string memory symbol_, string memory name_, uint decimals_) internal {
+        super.initOwned(factory);
         _symbol = symbol_;
         _name = name_;
         _decimals = decimals_;
