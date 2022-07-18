@@ -12,7 +12,7 @@
 
 ### Umswap Read Functions
 
-#### allowance
+#### allowance(tokenOwner, spender)
 
 Standard [ERC-20](https://eips.ethereum.org/EIPS/eip-20) function.
 
@@ -22,7 +22,7 @@ function allowance(address tokenOwner, address spender) override external view r
 
 <br />
 
-#### balanceOf
+#### balanceOf(tokenOwner)
 
 Standard [ERC-20](https://eips.ethereum.org/EIPS/eip-20) function.
 
@@ -32,7 +32,7 @@ function balanceOf(address tokenOwner) override external view returns (uint bala
 
 <br />
 
-#### decimals
+#### decimals()
 
 Standard [ERC-20](https://eips.ethereum.org/EIPS/eip-20) function. Set to 18 decimals.
 
@@ -42,7 +42,7 @@ function decimals() override external view returns (uint8)
 
 <br />
 
-#### getInfo
+#### getInfo()
 
 ```javascript
 function getInfo() public view returns (address _creator, string memory __symbol, string memory __name, uint[] memory _tokenIds, uint _swappedIn, uint _swappedOut, uint __totalSupply)
@@ -50,7 +50,7 @@ function getInfo() public view returns (address _creator, string memory __symbol
 
 <br />
 
-#### isValidTokenId
+#### isValidTokenId(tokenId)
 
 ```javascript
 function isValidTokenId(uint _tokenId) public view returns (bool)
@@ -58,7 +58,7 @@ function isValidTokenId(uint _tokenId) public view returns (bool)
 
 <br />
 
-#### name
+#### name()
 
 Standard [ERC-20](https://eips.ethereum.org/EIPS/eip-20) function.
 
@@ -68,7 +68,7 @@ function name() override external view returns (string memory)
 
 <br />
 
-#### symbol
+#### symbol()
 
 Standard [ERC-20](https://eips.ethereum.org/EIPS/eip-20) function.
 
@@ -78,7 +78,7 @@ function symbol() override external view returns (string memory)
 
 <br />
 
-#### totalSupply
+#### totalSupply()
 
 Standard [ERC-20](https://eips.ethereum.org/EIPS/eip-20) function.
 
@@ -90,7 +90,7 @@ function totalSupply() override external view returns (uint)
 
 ### Umswap Write Functions
 
-#### approve
+#### approve(spender, tokens)
 
 Standard [ERC-20](https://eips.ethereum.org/EIPS/eip-20) function.
 
@@ -100,7 +100,7 @@ function approve(address spender, uint tokens) override external returns (bool s
 
 <br />
 
-#### receive
+#### receive()
 
 ```receive
 receive() external payable
@@ -108,7 +108,7 @@ receive() external payable
 
 <br />
 
-#### swap
+#### swap(inTokenIds, outTokenIds, integrator)
 
 ```javascript
 function swap(uint[] calldata _inTokenIds, uint[] calldata _outTokenIds, address integrator) public payable reentrancyGuard
@@ -116,7 +116,7 @@ function swap(uint[] calldata _inTokenIds, uint[] calldata _outTokenIds, address
 
 <br />
 
-#### transfer
+#### transfer(to, tokens)
 
 Standard [ERC-20](https://eips.ethereum.org/EIPS/eip-20) function.
 
@@ -126,7 +126,7 @@ function transfer(address to, uint tokens) override external returns (bool succe
 
 <br />
 
-#### transferFrom
+#### transferFrom(from, to, tokens)
 
 Standard [ERC-20](https://eips.ethereum.org/EIPS/eip-20) function.
 
