@@ -469,6 +469,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
     uint8 constant ZERO = 48;
     bytes constant UMSYMBOLPREFIX = "UMS";
     bytes4 constant ERC721_INTERFACE = 0x80ac58cd;
+    uint constant MAXNAMELENGTH = 48;
 
     Umswap public template;
     Umswap[] public umswaps;
@@ -517,7 +518,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
 
     function isValidName(string memory str) public pure returns (bool) {
         bytes memory b = bytes(str);
-        if (b.length < 1 || b.length > 48) {
+        if (b.length < 1 || b.length > MAXNAMELENGTH) {
             return false;
         }
         // Leading and trailing space
