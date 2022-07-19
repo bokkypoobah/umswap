@@ -73,12 +73,32 @@ describe("umswap", function () {
     const swapIn1Tx = await umswap.connect(data.user0Signer).swap([111, 333], [], data.integrator, { value: ethers.utils.parseEther("0.2222") });
     await data.printEvents("swapIn1Tx", await swapIn1Tx.wait());
 
-    await data.printState("NFT Swapped In");
+    await data.printState("user0 swapped in [111, 333]");
 
-    const swapOut1Tx = await umswap.connect(data.user0Signer).swap([], [111, 333], data.integrator, { value: ethers.utils.parseEther("0.3333") });
+    const transfer1Tx = await umswap.connect(data.user0Signer).transfer(data.user1, ethers.utils.parseEther("0.54321"));
+    await data.printEvents("transfer1Tx", await transfer1Tx.wait());
+
+    await data.printState("user0 transferred 0.54321 tokens to user1");
+
+    const swapOut1Tx = await umswap.connect(data.user0Signer).swap([], [111], data.integrator, { value: ethers.utils.parseEther("0.3333") });
     await data.printEvents("swapOut1Tx", await swapOut1Tx.wait());
 
-    await data.printState("NFT Swapped Out");
+    await data.printState("user0 swapped out [111]");
+
+    const approve1Tx = await umswap.connect(data.user0Signer).approve(data.user1, ethers.utils.parseEther("0.45679"));
+    await data.printEvents("approve1Tx", await approve1Tx.wait());
+
+    await data.printState("user0 approved user1 to transfer 0.45679 tokens");
+
+    const transferFrom = await umswap.connect(data.user1Signer).transferFrom(data.user0, data.user1, ethers.utils.parseEther("0.45679"));
+    await data.printEvents("transferFrom", await transferFrom.wait());
+
+    await data.printState("user1 transfered 0.45679 tokens from user0");
+
+    const swapOut2Tx = await umswap.connect(data.user1Signer).swap([], [333], data.integrator, { value: ethers.utils.parseEther("0.3333") });
+    await data.printEvents("swapOut2Tx", await swapOut2Tx.wait());
+
+    await data.printState("user1 swapped out [333]");
 
     const withdrawal1Tx = await data.umswapFactory.withdraw(ZERO_ADDRESS, 0, 0);
     await data.printEvents("withdrawal1Tx", await withdrawal1Tx.wait());

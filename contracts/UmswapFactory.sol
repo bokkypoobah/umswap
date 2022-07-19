@@ -358,6 +358,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
 
     event Swapped(address account, uint[] _inTokenIds, uint[] _outTokenIds, uint swappedIn, uint swappedOut, uint timestamp);
 
+    error InsufficientTokensToBurn();
     error InvalidTokenId(uint tokenId);
 
     function initUmswap(address _creator, IERC721Partial _collection, string calldata _symbol, string calldata _name, uint[] calldata _tokenIds) public {
@@ -403,7 +404,11 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
 
     function swap(uint[] calldata _inTokenIds, uint[] calldata _outTokenIds, address integrator) public payable reentrancyGuard {
         if (_outTokenIds.length > _inTokenIds.length) {
-            _burn(msg.sender, (_outTokenIds.length - _inTokenIds.length) * 10 ** 18);
+            uint tokensToBurn = (_outTokenIds.length - _inTokenIds.length) * 10 ** 18;
+            if (tokensToBurn > this.balanceOf(msg.sender)) {
+                revert InsufficientTokensToBurn();
+            }
+            _burn(msg.sender, tokensToBurn);
         }
         for (uint i = 0; i < _inTokenIds.length; i = onePlus(i)) {
             if (!isValidTokenId(_inTokenIds[i])) {
