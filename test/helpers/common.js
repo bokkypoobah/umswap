@@ -141,7 +141,7 @@ class Data {
   }
 
   async printState(prefix) {
-    console.log("\n\n        --- " + prefix + " ---");
+    console.log("\n        --- " + prefix + " ---");
 
     let erc721TotalSupply = 0;
     const owners = {};

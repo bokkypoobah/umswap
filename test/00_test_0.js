@@ -59,51 +59,49 @@ describe("umswap", function () {
 
     const tokenIds = [111, 333, 555];
     const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "Odd TokenIds: - test", tokenIds, data.integrator, { value: ethers.utils.parseEther("0.1111") });
-    await data.printEvents("Odd TokenIds", await newUmswapTx.wait());
+    await data.printEvents("deployer->factory.newUmswap(erc721Mock, " + JSON.stringify(tokenIds) + ")", await newUmswapTx.wait());
 
     const umswapAddress = await data.umswapFactory.umswaps(0);
     const umswap  = await ethers.getContractAt("Umswap", umswapAddress);
     data.setUmswap(umswap);
 
     const approval1Tx = await data.erc721Mock.connect(data.user0Signer).setApprovalForAll(umswapAddress, true);
-    await data.printEvents("approval1Tx", await approval1Tx.wait());
-
+    await data.printEvents("user0->erc721Mock.setApprovalForAll(umswap, true)", await approval1Tx.wait());
     await data.printState("Before Any Umswaps");
 
-    const swapIn1Tx = await umswap.connect(data.user0Signer).swap([111, 333], [], data.integrator, { value: ethers.utils.parseEther("0.2222") });
-    await data.printEvents("swapIn1Tx", await swapIn1Tx.wait());
+    const swapInIds = [111, 333];
+    const swapIn1Tx = await umswap.connect(data.user0Signer).swap(swapInIds, [], data.integrator, { value: ethers.utils.parseEther("0.2222") });
+    await data.printEvents("user0->umswap(" + JSON.stringify(swapInIds) + ", [], ...)", await swapIn1Tx.wait());
+    await data.printState("user0 swapped in " + JSON.stringify(swapInIds));
 
-    await data.printState("user0 swapped in [111, 333]");
+    const transferAmount = "0.54321";
+    const transfer1Tx = await umswap.connect(data.user0Signer).transfer(data.user1, ethers.utils.parseEther(transferAmount));
+    await data.printEvents("user0->umswap.transfer(user1, " + transferAmount + ")", await transfer1Tx.wait());
+    await data.printState("user0 transferred " + transferAmount + " umswaps to user1");
 
-    const transfer1Tx = await umswap.connect(data.user0Signer).transfer(data.user1, ethers.utils.parseEther("0.54321"));
-    await data.printEvents("transfer1Tx", await transfer1Tx.wait());
+    const swapOutIds1 = [111];
+    const swapOut1Tx = await umswap.connect(data.user0Signer).swap([], swapOutIds1, data.integrator, { value: ethers.utils.parseEther("0.3333") });
+    await data.printEvents("user0->umswap.swap([], " + JSON.stringify(swapOutIds1) + ", ...)", await swapOut1Tx.wait());
+    await data.printState("user0 swapped out " + JSON.stringify(swapOutIds1));
 
-    await data.printState("user0 transferred 0.54321 tokens to user1");
+    const approveAmount = "0.45679";
+    const approve1Tx = await umswap.connect(data.user0Signer).approve(data.user1, ethers.utils.parseEther(approveAmount));
+    await data.printEvents("user0->umswap.approve(user1, " + approveAmount + ")", await approve1Tx.wait());
+    await data.printState("user0 approved user1 to transfer " + approveAmount + " umswaps");
 
-    const swapOut1Tx = await umswap.connect(data.user0Signer).swap([], [111], data.integrator, { value: ethers.utils.parseEther("0.3333") });
-    await data.printEvents("swapOut1Tx", await swapOut1Tx.wait());
+    const transferFromAmount = "0.45679";
+    const transferFrom = await umswap.connect(data.user1Signer).transferFrom(data.user0, data.user1, ethers.utils.parseEther(transferFromAmount));
+    await data.printEvents("user1->umswap.transferFrom(user0, user1, " + transferFromAmount + ")", await transferFrom.wait());
+    await data.printState("user1 transferred " + transferFromAmount + " umswaps from user0");
 
-    await data.printState("user0 swapped out [111]");
-
-    const approve1Tx = await umswap.connect(data.user0Signer).approve(data.user1, ethers.utils.parseEther("0.45679"));
-    await data.printEvents("approve1Tx", await approve1Tx.wait());
-
-    await data.printState("user0 approved user1 to transfer 0.45679 tokens");
-
-    const transferFrom = await umswap.connect(data.user1Signer).transferFrom(data.user0, data.user1, ethers.utils.parseEther("0.45679"));
-    await data.printEvents("transferFrom", await transferFrom.wait());
-
-    await data.printState("user1 transfered 0.45679 tokens from user0");
-
-    const swapOut2Tx = await umswap.connect(data.user1Signer).swap([], [333], data.integrator, { value: ethers.utils.parseEther("0.3333") });
-    await data.printEvents("swapOut2Tx", await swapOut2Tx.wait());
-
-    await data.printState("user1 swapped out [333]");
+    const swapOutIds2 = [333];
+    const swapOut2Tx = await umswap.connect(data.user1Signer).swap([], swapOutIds2, data.integrator, { value: ethers.utils.parseEther("0.3333") });
+    await data.printEvents("user1->umswap.swap([], " + JSON.stringify(swapOutIds2) + ", ...)", await swapOut2Tx.wait());
+    await data.printState("user1 swapped out " + JSON.stringify(swapOutIds2));
 
     const withdrawal1Tx = await data.umswapFactory.withdraw(ZERO_ADDRESS, 0, 0);
-    await data.printEvents("withdrawal1Tx", await withdrawal1Tx.wait());
-
-    await data.printState("Owner Withdrawn");
+    await data.printEvents("deployer->umswapFactory.withdraw(address(0), 0, 0)", await withdrawal1Tx.wait());
+    await data.printState("Deployer Withdrawn");
   });
 
 
