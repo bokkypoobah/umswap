@@ -143,19 +143,66 @@ describe("umswap", function () {
 
 
   it("03. Test 03", async function () {
-    console.log("      03. Test 03 - UmswapFactory Secondary Functions");
+    console.log("      03. Test 03 - UmswapFactory Withdrawal Of ETH/ERC-20/ERC-721 Tokens");
 
-    const tx1 = await data.umswapFactory.transferOwnership(data.user0);
-    expect(await data.umswapFactory.owner()).to.equal(data.user0);
-    console.log("        Tested transferOwnership(...) for success");
+    const tokenIds = [111, 333, 555];
+    const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "Odd TokenIds: - test", tokenIds, data.integrator, { value: ethers.utils.parseEther("0.1111") });
+    await data.printEvents("deployer->factory.newUmswap(erc721Mock, " + JSON.stringify(tokenIds) + ")", await newUmswapTx.wait());
 
-    const sendTip1Tx = await data.user0Signer.sendTransaction({ to: data.umswapFactory.address, value: ethers.utils.parseEther("0.888") });
+    const umswapAddress = await data.umswapFactory.umswaps(0);
+    const umswap  = await ethers.getContractAt("Umswap", umswapAddress);
+    data.setUmswap(umswap);
+
+    const approval1Tx = await data.erc721Mock.connect(data.user0Signer).setApprovalForAll(umswapAddress, true);
+    await data.printEvents("user0->erc721Mock.setApprovalForAll(umswap, true)", await approval1Tx.wait());
+    await data.printState("Before Any Umswaps");
+
+    const swapInIds = [111, 333];
+    const swapIn1Tx = await umswap.connect(data.user0Signer).swap(swapInIds, [], data.integrator, { value: ethers.utils.parseEther("0.2222") });
+    await data.printEvents("user0->umswap(" + JSON.stringify(swapInIds) + ", [], ...)", await swapIn1Tx.wait());
+    await data.printState("user0 swapped in " + JSON.stringify(swapInIds));
+
+    const transferAmount = "0.54321";
+    const transfer1Tx = await umswap.connect(data.user0Signer).transfer(data.umswapFactory.address, ethers.utils.parseEther(transferAmount));
+    await data.printEvents("user0->umswap.transfer(umswapFactory, " + transferAmount + ")", await transfer1Tx.wait());
+    await data.printState("user0 transferred " + transferAmount + " umswaps to umswapFactory");
+
+    const transferFrom1Tx = await data.erc721Mock.connect(data.user0Signer).transferFrom(data.user0, data.umswapFactory.address, 222);
+    await data.printEvents("user0->erc721Mock.transferFrom(user0, umswapFactory, 222)", await transferFrom1Tx.wait());
+    await data.printState("Before Any Umswaps");
+
+    const tx1 = await data.umswapFactory.transferOwnership(data.user2);
+    expect(await data.umswapFactory.owner()).to.equal(data.user2);
+    console.log("        Tested deployer->umswapFactory.transferOwnership(user2) - success");
+
     await expect(
-      data.umswapFactory.connect(data.user0Signer).withdraw(ZERO_ADDRESS, 0, 0)
-    ).to.emit(data.umswapFactory, "Withdrawn").withArgs(ZERO_ADDRESS, ethers.utils.parseEther("0.888"), 0);
-    console.log("        Tested withdraw(ZERO_ADDRESS, ...) for success");
+      data.umswapFactory.connect(data.user2Signer).withdraw(ZERO_ADDRESS, ethers.utils.parseEther("0.01111"), 0)
+    ).to.emit(data.umswapFactory, "Withdrawn").withArgs(ZERO_ADDRESS, ethers.utils.parseEther("0.01111"), 0);
+    console.log("        Tested user2->umswapFactory.withdraw(ZERO_ADDRESS, 0.01111, 0) - success");
 
-    console.log("      TODO: Test withdrawal of ERC-20s and ERC-721s");
+    await expect(
+      data.umswapFactory.connect(data.user2Signer).withdraw(umswap.address, ethers.utils.parseEther("0.11111"), 0)
+    ).to.emit(data.umswapFactory, "Withdrawn").withArgs(umswap.address, ethers.utils.parseEther("0.11111"), 0);
+    console.log("        Tested user2->umswapFactory.withdraw(umswap, 0.11111, 0) - success");
+
+    await data.printState("After Partial Withdraws");
+
+    await expect(
+      data.umswapFactory.connect(data.user2Signer).withdraw(ZERO_ADDRESS, 0, 0)
+    ).to.emit(data.umswapFactory, "Withdrawn").withArgs(ZERO_ADDRESS, ethers.utils.parseEther("0.05555"), 0);
+    console.log("        Tested user2->umswapFactory.withdraw(ZERO_ADDRESS, 0, 0) - success");
+
+    await expect(
+      data.umswapFactory.connect(data.user2Signer).withdraw(umswap.address, 0, 0)
+    ).to.emit(data.umswapFactory, "Withdrawn").withArgs(umswap.address, ethers.utils.parseEther("0.4321"), 0);
+    console.log("        Tested user2->umswapFactory.withdraw(umswap, 0.4321, 0) - success");
+
+    await expect(
+      data.umswapFactory.connect(data.user2Signer).withdraw(data.erc721Mock.address, 0, 222)
+    ).to.emit(data.umswapFactory, "Withdrawn").withArgs(data.erc721Mock.address, 0, 222);
+    console.log("        Tested user2->umswapFactory.withdraw(erc721Mock, 0, 222) - success");
+
+    await data.printState("After Withdraws");
   });
 
 
@@ -202,7 +249,7 @@ describe("umswap", function () {
     await data.printEvents("newUmswapTx", await newUmswapTx.wait());
     const umswapsLength = await data.umswapFactory.getUmswapsLength();
     expect(await data.umswapFactory.getUmswapsLength()).to.equal(1);
-    console.log("        Tested newUmswap(...) for success");
+    console.log("        Tested newUmswap(...) - success");
 
     const umswapAddress = await data.umswapFactory.umswaps(0);
     const umswap  = await ethers.getContractAt("Umswap", umswapAddress);
