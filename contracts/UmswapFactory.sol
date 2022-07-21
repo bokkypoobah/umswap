@@ -404,7 +404,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
 
     function swap(uint[] calldata _inTokenIds, uint[] calldata _outTokenIds, address integrator) public payable reentrancyGuard {
         if (_outTokenIds.length > _inTokenIds.length) {
-            uint tokensToBurn = (_outTokenIds.length - _inTokenIds.length) * 10 ** 18;
+            uint tokensToBurn = (_outTokenIds.length - _inTokenIds.length) * 10 ** DECIMALS;
             if (tokensToBurn > this.balanceOf(msg.sender)) {
                 revert InsufficientTokensToBurn();
             }
@@ -423,7 +423,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
             collection.transferFrom(address(this), msg.sender, _outTokenIds[i]);
         }
         if (_outTokenIds.length < _inTokenIds.length) {
-            _mint(msg.sender, (_inTokenIds.length - _outTokenIds.length) * 10 ** 18);
+            _mint(msg.sender, (_inTokenIds.length - _outTokenIds.length) * 10 ** DECIMALS);
         }
         swappedIn += _inTokenIds.length;
         swappedOut += _outTokenIds.length;

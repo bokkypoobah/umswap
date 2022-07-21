@@ -244,7 +244,7 @@ describe("umswap", function () {
 
 
   it("05. Test 05", async function () {
-    console.log("      05. Test 05 - TODO: Umswap Secondary/ERC-20 Functions");
+    console.log("      05. Test 05 - TODO: Umswap Additional Tests");
     const newUmswapTx = await data.umswapFactory.connect(data.user1Signer).newUmswap(data.erc721Mock.address, "name", [111, 222, 333], data.integrator, { value: ethers.utils.parseEther("0.1111") });
     await data.printEvents("newUmswapTx", await newUmswapTx.wait());
     const umswapsLength = await data.umswapFactory.getUmswapsLength();
