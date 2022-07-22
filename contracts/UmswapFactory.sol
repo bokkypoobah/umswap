@@ -431,8 +431,8 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         handleTips(integrator, owner);
     }
 
-    receive() external payable {
-        handleTips(address(0), owner);
+    function tip(address integrator) public payable {
+        handleTips(integrator, owner);
     }
 
     function getInfo() public view returns (address _creator, string memory symbol_, string memory name_, uint[] memory tokenIds_, uint swappedIn_, uint swappedOut_, uint totalSupply_) {
@@ -571,6 +571,10 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
         umswap.initUmswap(msg.sender, _collection, genSymbol(umswaps.length), _name, _tokenIds);
         umswaps.push(umswap);
         emit NewUmswap(msg.sender, umswap, _collection, _name, _tokenIds, block.timestamp);
+        handleTips(integrator, address(this));
+    }
+
+    function tip(address integrator) public payable {
         handleTips(integrator, address(this));
     }
 
