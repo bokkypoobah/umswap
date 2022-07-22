@@ -320,22 +320,22 @@ contract BasicToken is IERC20, Owned {
 
 
 contract TipHandler {
-    event ThankYou(address tipper, address integrator, uint tipIntegrator, uint tipRemainder, uint timestamp);
+    event ThankYou(address tipper, address integrator, uint integratorTip, uint remainingTip, uint timestamp);
 
     function handleTips(address integrator, address remainder) internal {
         if (msg.value > 0) {
-            uint tipIntegrator;
+            uint integratorTip;
             if (integrator != address(0) && integrator != remainder) {
-                tipIntegrator = msg.value * 4 / 5;
-                if (tipIntegrator > 0) {
-                    payable(integrator).transfer(tipIntegrator);
+                integratorTip = msg.value * 4 / 5;
+                if (integratorTip > 0) {
+                    payable(integrator).transfer(integratorTip);
                 }
             }
-            uint tipRemainder = msg.value - tipIntegrator;
-            if (tipRemainder > 0 && remainder != address(this)) {
-                payable(remainder).transfer(tipRemainder);
+            uint remainingTip = msg.value - integratorTip;
+            if (remainingTip > 0 && remainder != address(this)) {
+                payable(remainder).transfer(remainingTip);
             }
-            emit ThankYou(msg.sender, integrator, tipIntegrator, tipRemainder, block.timestamp);
+            emit ThankYou(msg.sender, integrator, integratorTip, remainingTip, block.timestamp);
         }
     }
 }
