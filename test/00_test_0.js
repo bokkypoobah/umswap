@@ -105,8 +105,8 @@ describe("umswap", function () {
   });
 
 
-  it("01. Test 01", async function () {
-    console.log("      01. Test 01 - Get Data");
+  it("02. Test 02", async function () {
+    console.log("      02. Test 02 - Get Data");
     for (let numberOfTokenIds of [10, 20, 30]) {
       for (let rangeStart of [0, 65]) {
         let tokenIds = generateRange(rangeStart, parseInt(rangeStart) + numberOfTokenIds, 1);
@@ -119,8 +119,8 @@ describe("umswap", function () {
   });
 
 
-  it("02. Test 02", async function () {
-    console.log("      02. Test 02 - New Umswaps with 16, 32, 48 and 256 bit tokenId collections. Note > 2 ** 48 x 1200 close to the current 30m block gas limit");
+  it("03. Test 03", async function () {
+    console.log("      03. Test 03 - New Umswaps with 16, 32, 48 and 256 bit tokenId collections. Note > 2 ** 48 x 1200 close to the current 30m block gas limit");
     for (let numberOfTokenIds of [10, 100, 1200]) {
       for (let rangeStart of [0, 2 ** 16, 2 ** 32, 2 ** 48]) {
         let tokenIds = generateRange(rangeStart, parseInt(rangeStart) + numberOfTokenIds, 1);
@@ -142,8 +142,8 @@ describe("umswap", function () {
   });
 
 
-  it("03. Test 03", async function () {
-    console.log("      03. Test 03 - UmswapFactory Withdrawal Of ETH/ERC-20/ERC-721 Tokens");
+  it("04. Test 04", async function () {
+    console.log("      04. Test 04 - UmswapFactory Withdrawal Of ETH/ERC-20/ERC-721 Tokens");
 
     const tokenIds = [111, 333, 555];
     const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "Odd TokenIds: - test", tokenIds, data.integrator, { value: ethers.utils.parseEther("0.1111") });
@@ -206,8 +206,8 @@ describe("umswap", function () {
   });
 
 
-  it("04. Test 04", async function () {
-    console.log("      04. Test 04 - UmswapFactory Exceptions");
+  it("05. Test 05", async function () {
+    console.log("      05. Test 05 - UmswapFactory Exceptions");
 
     const tx1 = await data.umswapFactory.transferOwnership(data.user0);
     await expect(
@@ -243,8 +243,8 @@ describe("umswap", function () {
   });
 
 
-  it("05. Test 05", async function () {
-    console.log("      05. Test 05 - TODO: Umswap Additional Tests");
+  it("06. Test 06", async function () {
+    console.log("      06. Test 06 - TODO: Umswap Additional Tests");
     const newUmswapTx = await data.umswapFactory.connect(data.user1Signer).newUmswap(data.erc721Mock.address, "name", [111, 222, 333], data.integrator, { value: ethers.utils.parseEther("0.1111") });
     await data.printEvents("newUmswapTx", await newUmswapTx.wait());
     const umswapsLength = await data.umswapFactory.getUmswapsLength();
@@ -260,8 +260,8 @@ describe("umswap", function () {
   });
 
 
-  it("06. Test 06", async function () {
-    console.log("      06. Test 06 - TODO: Umswap Exceptions");
+  it("07. Test 07", async function () {
+    console.log("      07. Test 07 - TODO: Umswap Exceptions");
   });
 
 });
