@@ -471,7 +471,16 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
 
 contract UmswapFactory is Owned, TipHandler, CloneFactory {
 
-    uint8 constant ZERO = 48;
+    bytes1 constant SPACE = 0x20;
+    bytes1 constant PLUS = 0x2b;
+    bytes1 constant MINUS = 0x2d;
+    bytes1 constant ZERO = 0x30;
+    bytes1 constant NINE = 0x39;
+    bytes1 constant COLON = 0x3a;
+    bytes1 constant UPPERA = 0x41;
+    bytes1 constant UPPERZ = 0x5a;
+    bytes1 constant LOWERA = 0x61;
+    bytes1 constant LOWERZ = 0x7a;
     bytes constant UMSYMBOLPREFIX = "UMS";
     bytes4 constant ERC721_INTERFACE = 0x80ac58cd;
     uint constant MAXNAMELENGTH = 48;
@@ -516,7 +525,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
                 i--;
             }
             num = id / 10 ** i;
-            b[j++] = bytes1(uint8(num % 10 + ZERO));
+            b[j++] = bytes1(uint8(num % 10 + uint8(ZERO)));
         } while (i > 0);
         s = string(b);
     }
@@ -526,21 +535,16 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
         if (b.length < 1 || b.length > MAXNAMELENGTH) {
             return false;
         }
-        // Leading and trailing space
-        if (b[0] == 0x20 || b[b.length-1] == 0x20) {
+        if (b[0] == SPACE || b[b.length-1] == SPACE) {
             return false;
         }
         bytes1 lastChar = b[0];
         for (uint i; i < b.length; i = onePlus(i)) {
             bytes1 char = b[i];
-             // Cannot contain continous spaces
-            if (char == 0x20 && lastChar == 0x20) {
+            if (char == SPACE && lastChar == SPACE) {
                 return false;
             }
-            // 0-9, A-Z, a-z, space, +, -, :
-            if (!(char >= 0x30 && char <= 0x39) && !(char >= 0x41 && char <= 0x5a) &&
-                !(char >= 0x61 && char <= 0x7a) &&
-                !(char == 0x20) && !(char == 0x2b) && !(char == 0x2d) && !(char == 0x3a)) {
+            if (!((char >= ZERO && char <= NINE) || (char >= UPPERA && char <= UPPERZ) || (char >= LOWERA && char <= LOWERZ) || char == SPACE || char == PLUS || char == MINUS || char == COLON)) {
                 return false;
             }
             lastChar = char;
