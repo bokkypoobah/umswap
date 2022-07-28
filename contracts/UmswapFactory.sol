@@ -355,7 +355,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
     uint[] private tokenIds256;
     uint64[4] private stats; // swappedIn, swappedOut, upVotes, downVotes
 
-    event Swapped(address account, uint[] _inTokenIds, uint[] _outTokenIds, uint64[4] stats, uint timestamp);
+    event Swapped(uint[] _inTokenIds, uint[] _outTokenIds, uint64[4] stats, address account, uint timestamp);
 
     error InsufficientTokensToBurn();
     error InvalidTokenId(uint tokenId);
@@ -426,9 +426,33 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         }
         stats[0] += uint64(_inTokenIds.length);
         stats[1] += uint64(_outTokenIds.length);
-        emit Swapped(msg.sender, _inTokenIds, _outTokenIds, stats, block.timestamp);
+        emit Swapped(_inTokenIds, _outTokenIds, stats, msg.sender, block.timestamp);
         handleTips(integrator, owner);
     }
+
+    // int constant PLUSONE = 10 ** 18;
+    // int constant MINUSONE = -1 * 10 ** 18;
+    // mapping(address => int) public votes;
+    // event Voted(int value, string message, uint64[4] stats, address account, uint timestamp);
+    // error InsufficientTokensToBurn();
+    //
+    // // NOTE: vote 0 to 10
+    // function vote(int value, string calldata message, address integrator) public payable {
+    //     votes[msg.sender] += value;
+    //     if (votes[msg.sender] > PLUSONE) {
+    //         revert MaxVoteOne();
+    //     }
+    //     if (votes[msg.sender] < MINUSONE) {
+    //         revert MinVoteMinusOne();
+    //     }
+    //     if (value == 1) {
+    //         stats[2]++;
+    //     } else if (value == -1) {
+    //         stats[3]++;
+    //     }
+    //     emit Voted(value, message, stats, msg.sender, block.timestamp);
+    //     handleTips(integrator, owner);
+    // }
 
     function tip(address integrator) public payable {
         handleTips(integrator, owner);
