@@ -435,7 +435,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         handleTips(integrator, owner);
     }
 
-    function getInfo() public view returns (address _creator, string memory symbol_, string memory name_, uint[] memory tokenIds_, uint swappedIn_, uint swappedOut_, uint totalSupply_) {
+    function getInfo() public view returns (address _creator, string memory symbol_, string memory name_, uint[] memory tokenIds_, uint[] memory stats) {
         _creator = creator;
         symbol_ = _symbol;
         name_ = _name;
@@ -462,9 +462,12 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         } else {
             tokenIds_ = new uint[](0);
         }
-        swappedIn_ = swappedIn;
-        swappedOut_ = swappedOut;
-        totalSupply_ = _totalSupply;
+        stats = new uint[](5);
+        stats[0] = _totalSupply;
+        stats[1] = swappedIn;
+        stats[2] = swappedOut;
+        stats[3] = 13; // TODO: upvotes
+        stats[4] = 26; // TODO: downvotes
     }
 }
 
@@ -614,9 +617,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
         string[] memory _symbols,
         string[] memory _names,
         uint[][] memory _tokenIds,
-        uint[] memory _swappedIns,
-        uint[] memory _swappedOuts,
-        uint[] memory _totalSupplies
+        uint[][] memory _stats
     ) {
         uint length = indices.length;
         _umswaps = new Umswap[](length);
@@ -624,12 +625,10 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
         _symbols = new string[](length);
         _names = new string[](length);
         _tokenIds = new uint[][](length);
-        _swappedIns = new uint[](length);
-        _swappedOuts = new uint[](length);
-        _totalSupplies = new uint[](length);
+        _stats = new uint[][](length);
         for (uint i = 0; i < length; i = onePlus(i)) {
             _umswaps[i] = umswaps[i];
-            (_creators[i], _symbols[i], _names[i], _tokenIds[i], _swappedIns[i], _swappedOuts[i], _totalSupplies[i]) = umswaps[i].getInfo();
+            (_creators[i], _symbols[i], _names[i], _tokenIds[i], _stats[i]) = umswaps[i].getInfo();
         }
     }
 }

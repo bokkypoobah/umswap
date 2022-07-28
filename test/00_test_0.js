@@ -170,7 +170,7 @@ describe("umswap", function () {
   });
 
 
-  it.only("03. Test 03", async function () {
+  it("03. Test 03", async function () {
     console.log("      03. Test 03 - New Umswaps with 16, 32, 64 and 256 bit tokenId collections. Note > 2 ** 64 x 1200 close to failure at the current 30m block gas limit");
     for (let numberOfTokenIds of [10, 100, 1200]) {
       for (let rangeStart of ["0x0", "0xffff", "0xffffffff", "0xffffffffffffffff"]) {

@@ -188,10 +188,21 @@ class Data {
       const getUmswapsLength = await this.umswapFactory.getUmswapsLength();
       let indices = generateRange(0, getUmswapsLength - 1, 1);
       const getUmswaps = await this.umswapFactory.getUmswaps(indices);
-      console.log("            # Address              Creator              Symbol   Name                             In  Out     TotalSupply TokenIds                      ");
-      console.log("          --- -------------------- -------------------- -------- ------------------------------ ---- ---- --------------- ------------------------------");
+      // console.log("getUmswaps: " + JSON.stringify(getUmswaps, null, 2));
+      console.log("            # Address              Creator              Symbol   Name                               TotalSupply   In  Out TokenIds                      ");
+      console.log("          --- -------------------- -------------------- -------- ------------------------------ --------------- ---- ---- ------------------------------");
       for (let i = 0; i < getUmswaps[0].length; i++) {
-        console.log("          " + this.padLeft(i, 3) + " " + this.padRight(this.getShortAccountName(getUmswaps[0][i]), 20) + " " + this.padRight(this.getShortAccountName(getUmswaps[1][i]), 20) + " " + getUmswaps[2][i] + " " + this.padRight(getUmswaps[3][i], 30) + " " + this.padLeft(getUmswaps[5][i], 4) + " " + this.padLeft(getUmswaps[6][i], 4) + " " + this.padLeft(ethers.utils.formatEther(getUmswaps[7][i]), 15) + " " + this.padRight(JSON.stringify(getUmswaps[4][i].map((x) => { return parseInt(x.toString()); })), 30));
+        const stats = getUmswaps[5][i];
+        // console.log("stats: " + JSON.stringify(stats, null, 2));
+        // console.log("stats[0]: " + stats[0]);
+        console.log("          " + this.padLeft(i, 3) + " " + this.padRight(this.getShortAccountName(getUmswaps[0][i]), 20) + " " +
+          this.padRight(this.getShortAccountName(getUmswaps[1][i]), 20) + " " + getUmswaps[2][i] + " " +
+          this.padRight(getUmswaps[3][i], 30) + " " +
+          this.padLeft(ethers.utils.formatEther(stats[0]), 15) + " " +
+          this.padLeft(stats[1], 4) + " " +
+          this.padLeft(stats[2], 4) + " " +
+          this.padRight(JSON.stringify(getUmswaps[4][i].map((x) => { return parseInt(x.toString()); })), 30)
+        );
       }
       console.log();
     }
