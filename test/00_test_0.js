@@ -298,8 +298,11 @@ describe("umswap", function () {
 
   it("06. Test 06", async function () {
     console.log("      06. Test 06 - TODO: Umswap Additional Tests");
-    const newUmswapTx = await data.umswapFactory.connect(data.user1Signer).newUmswap(data.erc721Mock.address, "name", [111, 222, 333], data.integrator, { value: ethers.utils.parseEther("0.1111") });
-    await data.printEvents("newUmswapTx", await newUmswapTx.wait());
+
+    const tokenIds = [111, 333, 555];
+    const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "Odd TokenIds: - test", tokenIds, data.integrator, { value: ethers.utils.parseEther("0.1111") });
+    await data.printEvents("deployer->factory.newUmswap(erc721Mock, " + JSON.stringify(tokenIds) + ")", await newUmswapTx.wait());
+
     const umswapsLength = await data.umswapFactory.getUmswapsLength();
     expect(await data.umswapFactory.getUmswapsLength()).to.equal(1);
     console.log("        Tested newUmswap(...) - success");
@@ -307,6 +310,16 @@ describe("umswap", function () {
     const umswapAddress = await data.umswapFactory.umswaps(0);
     const umswap  = await ethers.getContractAt("Umswap", umswapAddress);
     data.setUmswap(umswap);
+
+    const approval1Tx = await data.erc721Mock.connect(data.user0Signer).setApprovalForAll(umswapAddress, true);
+    await data.printEvents("user0->erc721Mock.setApprovalForAll(umswap, true)", await approval1Tx.wait());
+    await data.printState("Before Any Umswaps");
+
+    const swapInIds = [111, 333];
+    const swapIn1Tx = await umswap.connect(data.user0Signer).swap(swapInIds, [], data.integrator, { value: ethers.utils.parseEther("0.2222") });
+    await data.printEvents("user0->umswap(" + JSON.stringify(swapInIds) + ", [], ...)", await swapIn1Tx.wait());
+    await data.printState("user0 swapped in " + JSON.stringify(swapInIds));
+
 
     await data.printState("End");
 

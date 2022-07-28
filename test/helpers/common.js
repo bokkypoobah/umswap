@@ -83,7 +83,7 @@ class Data {
             if (a.type == 'address') {
               result = result + this.getShortAccountName(data.args[a.name].toString());
             } else if (a.type == 'uint256' || a.type == 'uint128') {
-              if (a.name == 'tokens' || a.name == 'amount' || a.name == 'balance' || a.name == 'value' || a.name.substring(0, 3) == 'tip') {
+              if (a.name == 'tokens' || a.name == 'amount' || a.name == 'balance' || a.name == 'value' || a.name == 'integratorTip' || a.name == 'remainingTip') {
                 result = result + ethers.utils.formatUnits(data.args[a.name], 18);
               } else {
                 result = result + data.args[a.name].toString();
@@ -196,12 +196,12 @@ class Data {
         // console.log("stats: " + JSON.stringify(stats, null, 2));
         // console.log("stats[0]: " + stats[0]);
         console.log("          " + this.padLeft(i, 3) + " " + this.padRight(this.getShortAccountName(getUmswaps[0][i]), 20) + " " +
-          this.padRight(this.getShortAccountName(getUmswaps[1][i]), 20) + " " + getUmswaps[2][i] + " " +
-          this.padRight(getUmswaps[3][i], 30) + " " +
-          this.padLeft(ethers.utils.formatEther(stats[0]), 15) + " " +
+          this.padRight(this.getShortAccountName(getUmswaps[4][i]), 20) + " " + getUmswaps[1][i] + " " +
+          this.padRight(getUmswaps[2][i], 30) + " " +
+          this.padLeft(ethers.utils.formatEther(stats[3]), 15) + " " +
+          this.padLeft(stats[0], 4) + " " +
           this.padLeft(stats[1], 4) + " " +
-          this.padLeft(stats[2], 4) + " " +
-          this.padRight(JSON.stringify(getUmswaps[4][i].map((x) => { return parseInt(x.toString()); })), 30)
+          this.padRight(JSON.stringify(getUmswaps[3][i].map((x) => { return parseInt(x.toString()); })), 30)
         );
       }
       console.log();
