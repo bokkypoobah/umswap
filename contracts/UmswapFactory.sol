@@ -320,7 +320,7 @@ contract BasicToken is IERC20, Owned {
 
 
 contract TipHandler {
-    event ThankYou(address integrator, uint integratorTip, uint remainingTip, address account, uint timestamp);
+    event ThankYou(address indexed account, uint indexed timestamp, address indexed integrator, uint integratorTip, uint remainingTip);
 
     function handleTips(address integrator, address remainder) internal {
         if (msg.value > 0) {
@@ -335,7 +335,7 @@ contract TipHandler {
             if (remainingTip > 0 && remainder != address(this)) {
                 payable(remainder).transfer(remainingTip);
             }
-            emit ThankYou(integrator, integratorTip, remainingTip, msg.sender, block.timestamp);
+            emit ThankYou(msg.sender, block.timestamp, integrator, integratorTip, remainingTip);
         }
     }
 }
@@ -349,7 +349,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
 
     struct Rating {
         address account;
-        uint64 value;
+        uint64 rate;
     }
 
     uint8 constant DECIMALS = 18;
@@ -361,13 +361,13 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
     uint32[] private tokenIds32;
     uint64[] private tokenIds64;
     uint[] private tokenIds256;
-    uint64[3] private stats; // swappedIn, swappedOut, totalRatings
+    uint64[3] private stats;
 
     mapping(address => Rating) public ratings;
     address[] public raters;
 
-    event Swapped(uint[] _inTokenIds, uint[] _outTokenIds, uint64[3] stats, address account, uint timestamp);
-    event Rated(uint value, string message, uint64[3] stats, address account, uint timestamp);
+    event Swapped(address indexed account, uint indexed timestamp, uint[] _inTokenIds, uint[] _outTokenIds, uint64[3] stats);
+    event Rated(address indexed account, uint indexed timestamp, uint rate, string message, uint64[3] stats);
 
     error InsufficientTokensToBurn();
     error InvalidTokenId(uint tokenId);
@@ -439,24 +439,24 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         }
         stats[uint(Stats.SwappedIn)] += uint64(_inTokenIds.length);
         stats[uint(Stats.SwappedOut)] += uint64(_outTokenIds.length);
-        emit Swapped(_inTokenIds, _outTokenIds, stats, msg.sender, block.timestamp);
+        emit Swapped(msg.sender, block.timestamp, _inTokenIds, _outTokenIds, stats);
         handleTips(integrator, owner);
     }
 
-    function rate(uint value, string calldata message, address integrator) public payable {
-        if (value > MAXRATING) {
+    function rate(uint _rate, string calldata message, address integrator) public payable {
+        if (_rate > MAXRATING) {
             revert MaxRatingExceeded(MAXRATING);
         }
         Rating storage _rating = ratings[msg.sender];
         if (_rating.account == address(0)) {
-            ratings[msg.sender] = Rating(msg.sender, uint64(value));
+            ratings[msg.sender] = Rating(msg.sender, uint64(_rate));
             raters.push(msg.sender);
         } else {
-            stats[uint(Stats.TotalRatings)] -= _rating.value;
-            _rating.value = uint64(value);
+            stats[uint(Stats.TotalRatings)] -= _rating.rate;
+            _rating.rate = uint64(_rate);
         }
-        stats[uint(Stats.TotalRatings)] += uint64(value);
-        emit Rated(value, message, stats, msg.sender, block.timestamp);
+        stats[uint(Stats.TotalRatings)] += uint64(_rate);
+        emit Rated(msg.sender, block.timestamp, _rate, message, stats);
         handleTips(integrator, owner);
     }
 
@@ -526,7 +526,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
     error DuplicateSet();
     error TokenIdsMustBeSortedWithNoDuplicates();
 
-    event NewUmswap(Umswap _umswap, IERC721Partial _collection, string _name, uint[] _tokenIds, address creator, uint timestamp);
+    event NewUmswap(address indexed creator, uint timestamp, Umswap indexed _umswap, IERC721Partial indexed _collection, string _name, uint[] _tokenIds);
     event Withdrawn(address indexed token, uint tokens, uint tokenId);
 
     constructor() {
@@ -606,7 +606,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
         Umswap umswap = Umswap(payable(createClone(address(template))));
         umswap.initUmswap(msg.sender, _collection, genSymbol(umswaps.length), _name, _tokenIds);
         umswaps.push(umswap);
-        emit NewUmswap(umswap, _collection, _name, _tokenIds, msg.sender, block.timestamp);
+        emit NewUmswap(msg.sender, block.timestamp, umswap, _collection, _name, _tokenIds);
         handleTips(integrator, address(this));
     }
 
