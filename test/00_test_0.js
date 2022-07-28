@@ -170,17 +170,19 @@ describe("umswap", function () {
   });
 
 
-  it("03. Test 03", async function () {
-    console.log("      03. Test 03 - New Umswaps with 16, 32, 48 and 256 bit tokenId collections. Note > 2 ** 48 x 1200 close to the current 30m block gas limit");
+  it.only("03. Test 03", async function () {
+    console.log("      03. Test 03 - New Umswaps with 16, 32, 64 and 256 bit tokenId collections. Note > 2 ** 64 x 1200 close to failure at the current 30m block gas limit");
     for (let numberOfTokenIds of [10, 100, 1200]) {
-      for (let rangeStart of [0, 2 ** 16, 2 ** 32, 2 ** 48]) {
-        let tokenIds = generateRange(rangeStart, parseInt(rangeStart) + numberOfTokenIds, 1);
+      for (let rangeStart of ["0x0", "0xffff", "0xffffffff", "0xffffffffffffffff"]) {
+        let tokenIds = generateRange(0, numberOfTokenIds, 1);
+        const rangeStartBN = ethers.BigNumber.from(rangeStart);
+        tokenIds = tokenIds.map((i) => rangeStartBN.add(i));
         const name = numberOfTokenIds + " items from " + rangeStart;
         const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, name, tokenIds, data.integrator, { value: ethers.utils.parseEther("0.1111") });
         await data.printEvents(name, await newUmswapTx.wait());
       }
     }
-    console.log("      02. Test 02 - New Umswaps with 16 bit tokenId collections. Note < 2 ** 16 x 3800 close to the current 30m block gas limit");
+    console.log("      02. Test 02 - New Umswaps with 16 bit tokenId collections. Note < 2 ** 16 x 3800 close to the current 30m block gas limit. 4k fails");
     for (let numberOfTokenIds of [3800]) {
       for (let rangeStart of [0]) {
         let tokenIds = generateRange(rangeStart, parseInt(rangeStart) + numberOfTokenIds, 1);

@@ -124,7 +124,7 @@ library ArrayUtils {
         }
         return false;
     }
-    function includes48(uint48[] memory self, uint target) internal pure returns (bool) {
+    function includes64(uint64[] memory self, uint target) internal pure returns (bool) {
         if (self.length > 0) {
             uint left;
             uint right = self.length - 1;
@@ -351,7 +351,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
     IERC721Partial private collection;
     uint16[] private tokenIds16;
     uint32[] private tokenIds32;
-    uint48[] private tokenIds48;
+    uint64[] private tokenIds64;
     uint[] private tokenIds256;
     uint private swappedIn;
     uint private swappedOut;
@@ -379,9 +379,9 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
             for (uint i = 0; i < _tokenIds.length; i = onePlus(i)) {
                 tokenIds32.push(uint32(_tokenIds[i]));
             }
-        } else if (maxTokenId < 2 ** 48) {
+        } else if (maxTokenId < 2 ** 64) {
             for (uint i = 0; i < _tokenIds.length; i = onePlus(i)) {
-                tokenIds48.push(uint48(_tokenIds[i]));
+                tokenIds64.push(uint64(_tokenIds[i]));
             }
         } else {
             tokenIds256 = _tokenIds;
@@ -393,8 +393,8 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
             return ArrayUtils.includes16(tokenIds16, _tokenId);
         } else if (tokenIds32.length > 0) {
             return ArrayUtils.includes32(tokenIds32, _tokenId);
-        } else if (tokenIds48.length > 0) {
-            return ArrayUtils.includes48(tokenIds48, _tokenId);
+        } else if (tokenIds64.length > 0) {
+            return ArrayUtils.includes64(tokenIds64, _tokenId);
         } else if (tokenIds256.length > 0) {
             return ArrayUtils.includes256(tokenIds256, _tokenId);
         } else {
@@ -449,10 +449,10 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
             for (uint i = 0; i < tokenIds32.length; i = onePlus(i)) {
                 tokenIds_[i] = tokenIds32[i];
             }
-        } else if (tokenIds48.length > 0) {
-            tokenIds_ = new uint[](tokenIds48.length);
-            for (uint i = 0; i < tokenIds48.length; i = onePlus(i)) {
-                tokenIds_[i] = tokenIds48[i];
+        } else if (tokenIds64.length > 0) {
+            tokenIds_ = new uint[](tokenIds64.length);
+            for (uint i = 0; i < tokenIds64.length; i = onePlus(i)) {
+                tokenIds_[i] = tokenIds64[i];
             }
         } else if (tokenIds256.length > 0) {
             tokenIds_ = new uint[](tokenIds256.length);

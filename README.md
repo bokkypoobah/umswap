@@ -291,5 +291,6 @@ See [test/00_test_0.js](test/00_test_0.js) for the testing scripts and [testIt.o
 
 ## Notes
 
+npm install --save-dev hardhat
 OpenZeppelin v4.7.0
 npm install --save-dev @openzeppelin/test-helpers
