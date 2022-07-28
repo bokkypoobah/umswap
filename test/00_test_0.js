@@ -320,9 +320,17 @@ describe("umswap", function () {
     await data.printEvents("user0->umswap(" + JSON.stringify(swapInIds) + ", [], ...)", await swapIn1Tx.wait());
     await data.printState("user0 swapped in " + JSON.stringify(swapInIds));
 
+    const rate1Tx =  await umswap.connect(data.user0Signer).rate(5, "Yeah 5", data.integrator, { value: ethers.utils.parseEther("0.2222") });
+    await data.printEvents("user0->rate(5, 'Yeah', ...)", await rate1Tx.wait());
+    await data.printState("user0 rated 5");
 
-    await data.printState("End");
+    const rate2Tx =  await umswap.connect(data.user1Signer).rate(6, "Yeah 6", data.integrator, { value: ethers.utils.parseEther("0.2222") });
+    await data.printEvents("user1->rate(6, 'Yeah', ...)", await rate2Tx.wait());
+    await data.printState("user1 rated 6");
 
+    const rate3Tx =  await umswap.connect(data.user0Signer).rate(10, "Yeah 10", data.integrator, { value: ethers.utils.parseEther("0.2222") });
+    await data.printEvents("user0->rate(10, 'Yeah', ...)", await rate3Tx.wait());
+    await data.printState("user0 rated 10");
   });
 
 

@@ -189,8 +189,8 @@ class Data {
       let indices = generateRange(0, getUmswapsLength - 1, 1);
       const getUmswaps = await this.umswapFactory.getUmswaps(indices);
       // console.log("getUmswaps: " + JSON.stringify(getUmswaps, null, 2));
-      console.log("            # Address              Creator              Symbol   Name                               TotalSupply   In  Out TokenIds                      ");
-      console.log("          --- -------------------- -------------------- -------- ------------------------------ --------------- ---- ---- ------------------------------");
+      console.log("            # Address              Creator              Symbol   Name                               TotalSupply   In  Out  Rts  Rt# TokenIds                      ");
+      console.log("          --- -------------------- -------------------- -------- ------------------------------ --------------- ---- ---- ---- ---- ------------------------------");
       for (let i = 0; i < getUmswaps[0].length; i++) {
         const stats = getUmswaps[5][i];
         // console.log("stats: " + JSON.stringify(stats, null, 2));
@@ -201,6 +201,8 @@ class Data {
           this.padLeft(ethers.utils.formatEther(stats[3]), 15) + " " +
           this.padLeft(stats[0], 4) + " " +
           this.padLeft(stats[1], 4) + " " +
+          this.padLeft(stats[2], 4) + " " +
+          this.padLeft(stats[4], 4) + " " +
           this.padRight(JSON.stringify(getUmswaps[3][i].map((x) => { return parseInt(x.toString()); })), 30)
         );
       }
