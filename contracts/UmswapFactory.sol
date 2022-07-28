@@ -353,10 +353,9 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
     uint32[] private tokenIds32;
     uint64[] private tokenIds64;
     uint[] private tokenIds256;
-    uint private swappedIn;
-    uint private swappedOut;
+    uint64[4] private stats; // swappedIn, swappedOut, upVotes, downVotes
 
-    event Swapped(address account, uint[] _inTokenIds, uint[] _outTokenIds, uint swappedIn, uint swappedOut, uint timestamp);
+    event Swapped(address account, uint[] _inTokenIds, uint[] _outTokenIds, uint64[4] stats, uint timestamp);
 
     error InsufficientTokensToBurn();
     error InvalidTokenId(uint tokenId);
@@ -425,9 +424,9 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         if (_outTokenIds.length < _inTokenIds.length) {
             _mint(msg.sender, (_inTokenIds.length - _outTokenIds.length) * 10 ** DECIMALS);
         }
-        swappedIn += _inTokenIds.length;
-        swappedOut += _outTokenIds.length;
-        emit Swapped(msg.sender, _inTokenIds, _outTokenIds, swappedIn, swappedOut, block.timestamp);
+        stats[0] += uint64(_inTokenIds.length);
+        stats[1] += uint64(_outTokenIds.length);
+        emit Swapped(msg.sender, _inTokenIds, _outTokenIds, stats, block.timestamp);
         handleTips(integrator, owner);
     }
 
@@ -435,7 +434,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         handleTips(integrator, owner);
     }
 
-    function getInfo() public view returns (address _creator, string memory symbol_, string memory name_, uint[] memory tokenIds_, uint[] memory stats) {
+    function getInfo() public view returns (address _creator, string memory symbol_, string memory name_, uint[] memory tokenIds_, uint[] memory stats_) {
         _creator = creator;
         symbol_ = _symbol;
         name_ = _name;
@@ -462,12 +461,12 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         } else {
             tokenIds_ = new uint[](0);
         }
-        stats = new uint[](5);
-        stats[0] = _totalSupply;
-        stats[1] = swappedIn;
-        stats[2] = swappedOut;
-        stats[3] = 13; // TODO: upvotes
-        stats[4] = 26; // TODO: downvotes
+        stats_ = new uint[](5);
+        stats_[0] = _totalSupply;
+        stats_[1] = stats[0];
+        stats_[2] = stats[1];
+        stats_[3] = stats[2];
+        stats_[4] = stats[3];
     }
 }
 
@@ -515,7 +514,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
     }
 
     function genSymbol(uint id) internal pure returns (string memory s) {
-        bytes memory b = new bytes(20);
+        bytes memory b = new bytes(8);
         uint i;
         uint j;
         uint num;
