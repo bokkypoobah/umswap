@@ -345,7 +345,15 @@ contract TipHandler {
 /// @title ERC-721 pool
 contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
 
+    enum StatsField { SwappedIn, SwappedOut, TotalVotes }
+
+    struct Vote {
+        address account;
+        uint64 value;
+    }
+
     uint8 constant DECIMALS = 18;
+    uint constant MAXVOTEVALUE = 10;
 
     address private creator;
     IERC721Partial private collection;
@@ -353,12 +361,17 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
     uint32[] private tokenIds32;
     uint64[] private tokenIds64;
     uint[] private tokenIds256;
-    uint64[4] private stats; // swappedIn, swappedOut, upVotes, downVotes
+    uint64[3] private stats; // swappedIn, swappedOut, totalVotes
 
-    event Swapped(uint[] _inTokenIds, uint[] _outTokenIds, uint64[4] stats, address account, uint timestamp);
+    mapping(address => Vote) public votes;
+    address[] public voters;
+
+    event Swapped(uint[] _inTokenIds, uint[] _outTokenIds, uint64[3] stats, address account, uint timestamp);
+    event Voted(uint value, string message, uint64[3] stats, address account, uint timestamp);
 
     error InsufficientTokensToBurn();
     error InvalidTokenId(uint tokenId);
+    error ExceededMax(uint max);
 
     function initUmswap(address _creator, IERC721Partial _collection, string calldata _symbol, string calldata _name, uint[] calldata _tokenIds) public {
         creator = _creator;
@@ -424,35 +437,29 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         if (_outTokenIds.length < _inTokenIds.length) {
             _mint(msg.sender, (_inTokenIds.length - _outTokenIds.length) * 10 ** DECIMALS);
         }
-        stats[0] += uint64(_inTokenIds.length);
-        stats[1] += uint64(_outTokenIds.length);
+        stats[uint(StatsField.SwappedIn)] += uint64(_inTokenIds.length);
+        stats[uint(StatsField.SwappedOut)] += uint64(_outTokenIds.length);
         emit Swapped(_inTokenIds, _outTokenIds, stats, msg.sender, block.timestamp);
         handleTips(integrator, owner);
     }
 
-    // int constant PLUSONE = 10 ** 18;
-    // int constant MINUSONE = -1 * 10 ** 18;
-    // mapping(address => int) public votes;
-    // event Voted(int value, string message, uint64[4] stats, address account, uint timestamp);
-    // error InsufficientTokensToBurn();
-    //
-    // // NOTE: vote 0 to 10
-    // function vote(int value, string calldata message, address integrator) public payable {
-    //     votes[msg.sender] += value;
-    //     if (votes[msg.sender] > PLUSONE) {
-    //         revert MaxVoteOne();
-    //     }
-    //     if (votes[msg.sender] < MINUSONE) {
-    //         revert MinVoteMinusOne();
-    //     }
-    //     if (value == 1) {
-    //         stats[2]++;
-    //     } else if (value == -1) {
-    //         stats[3]++;
-    //     }
-    //     emit Voted(value, message, stats, msg.sender, block.timestamp);
-    //     handleTips(integrator, owner);
-    // }
+
+    function vote(uint value, string calldata message, address integrator) public payable {
+        if (value > MAXVOTEVALUE) {
+            revert ExceededMax(MAXVOTEVALUE);
+        }
+        Vote storage _vote = votes[msg.sender];
+        if (_vote.account == address(0)) {
+            votes[msg.sender] = Vote(msg.sender, uint64(value));
+            voters.push(msg.sender);
+        } else {
+            stats[uint(StatsField.TotalVotes)] -= _vote.value;
+            _vote.value = uint64(value);
+        }
+        stats[uint(StatsField.TotalVotes)] += uint64(value);
+        emit Voted(value, message, stats, msg.sender, block.timestamp);
+        handleTips(integrator, owner);
+    }
 
     function tip(address integrator) public payable {
         handleTips(integrator, owner);
@@ -487,10 +494,10 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         }
         stats_ = new uint[](5);
         stats_[0] = _totalSupply;
-        stats_[1] = stats[0];
-        stats_[2] = stats[1];
-        stats_[3] = stats[2];
-        stats_[4] = stats[3];
+        stats_[1] = stats[uint(StatsField.SwappedIn)];
+        stats_[2] = stats[uint(StatsField.SwappedOut)];
+        stats_[3] = stats[uint(StatsField.TotalVotes)];
+        stats_[4] = voters.length;
     }
 }
 
