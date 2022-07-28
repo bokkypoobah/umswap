@@ -228,31 +228,46 @@ describe("umswap", function () {
     expect(await data.umswapFactory.owner()).to.equal(data.user2);
     console.log("        Tested deployer->umswapFactory.transferOwnership(user2) - success");
 
-    await expect(
-      data.umswapFactory.connect(data.user2Signer).withdraw(ZERO_ADDRESS, ethers.utils.parseEther("0.01111"), 0)
-    ).to.emit(data.umswapFactory, "Withdrawn").withArgs(ZERO_ADDRESS, ethers.utils.parseEther("0.01111"), 0);
+    const withdrawal1Tx = await data.umswapFactory.connect(data.user2Signer).withdraw(ZERO_ADDRESS, ethers.utils.parseEther("0.01111"), 0);
+    await data.printEvents("user2->umswapFactory.withdraw(ZERO_ADDRESS, 0.01111, 0)", await withdrawal1Tx.wait());
+    const withdrawal1TxReceipt = await ethers.provider.getTransactionReceipt(withdrawal1Tx.hash);
+    const event1 = data.umswapFactory.interface.decodeEventLog("Withdrawn", withdrawal1TxReceipt.logs[0].data, withdrawal1TxReceipt.logs[0].topics);
+    expect(event1[2]).to.equal(ZERO_ADDRESS);
+    expect(event1[3]).to.equal(ethers.utils.parseEther("0.01111"));
     console.log("        Tested user2->umswapFactory.withdraw(ZERO_ADDRESS, 0.01111, 0) - success");
 
-    await expect(
-      data.umswapFactory.connect(data.user2Signer).withdraw(umswap.address, ethers.utils.parseEther("0.11111"), 0)
-    ).to.emit(data.umswapFactory, "Withdrawn").withArgs(umswap.address, ethers.utils.parseEther("0.11111"), 0);
+    const withdrawal2Tx = await data.umswapFactory.connect(data.user2Signer).withdraw(umswap.address, ethers.utils.parseEther("0.11111"), 0);
+    await data.printEvents("user2->umswapFactory.withdraw(umswap, 0.11111, 0)", await withdrawal2Tx.wait());
+    const withdrawal2TxReceipt = await ethers.provider.getTransactionReceipt(withdrawal2Tx.hash);
+    const event2 = data.umswapFactory.interface.decodeEventLog("Withdrawn", withdrawal2TxReceipt.logs[1].data, withdrawal2TxReceipt.logs[1].topics);
+    expect(event2[2]).to.equal(umswap.address);
+    expect(event2[3]).to.equal(ethers.utils.parseEther("0.11111"));
     console.log("        Tested user2->umswapFactory.withdraw(umswap, 0.11111, 0) - success");
 
     await data.printState("After Partial Withdraws");
 
-    await expect(
-      data.umswapFactory.connect(data.user2Signer).withdraw(ZERO_ADDRESS, 0, 0)
-    ).to.emit(data.umswapFactory, "Withdrawn").withArgs(ZERO_ADDRESS, ethers.utils.parseEther("0.05555"), 0);
-    console.log("        Tested user2->umswapFactory.withdraw(ZERO_ADDRESS, 0, 0) - success");
+    const withdrawal3Tx = await data.umswapFactory.connect(data.user2Signer).withdraw(ZERO_ADDRESS, 0, 0);
+    await data.printEvents("user2->umswapFactory.withdraw(ZERO_ADDRESS, 0, 0)", await withdrawal3Tx.wait());
+    const withdrawal3TxReceipt = await ethers.provider.getTransactionReceipt(withdrawal3Tx.hash);
+    const event3 = data.umswapFactory.interface.decodeEventLog("Withdrawn", withdrawal3TxReceipt.logs[0].data, withdrawal3TxReceipt.logs[0].topics);
+    expect(event3[2]).to.equal(ZERO_ADDRESS);
+    expect(event3[3]).to.equal(ethers.utils.parseEther("0.05555"));
+    console.log("        Tested user2->umswapFactory.withdraw(ZERO_ADDRESS, 0 => 0.05555, 0) - success");
 
-    await expect(
-      data.umswapFactory.connect(data.user2Signer).withdraw(umswap.address, 0, 0)
-    ).to.emit(data.umswapFactory, "Withdrawn").withArgs(umswap.address, ethers.utils.parseEther("0.4321"), 0);
-    console.log("        Tested user2->umswapFactory.withdraw(umswap, 0.4321, 0) - success");
+    const withdrawal4Tx = await data.umswapFactory.connect(data.user2Signer).withdraw(umswap.address, 0, 0);
+    await data.printEvents("user2->umswapFactory.withdraw(umswap, 0, 0)", await withdrawal4Tx.wait());
+    const withdrawal4TxReceipt = await ethers.provider.getTransactionReceipt(withdrawal4Tx.hash);
+    const event4 = data.umswapFactory.interface.decodeEventLog("Withdrawn", withdrawal4TxReceipt.logs[1].data, withdrawal4TxReceipt.logs[1].topics);
+    expect(event4[2]).to.equal(umswap.address);
+    expect(event4[3]).to.equal(ethers.utils.parseEther("0.4321"));
+    console.log("        Tested user2->umswapFactory.withdraw(umswap, 0 => 0.4321, 0) - success");
 
-    await expect(
-      data.umswapFactory.connect(data.user2Signer).withdraw(data.erc721Mock.address, 0, 222)
-    ).to.emit(data.umswapFactory, "Withdrawn").withArgs(data.erc721Mock.address, 0, 222);
+    const withdrawal5Tx = await data.umswapFactory.connect(data.user2Signer).withdraw(data.erc721Mock.address, 0, 222);
+    await data.printEvents("user2->umswapFactory.withdraw(erc721Mock, 0, 222)", await withdrawal5Tx.wait());
+    const withdrawal5TxReceipt = await ethers.provider.getTransactionReceipt(withdrawal5Tx.hash);
+    const event5 = data.umswapFactory.interface.decodeEventLog("Withdrawn", withdrawal5TxReceipt.logs[2].data, withdrawal5TxReceipt.logs[2].topics);
+    expect(event5[2]).to.equal(data.erc721Mock.address);
+    expect(event5[4]).to.equal(222);
     console.log("        Tested user2->umswapFactory.withdraw(erc721Mock, 0, 222) - success");
 
     await data.printState("After Withdraws");
@@ -334,8 +349,8 @@ describe("umswap", function () {
   });
 
 
-  it("07. Test 07", async function () {
-    console.log("      07. Test 07 - TODO: Umswap Exceptions");
-  });
+  // it("07. Test 07", async function () {
+  //   console.log("      07. Test 07 - TODO: Umswap Exceptions");
+  // });
 
 });

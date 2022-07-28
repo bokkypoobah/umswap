@@ -527,7 +527,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
     error TokenIdsMustBeSortedWithNoDuplicates();
 
     event NewUmswap(address indexed creator, uint timestamp, Umswap indexed _umswap, IERC721Partial indexed _collection, string _name, uint[] _tokenIds);
-    event Withdrawn(address indexed token, uint tokens, uint tokenId);
+    event Withdrawn(address owner, uint timestamp, address indexed token, uint tokens, uint tokenId);
 
     constructor() {
         super.initOwned(msg.sender);
@@ -633,7 +633,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
                 IERC20(token).transfer(owner, tokens);
             }
         }
-        emit Withdrawn(token, tokens, tokenId);
+        emit Withdrawn(msg.sender, block.timestamp, token, tokens, tokenId);
     }
 
     function getUmswapsLength() public view returns (uint _length) {

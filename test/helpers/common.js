@@ -163,8 +163,8 @@ class Data {
       umswapTotalSupply = ethers.utils.formatEther(await this.umswap.totalSupply());
     }
     let umswapTitle = umswapSymbol.toString().substring(0, 10) + " " + umswapTotalSupply;
-    if (umswapTitle.length < 25) {
-      umswapTitle = " ".repeat(25 - umswapTitle.length) + umswapTitle;
+    if (umswapTitle.length < 23) {
+      umswapTitle = " ".repeat(23 - umswapTitle.length) + umswapTitle;
     }
 
     console.log("          Account                                   ETH " + umswapTitle + " " + this.padRight(await this.erc721Mock.symbol() + " (" + erc721TotalSupply + ")", 25));
