@@ -1,5 +1,7 @@
 # UmswapFactory
 
+## TODO
+
 Source file [../../contracts/UmswapFactory.sol](../../contracts/UmswapFactory.sol).
 
 <br />
@@ -10,7 +12,7 @@ Source file [../../contracts/UmswapFactory.sol](../../contracts/UmswapFactory.so
 pragma solidity ^0.8.0;
 
 // ----------------------------------------------------------------------------
-// Umswap v0.8.6 testing
+// Umswap v0.8.7 testing
 //
 // https://github.com/bokkypoobah/Umswap
 //
@@ -253,9 +255,9 @@ contract Owned {
         initialised = true;
     }
 
-    function transferOwnership(address _newOwner) public onlyOwner {
-        emit OwnershipTransferred(owner, _newOwner);
-        owner = _newOwner;
+    function transferOwnership(address newOwner) public onlyOwner {
+        emit OwnershipTransferred(owner, newOwner);
+        owner = newOwner;
     }
 }
 
@@ -265,17 +267,17 @@ contract BasicToken is IERC20, Owned {
 
     string _symbol;
     string _name;
-    uint _decimals;
+    uint8 _decimals;
     uint _totalSupply;
 
-    mapping(address => uint) _balances;
-    mapping(address => mapping(address => uint)) _allowed;
+    mapping(address => uint) balances;
+    mapping(address => mapping(address => uint)) allowed;
 
-    function initBasicToken(address factory, string memory symbol_, string memory name_, uint decimals_) internal {
+    function initBasicToken(address factory, string memory __symbol, string memory __name, uint8 __decimals) internal {
         super.initOwned(factory);
-        _symbol = symbol_;
-        _name = name_;
-        _decimals = decimals_;
+        _symbol = __symbol;
+        _name = __name;
+        _decimals = __decimals;
     }
     function symbol() override external view returns (string memory) {
         return _symbol;
@@ -284,43 +286,43 @@ contract BasicToken is IERC20, Owned {
         return _name;
     }
     function decimals() override external view returns (uint8) {
-        return uint8(_decimals);
+        return _decimals;
     }
     function totalSupply() override external view returns (uint) {
-        return _totalSupply - _balances[address(0)];
+        return _totalSupply - balances[address(0)];
     }
     function balanceOf(address tokenOwner) override external view returns (uint balance) {
-        return _balances[tokenOwner];
+        return balances[tokenOwner];
     }
     function transfer(address to, uint tokens) override external returns (bool success) {
-        _balances[msg.sender] -= tokens;
-        _balances[to] += tokens;
+        balances[msg.sender] -= tokens;
+        balances[to] += tokens;
         emit Transfer(msg.sender, to, tokens);
         return true;
     }
     function approve(address spender, uint tokens) override external returns (bool success) {
-        _allowed[msg.sender][spender] = tokens;
+        allowed[msg.sender][spender] = tokens;
         emit Approval(msg.sender, spender, tokens);
         return true;
     }
     function transferFrom(address from, address to, uint tokens) override external returns (bool success) {
-        _balances[from] -= tokens;
-        _allowed[from][msg.sender] -= tokens;
-        _balances[to] += tokens;
+        balances[from] -= tokens;
+        allowed[from][msg.sender] -= tokens;
+        balances[to] += tokens;
         emit Transfer(from, to, tokens);
         return true;
     }
     function allowance(address tokenOwner, address spender) override external view returns (uint remaining) {
-        return _allowed[tokenOwner][spender];
+        return allowed[tokenOwner][spender];
     }
     function _mint(address tokenOwner, uint tokens) internal returns (bool success) {
-        _balances[tokenOwner] += tokens;
+        balances[tokenOwner] += tokens;
         _totalSupply += tokens;
         emit Transfer(address(0), tokenOwner, tokens);
         return true;
     }
     function _burn(address tokenOwner, uint tokens) internal returns (bool success) {
-        _balances[tokenOwner] -= tokens;
+        balances[tokenOwner] -= tokens;
         _totalSupply -= tokens;
         emit Transfer(tokenOwner, address(0), tokens);
         return true;
@@ -375,84 +377,84 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
     mapping(address => Rating) public ratings;
     address[] public raters;
 
-    event Swapped(address indexed account, uint indexed timestamp, uint[] _inTokenIds, uint[] _outTokenIds, uint64[3] stats);
+    event Swapped(address indexed account, uint indexed timestamp, uint[] inTokenIds, uint[] outTokenIds, uint64[3] stats);
     event Rated(address indexed account, uint indexed timestamp, uint rate, string message, uint64[3] stats);
 
     error InsufficientTokensToBurn();
     error InvalidTokenId(uint tokenId);
     error MaxRatingExceeded(uint max);
 
-    function initUmswap(address _creator, IERC721Partial _collection, string calldata _symbol, string calldata _name, uint[] calldata _tokenIds) public {
+    function initUmswap(address _creator, IERC721Partial _collection, string calldata _symbol, string calldata _name, uint[] calldata tokenIds) public {
         creator = _creator;
         collection = _collection;
         super.initBasicToken(msg.sender, _symbol, _name, DECIMALS);
         uint maxTokenId;
-        for (uint i = 0; i < _tokenIds.length; i = onePlus(i)) {
-            if (_tokenIds[i] > maxTokenId) {
-                maxTokenId = _tokenIds[i];
+        for (uint i = 0; i < tokenIds.length; i = onePlus(i)) {
+            if (tokenIds[i] > maxTokenId) {
+                maxTokenId = tokenIds[i];
             }
         }
         if (maxTokenId < 2 ** 16) {
-            for (uint i = 0; i < _tokenIds.length; i = onePlus(i)) {
-                tokenIds16.push(uint16(_tokenIds[i]));
+            for (uint i = 0; i < tokenIds.length; i = onePlus(i)) {
+                tokenIds16.push(uint16(tokenIds[i]));
             }
         } else if (maxTokenId < 2 ** 32) {
-            for (uint i = 0; i < _tokenIds.length; i = onePlus(i)) {
-                tokenIds32.push(uint32(_tokenIds[i]));
+            for (uint i = 0; i < tokenIds.length; i = onePlus(i)) {
+                tokenIds32.push(uint32(tokenIds[i]));
             }
         } else if (maxTokenId < 2 ** 64) {
-            for (uint i = 0; i < _tokenIds.length; i = onePlus(i)) {
-                tokenIds64.push(uint64(_tokenIds[i]));
+            for (uint i = 0; i < tokenIds.length; i = onePlus(i)) {
+                tokenIds64.push(uint64(tokenIds[i]));
             }
         } else {
-            tokenIds256 = _tokenIds;
+            tokenIds256 = tokenIds;
         }
     }
 
-    function isValidTokenId(uint _tokenId) public view returns (bool) {
+    function isValidTokenId(uint tokenId) public view returns (bool) {
         if (tokenIds16.length > 0) {
-            return ArrayUtils.includes16(tokenIds16, _tokenId);
+            return ArrayUtils.includes16(tokenIds16, tokenId);
         } else if (tokenIds32.length > 0) {
-            return ArrayUtils.includes32(tokenIds32, _tokenId);
+            return ArrayUtils.includes32(tokenIds32, tokenId);
         } else if (tokenIds64.length > 0) {
-            return ArrayUtils.includes64(tokenIds64, _tokenId);
+            return ArrayUtils.includes64(tokenIds64, tokenId);
         } else if (tokenIds256.length > 0) {
-            return ArrayUtils.includes256(tokenIds256, _tokenId);
+            return ArrayUtils.includes256(tokenIds256, tokenId);
         } else {
             return true;
         }
     }
 
-    function swap(uint[] calldata _inTokenIds, uint[] calldata _outTokenIds, address integrator) public payable reentrancyGuard {
-        if (_outTokenIds.length > _inTokenIds.length) {
-            uint tokensToBurn = (_outTokenIds.length - _inTokenIds.length) * 10 ** DECIMALS;
+    function swap(uint[] calldata inTokenIds, uint[] calldata outTokenIds, address integrator) public payable reentrancyGuard {
+        if (outTokenIds.length > inTokenIds.length) {
+            uint tokensToBurn = (outTokenIds.length - inTokenIds.length) * 10 ** DECIMALS;
             if (tokensToBurn > this.balanceOf(msg.sender)) {
                 revert InsufficientTokensToBurn();
             }
             _burn(msg.sender, tokensToBurn);
         }
-        for (uint i = 0; i < _inTokenIds.length; i = onePlus(i)) {
-            if (!isValidTokenId(_inTokenIds[i])) {
-                revert InvalidTokenId(_inTokenIds[i]);
+        for (uint i = 0; i < inTokenIds.length; i = onePlus(i)) {
+            if (!isValidTokenId(inTokenIds[i])) {
+                revert InvalidTokenId(inTokenIds[i]);
             }
-            collection.transferFrom(msg.sender, address(this), _inTokenIds[i]);
+            collection.transferFrom(msg.sender, address(this), inTokenIds[i]);
         }
-        for (uint i = 0; i < _outTokenIds.length; i = onePlus(i)) {
-            if (!isValidTokenId(_outTokenIds[i])) {
-                revert InvalidTokenId(_outTokenIds[i]);
+        for (uint i = 0; i < outTokenIds.length; i = onePlus(i)) {
+            if (!isValidTokenId(outTokenIds[i])) {
+                revert InvalidTokenId(outTokenIds[i]);
             }
-            collection.transferFrom(address(this), msg.sender, _outTokenIds[i]);
+            collection.transferFrom(address(this), msg.sender, outTokenIds[i]);
         }
-        if (_outTokenIds.length < _inTokenIds.length) {
-            _mint(msg.sender, (_inTokenIds.length - _outTokenIds.length) * 10 ** DECIMALS);
+        if (outTokenIds.length < inTokenIds.length) {
+            _mint(msg.sender, (inTokenIds.length - outTokenIds.length) * 10 ** DECIMALS);
         }
-        stats[uint(Stats.SwappedIn)] += uint64(_inTokenIds.length);
-        stats[uint(Stats.SwappedOut)] += uint64(_outTokenIds.length);
-        emit Swapped(msg.sender, block.timestamp, _inTokenIds, _outTokenIds, stats);
+        stats[uint(Stats.SwappedIn)] += uint64(inTokenIds.length);
+        stats[uint(Stats.SwappedOut)] += uint64(outTokenIds.length);
+        emit Swapped(msg.sender, block.timestamp, inTokenIds, outTokenIds, stats);
         handleTips(integrator, owner);
     }
 
-    function rate(uint _rate, string calldata _message, address integrator) public payable reentrancyGuard {
+    function rate(uint _rate, string calldata message, address integrator) public payable reentrancyGuard {
         if (_rate > MAXRATING) {
             revert MaxRatingExceeded(MAXRATING);
         }
@@ -465,7 +467,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
             _rating.rate = uint64(_rate);
         }
         stats[uint(Stats.TotalRatings)] += uint64(_rate);
-        emit Rated(msg.sender, block.timestamp, _rate, _message, stats);
+        emit Rated(msg.sender, block.timestamp, _rate, message, stats);
         handleTips(integrator, owner);
     }
 
@@ -508,12 +510,12 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         stats_[4] = raters.length;
     }
 
-    function getRatings(uint[] memory indices) public view returns (Rating[] memory _ratings) {
+    function getRatings(uint[] memory indices) public view returns (Rating[] memory ratings_) {
         uint length = indices.length;
-        _ratings = new Rating[](length);
+        ratings_ = new Rating[](length);
         for (uint i = 0; i < length; i = onePlus(i)) {
             address rater = raters[i];
-            _ratings[i] = ratings[rater];
+            ratings_[i] = ratings[rater];
         }
     }
 }
@@ -534,6 +536,7 @@ contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
     bytes constant UMSYMBOLPREFIX = "UMS";
     bytes4 constant ERC721_INTERFACE = 0x80ac58cd;
     uint constant MAXNAMELENGTH = 48;
+    uint constant MAXTOPICLENGTH = 48;
     uint constant MAXMESSAGELENGTH = 280;
 
     Umswap public template;
@@ -543,12 +546,13 @@ contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
 
     error NotERC721();
     error InvalidName();
+    error InvalidTopic();
     error InvalidMessage();
     error InvalidUmswap();
     error DuplicateSet();
     error TokenIdsMustBeSortedWithNoDuplicates();
 
-    event NewUmswap(address indexed creator, uint timestamp, Umswap indexed _umswap, IERC721Partial indexed _collection, string _name, uint[] _tokenIds);
+    event NewUmswap(address indexed creator, uint timestamp, Umswap indexed umswap, IERC721Partial indexed collection, string name, uint[] tokenIds);
     event Message(address indexed from, uint timestamp, address indexed to, Umswap indexed umswap, string topic, string message);
     event Withdrawn(address owner, uint timestamp, address indexed token, uint tokens, uint tokenId);
 
@@ -607,34 +611,38 @@ contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
         return true;
     }
 
-    function newUmswap(IERC721Partial _collection, string calldata _name, uint[] calldata _tokenIds, address integrator) public payable reentrancyGuard {
-        if (!isERC721(address(_collection))) {
+    function newUmswap(IERC721Partial collection, string calldata name, uint[] calldata tokenIds, address integrator) public payable reentrancyGuard {
+        if (!isERC721(address(collection))) {
             revert NotERC721();
         }
-        if (!isValidName(_name)) {
+        if (!isValidName(name)) {
             revert InvalidName();
         }
-        if (_tokenIds.length > 0) {
-            for (uint i = 1; i < _tokenIds.length; i = onePlus(i)) {
-                if (_tokenIds[i - 1] >= _tokenIds[i]) {
+        if (tokenIds.length > 0) {
+            for (uint i = 1; i < tokenIds.length; i = onePlus(i)) {
+                if (tokenIds[i - 1] >= tokenIds[i]) {
                     revert TokenIdsMustBeSortedWithNoDuplicates();
                 }
             }
         }
-        bytes32 key = keccak256(abi.encodePacked(_collection, _name, _tokenIds));
+        bytes32 key = keccak256(abi.encodePacked(collection, name, tokenIds));
         if (setExists[key]) {
             revert DuplicateSet();
         }
         setExists[key] = true;
         Umswap umswap = Umswap(payable(createClone(address(template))));
-        umswap.initUmswap(msg.sender, _collection, genSymbol(umswaps.length), _name, _tokenIds);
+        umswap.initUmswap(msg.sender, collection, genSymbol(umswaps.length), name, tokenIds);
         umswaps.push(umswap);
         umswapExists[umswap] = true;
-        emit NewUmswap(msg.sender, block.timestamp, umswap, _collection, _name, _tokenIds);
+        emit NewUmswap(msg.sender, block.timestamp, umswap, collection, name, tokenIds);
         handleTips(integrator, address(this));
     }
 
-    function message(address _to, Umswap _umswap, string calldata _topic, string calldata _message, address integrator) public payable reentrancyGuard {
+    function message(address to, Umswap _umswap, string calldata topic, string calldata _message, address integrator) public payable reentrancyGuard {
+        bytes memory topicBytes = bytes(topic);
+        if (topicBytes.length > MAXTOPICLENGTH) {
+            revert InvalidTopic();
+        }
         bytes memory messageBytes = bytes(_message);
         if (messageBytes.length < 1 || messageBytes.length > MAXMESSAGELENGTH) {
             revert InvalidMessage();
@@ -642,7 +650,7 @@ contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
         if (_umswap != Umswap(address(0)) && !umswapExists[_umswap]) {
             revert InvalidUmswap();
         }
-        emit Message(msg.sender, block.timestamp, _to, _umswap, _topic, _message);
+        emit Message(msg.sender, block.timestamp, to, _umswap, topic, _message);
         handleTips(integrator, address(this));
     }
 
@@ -677,23 +685,23 @@ contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
     }
 
     function getUmswaps(uint[] memory indices) public view returns (
-        Umswap[] memory _umswaps,
-        string[] memory _symbols,
-        string[] memory _names,
-        uint[][] memory _tokenIds,
-        address[] memory _creators,
-        uint[][] memory _stats
+        Umswap[] memory umswaps_,
+        string[] memory symbols,
+        string[] memory names,
+        uint[][] memory tokenIds,
+        address[] memory creators,
+        uint[][] memory stats
     ) {
         uint length = indices.length;
-        _umswaps = new Umswap[](length);
-        _symbols = new string[](length);
-        _names = new string[](length);
-        _tokenIds = new uint[][](length);
-        _creators = new address[](length);
-        _stats = new uint[][](length);
+        umswaps_ = new Umswap[](length);
+        symbols = new string[](length);
+        names = new string[](length);
+        tokenIds = new uint[][](length);
+        creators = new address[](length);
+        stats = new uint[][](length);
         for (uint i = 0; i < length; i = onePlus(i)) {
-            _umswaps[i] = umswaps[i];
-            (_symbols[i], _names[i], _tokenIds[i], _creators[i], _stats[i]) = umswaps[i].getInfo();
+            umswaps_[i] = umswaps[i];
+            (symbols[i], names[i], tokenIds[i], creators[i], stats[i]) = umswaps[i].getInfo();
         }
     }
 }
