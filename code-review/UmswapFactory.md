@@ -524,15 +524,8 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
 contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
 
     bytes1 constant SPACE = 0x20;
-    bytes1 constant PLUS = 0x2b;
-    bytes1 constant MINUS = 0x2d;
     bytes1 constant ZERO = 0x30;
-    bytes1 constant NINE = 0x39;
-    bytes1 constant COLON = 0x3a;
-    bytes1 constant UPPERA = 0x41;
-    bytes1 constant UPPERZ = 0x5a;
-    bytes1 constant LOWERA = 0x61;
-    bytes1 constant LOWERZ = 0x7a;
+    bytes1 constant TILDE = 0x7e;
     bytes constant UMSYMBOLPREFIX = "UMS";
     bytes4 constant ERC721_INTERFACE = 0x80ac58cd;
     uint constant MAXNAMELENGTH = 48;
@@ -603,7 +596,7 @@ contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
             if (char == SPACE && lastChar == SPACE) {
                 return false;
             }
-            if (!((char >= ZERO && char <= NINE) || (char >= UPPERA && char <= UPPERZ) || (char >= LOWERA && char <= LOWERZ) || char == SPACE || char == PLUS || char == MINUS || char == COLON)) {
+            if (!(char >= SPACE && char <= TILDE)) {
                 return false;
             }
             lastChar = char;
