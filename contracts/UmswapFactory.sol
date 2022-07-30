@@ -1,3 +1,7 @@
+/**
+ *Submitted for verification at Etherscan.io on 2022-07-30
+*/
+
 pragma solidity ^0.8.0;
 
 // ----------------------------------------------------------------------------
@@ -5,7 +9,7 @@ pragma solidity ^0.8.0;
 //
 // https://github.com/bokkypoobah/Umswap
 //
-// Deployed to
+// Deployed to 0x39D61eDC9E951C93A0A714c008006c5093992db3
 //
 // SPDX-License-Identifier: MIT
 //
