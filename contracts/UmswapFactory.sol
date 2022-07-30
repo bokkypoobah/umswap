@@ -244,9 +244,9 @@ contract Owned {
         initialised = true;
     }
 
-    function transferOwnership(address _newOwner) public onlyOwner {
-        emit OwnershipTransferred(owner, _newOwner);
-        owner = _newOwner;
+    function transferOwnership(address newOwner) public onlyOwner {
+        emit OwnershipTransferred(owner, newOwner);
+        owner = newOwner;
     }
 }
 
@@ -256,17 +256,17 @@ contract BasicToken is IERC20, Owned {
 
     string _symbol;
     string _name;
-    uint _decimals;
+    uint8 _decimals;
     uint _totalSupply;
 
-    mapping(address => uint) _balances;
-    mapping(address => mapping(address => uint)) _allowed;
+    mapping(address => uint) balances;
+    mapping(address => mapping(address => uint)) allowed;
 
-    function initBasicToken(address factory, string memory symbol_, string memory name_, uint decimals_) internal {
+    function initBasicToken(address factory, string memory __symbol, string memory __name, uint8 __decimals) internal {
         super.initOwned(factory);
-        _symbol = symbol_;
-        _name = name_;
-        _decimals = decimals_;
+        _symbol = __symbol;
+        _name = __name;
+        _decimals = __decimals;
     }
     function symbol() override external view returns (string memory) {
         return _symbol;
@@ -275,43 +275,43 @@ contract BasicToken is IERC20, Owned {
         return _name;
     }
     function decimals() override external view returns (uint8) {
-        return uint8(_decimals);
+        return _decimals;
     }
     function totalSupply() override external view returns (uint) {
-        return _totalSupply - _balances[address(0)];
+        return _totalSupply - balances[address(0)];
     }
     function balanceOf(address tokenOwner) override external view returns (uint balance) {
-        return _balances[tokenOwner];
+        return balances[tokenOwner];
     }
     function transfer(address to, uint tokens) override external returns (bool success) {
-        _balances[msg.sender] -= tokens;
-        _balances[to] += tokens;
+        balances[msg.sender] -= tokens;
+        balances[to] += tokens;
         emit Transfer(msg.sender, to, tokens);
         return true;
     }
     function approve(address spender, uint tokens) override external returns (bool success) {
-        _allowed[msg.sender][spender] = tokens;
+        allowed[msg.sender][spender] = tokens;
         emit Approval(msg.sender, spender, tokens);
         return true;
     }
     function transferFrom(address from, address to, uint tokens) override external returns (bool success) {
-        _balances[from] -= tokens;
-        _allowed[from][msg.sender] -= tokens;
-        _balances[to] += tokens;
+        balances[from] -= tokens;
+        allowed[from][msg.sender] -= tokens;
+        balances[to] += tokens;
         emit Transfer(from, to, tokens);
         return true;
     }
     function allowance(address tokenOwner, address spender) override external view returns (uint remaining) {
-        return _allowed[tokenOwner][spender];
+        return allowed[tokenOwner][spender];
     }
     function _mint(address tokenOwner, uint tokens) internal returns (bool success) {
-        _balances[tokenOwner] += tokens;
+        balances[tokenOwner] += tokens;
         _totalSupply += tokens;
         emit Transfer(address(0), tokenOwner, tokens);
         return true;
     }
     function _burn(address tokenOwner, uint tokens) internal returns (bool success) {
-        _balances[tokenOwner] -= tokens;
+        balances[tokenOwner] -= tokens;
         _totalSupply -= tokens;
         emit Transfer(tokenOwner, address(0), tokens);
         return true;
@@ -366,84 +366,84 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
     mapping(address => Rating) public ratings;
     address[] public raters;
 
-    event Swapped(address indexed account, uint indexed timestamp, uint[] _inTokenIds, uint[] _outTokenIds, uint64[3] stats);
+    event Swapped(address indexed account, uint indexed timestamp, uint[] inTokenIds, uint[] outTokenIds, uint64[3] stats);
     event Rated(address indexed account, uint indexed timestamp, uint rate, string message, uint64[3] stats);
 
     error InsufficientTokensToBurn();
     error InvalidTokenId(uint tokenId);
     error MaxRatingExceeded(uint max);
 
-    function initUmswap(address _creator, IERC721Partial _collection, string calldata _symbol, string calldata _name, uint[] calldata _tokenIds) public {
+    function initUmswap(address _creator, IERC721Partial _collection, string calldata _symbol, string calldata _name, uint[] calldata tokenIds) public {
         creator = _creator;
         collection = _collection;
         super.initBasicToken(msg.sender, _symbol, _name, DECIMALS);
         uint maxTokenId;
-        for (uint i = 0; i < _tokenIds.length; i = onePlus(i)) {
-            if (_tokenIds[i] > maxTokenId) {
-                maxTokenId = _tokenIds[i];
+        for (uint i = 0; i < tokenIds.length; i = onePlus(i)) {
+            if (tokenIds[i] > maxTokenId) {
+                maxTokenId = tokenIds[i];
             }
         }
         if (maxTokenId < 2 ** 16) {
-            for (uint i = 0; i < _tokenIds.length; i = onePlus(i)) {
-                tokenIds16.push(uint16(_tokenIds[i]));
+            for (uint i = 0; i < tokenIds.length; i = onePlus(i)) {
+                tokenIds16.push(uint16(tokenIds[i]));
             }
         } else if (maxTokenId < 2 ** 32) {
-            for (uint i = 0; i < _tokenIds.length; i = onePlus(i)) {
-                tokenIds32.push(uint32(_tokenIds[i]));
+            for (uint i = 0; i < tokenIds.length; i = onePlus(i)) {
+                tokenIds32.push(uint32(tokenIds[i]));
             }
         } else if (maxTokenId < 2 ** 64) {
-            for (uint i = 0; i < _tokenIds.length; i = onePlus(i)) {
-                tokenIds64.push(uint64(_tokenIds[i]));
+            for (uint i = 0; i < tokenIds.length; i = onePlus(i)) {
+                tokenIds64.push(uint64(tokenIds[i]));
             }
         } else {
-            tokenIds256 = _tokenIds;
+            tokenIds256 = tokenIds;
         }
     }
 
-    function isValidTokenId(uint _tokenId) public view returns (bool) {
+    function isValidTokenId(uint tokenId) public view returns (bool) {
         if (tokenIds16.length > 0) {
-            return ArrayUtils.includes16(tokenIds16, _tokenId);
+            return ArrayUtils.includes16(tokenIds16, tokenId);
         } else if (tokenIds32.length > 0) {
-            return ArrayUtils.includes32(tokenIds32, _tokenId);
+            return ArrayUtils.includes32(tokenIds32, tokenId);
         } else if (tokenIds64.length > 0) {
-            return ArrayUtils.includes64(tokenIds64, _tokenId);
+            return ArrayUtils.includes64(tokenIds64, tokenId);
         } else if (tokenIds256.length > 0) {
-            return ArrayUtils.includes256(tokenIds256, _tokenId);
+            return ArrayUtils.includes256(tokenIds256, tokenId);
         } else {
             return true;
         }
     }
 
-    function swap(uint[] calldata _inTokenIds, uint[] calldata _outTokenIds, address integrator) public payable reentrancyGuard {
-        if (_outTokenIds.length > _inTokenIds.length) {
-            uint tokensToBurn = (_outTokenIds.length - _inTokenIds.length) * 10 ** DECIMALS;
+    function swap(uint[] calldata inTokenIds, uint[] calldata outTokenIds, address integrator) public payable reentrancyGuard {
+        if (outTokenIds.length > inTokenIds.length) {
+            uint tokensToBurn = (outTokenIds.length - inTokenIds.length) * 10 ** DECIMALS;
             if (tokensToBurn > this.balanceOf(msg.sender)) {
                 revert InsufficientTokensToBurn();
             }
             _burn(msg.sender, tokensToBurn);
         }
-        for (uint i = 0; i < _inTokenIds.length; i = onePlus(i)) {
-            if (!isValidTokenId(_inTokenIds[i])) {
-                revert InvalidTokenId(_inTokenIds[i]);
+        for (uint i = 0; i < inTokenIds.length; i = onePlus(i)) {
+            if (!isValidTokenId(inTokenIds[i])) {
+                revert InvalidTokenId(inTokenIds[i]);
             }
-            collection.transferFrom(msg.sender, address(this), _inTokenIds[i]);
+            collection.transferFrom(msg.sender, address(this), inTokenIds[i]);
         }
-        for (uint i = 0; i < _outTokenIds.length; i = onePlus(i)) {
-            if (!isValidTokenId(_outTokenIds[i])) {
-                revert InvalidTokenId(_outTokenIds[i]);
+        for (uint i = 0; i < outTokenIds.length; i = onePlus(i)) {
+            if (!isValidTokenId(outTokenIds[i])) {
+                revert InvalidTokenId(outTokenIds[i]);
             }
-            collection.transferFrom(address(this), msg.sender, _outTokenIds[i]);
+            collection.transferFrom(address(this), msg.sender, outTokenIds[i]);
         }
-        if (_outTokenIds.length < _inTokenIds.length) {
-            _mint(msg.sender, (_inTokenIds.length - _outTokenIds.length) * 10 ** DECIMALS);
+        if (outTokenIds.length < inTokenIds.length) {
+            _mint(msg.sender, (inTokenIds.length - outTokenIds.length) * 10 ** DECIMALS);
         }
-        stats[uint(Stats.SwappedIn)] += uint64(_inTokenIds.length);
-        stats[uint(Stats.SwappedOut)] += uint64(_outTokenIds.length);
-        emit Swapped(msg.sender, block.timestamp, _inTokenIds, _outTokenIds, stats);
+        stats[uint(Stats.SwappedIn)] += uint64(inTokenIds.length);
+        stats[uint(Stats.SwappedOut)] += uint64(outTokenIds.length);
+        emit Swapped(msg.sender, block.timestamp, inTokenIds, outTokenIds, stats);
         handleTips(integrator, owner);
     }
 
-    function rate(uint _rate, string calldata _message, address integrator) public payable reentrancyGuard {
+    function rate(uint _rate, string calldata message, address integrator) public payable reentrancyGuard {
         if (_rate > MAXRATING) {
             revert MaxRatingExceeded(MAXRATING);
         }
@@ -456,7 +456,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
             _rating.rate = uint64(_rate);
         }
         stats[uint(Stats.TotalRatings)] += uint64(_rate);
-        emit Rated(msg.sender, block.timestamp, _rate, _message, stats);
+        emit Rated(msg.sender, block.timestamp, _rate, message, stats);
         handleTips(integrator, owner);
     }
 
@@ -499,12 +499,12 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         stats_[4] = raters.length;
     }
 
-    function getRatings(uint[] memory indices) public view returns (Rating[] memory _ratings) {
+    function getRatings(uint[] memory indices) public view returns (Rating[] memory ratings_) {
         uint length = indices.length;
-        _ratings = new Rating[](length);
+        ratings_ = new Rating[](length);
         for (uint i = 0; i < length; i = onePlus(i)) {
             address rater = raters[i];
-            _ratings[i] = ratings[rater];
+            ratings_[i] = ratings[rater];
         }
     }
 }
