@@ -195,6 +195,7 @@ class Data {
         const stats = getUmswaps[5][i];
         // console.log("stats: " + JSON.stringify(stats, null, 2));
         // console.log("stats[0]: " + stats[0]);
+        const ratingsLength = stats[4];
         console.log("          " + this.padLeft(i, 3) + " " + this.padRight(this.getShortAccountName(getUmswaps[0][i]), 20) + " " +
           this.padRight(this.getShortAccountName(getUmswaps[4][i]), 20) + " " + getUmswaps[1][i] + " " +
           this.padRight(getUmswaps[2][i], 30) + " " +
@@ -202,9 +203,17 @@ class Data {
           this.padLeft(stats[0], 4) + " " +
           this.padLeft(stats[1], 4) + " " +
           this.padLeft(stats[2], 4) + " " +
-          this.padLeft(stats[4], 4) + " " +
+          this.padLeft(ratingsLength, 4) + " " +
           this.padRight(JSON.stringify(getUmswaps[3][i].map((x) => { return parseInt(x.toString()); })), 30)
         );
+        if (ratingsLength > 0 && i == 0 && this.umswap != null) {
+          console.log();
+          const indices = generateRange(0, ratingsLength - 1, 1);
+          const ratings = await this.umswap.getRatings(indices);
+          for (let j = 0; j < ratings.length; j++) {
+            console.log("          " + this.getShortAccountName(ratings[j][0], 20) + " rated " + ratings[j][1]);
+          }
+        }
       }
       console.log();
     }
