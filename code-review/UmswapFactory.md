@@ -507,6 +507,15 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         stats_[3] = _totalSupply;
         stats_[4] = raters.length;
     }
+
+    function getRatings(uint[] memory indices) public view returns (Rating[] memory _ratings) {
+        uint length = indices.length;
+        _ratings = new Rating[](length);
+        for (uint i = 0; i < length; i = onePlus(i)) {
+            address rater = raters[i];
+            _ratings[i] = ratings[rater];
+        }
+    }
 }
 
 
