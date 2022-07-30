@@ -443,7 +443,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         handleTips(integrator, owner);
     }
 
-    function rate(uint _rate, string calldata _message, address integrator) public payable {
+    function rate(uint _rate, string calldata _message, address integrator) public payable reentrancyGuard {
         if (_rate > MAXRATING) {
             revert MaxRatingExceeded(MAXRATING);
         }
@@ -460,7 +460,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         handleTips(integrator, owner);
     }
 
-    function tip(address integrator) public payable {
+    function tip(address integrator) public payable reentrancyGuard {
         handleTips(integrator, owner);
     }
 
@@ -501,7 +501,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
 }
 
 
-contract UmswapFactory is Owned, TipHandler, CloneFactory {
+contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
 
     bytes1 constant SPACE = 0x20;
     bytes1 constant PLUS = 0x2b;
@@ -589,7 +589,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
         return true;
     }
 
-    function newUmswap(IERC721Partial _collection, string calldata _name, uint[] calldata _tokenIds, address integrator) public payable {
+    function newUmswap(IERC721Partial _collection, string calldata _name, uint[] calldata _tokenIds, address integrator) public payable reentrancyGuard {
         if (!isERC721(address(_collection))) {
             revert NotERC721();
         }
@@ -616,7 +616,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
         handleTips(integrator, address(this));
     }
 
-    function message(address _to, Umswap _umswap, string calldata _topic, string calldata _message, address integrator) public payable {
+    function message(address _to, Umswap _umswap, string calldata _topic, string calldata _message, address integrator) public payable reentrancyGuard {
         bytes memory messageBytes = bytes(_message);
         if (messageBytes.length < 1 || messageBytes.length > MAXMESSAGELENGTH) {
             revert InvalidMessage();
@@ -628,7 +628,7 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
         handleTips(integrator, address(this));
     }
 
-    function tip(address integrator) public payable {
+    function tip(address integrator) public payable reentrancyGuard {
         handleTips(integrator, address(this));
     }
 
