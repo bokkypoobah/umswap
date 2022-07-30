@@ -346,6 +346,29 @@ describe("umswap", function () {
     const rate3Tx =  await umswap.connect(data.user0Signer).rate(10, "Yeah 10", data.integrator, { value: ethers.utils.parseEther("0.2222") });
     await data.printEvents("user0->rate(10, 'Yeah', ...)", await rate3Tx.wait());
     await data.printState("user0 rated 10");
+
+    const sendMessage1Tx =  await data.umswapFactory.connect(data.user1Signer).message(ZERO_ADDRESS, ZERO_ADDRESS, "Topic 1", "Hello world!", data.integrator, { value: ethers.utils.parseEther("0.55555") });
+    await data.printEvents("user1->message(0x0, 0x0, 'Hello world!', ...)", await sendMessage1Tx.wait());
+
+    const sendMessage2Tx =  await data.umswapFactory.connect(data.user1Signer).message(ZERO_ADDRESS, umswap.address, "Topic 2", "Hello world! - specific umswap", data.integrator, { value: ethers.utils.parseEther("0.55555") });
+    await data.printEvents("user1->message(0x0, umswap, 'Hello world!', ...)", await sendMessage2Tx.wait());
+
+    const blah1 = "🤪 Blah ".repeat(280/10);
+    const sendMessage3Tx =  await data.umswapFactory.connect(data.user2Signer).message(ZERO_ADDRESS, ZERO_ADDRESS, "Topic 3", blah1, data.integrator, { value: ethers.utils.parseEther("0.55555") });
+    await data.printEvents("user2->message(0x0, 0x0, '(long message)', ...)", await sendMessage3Tx.wait());
+
+    await expect(
+      data.umswapFactory.connect(data.user2Signer).message(ZERO_ADDRESS, data.user0, "Should Fail - Invalid Umswap", "Hello world!", data.integrator, { value: ethers.utils.parseEther("0.55555") })
+    ).to.be.revertedWithCustomError(data.umswapFactory, "InvalidUmswap");
+    console.log("        Tested message(...) for error 'InvalidUmswap'");
+
+    const blah2 = "Blah".repeat(280/4) + "a";
+    await expect(
+      data.umswapFactory.connect(data.user2Signer).message(ZERO_ADDRESS, data.user0, "Should Fail", blah2, data.integrator, { value: ethers.utils.parseEther("0.55555") })
+    ).to.be.revertedWithCustomError(data.umswapFactory, "InvalidMessage");
+    console.log("        Tested message(...) for error 'InvalidMessage'");
+
+    await data.printState("users 1 & 2 sent messages");
   });
 
 

@@ -443,7 +443,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         handleTips(integrator, owner);
     }
 
-    function rate(uint _rate, string calldata message, address integrator) public payable {
+    function rate(uint _rate, string calldata _message, address integrator) public payable {
         if (_rate > MAXRATING) {
             revert MaxRatingExceeded(MAXRATING);
         }
@@ -456,7 +456,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
             _rating.rate = uint64(_rate);
         }
         stats[uint(Stats.TotalRatings)] += uint64(_rate);
-        emit Rated(msg.sender, block.timestamp, _rate, message, stats);
+        emit Rated(msg.sender, block.timestamp, _rate, _message, stats);
         handleTips(integrator, owner);
     }
 
@@ -516,17 +516,22 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
     bytes constant UMSYMBOLPREFIX = "UMS";
     bytes4 constant ERC721_INTERFACE = 0x80ac58cd;
     uint constant MAXNAMELENGTH = 48;
+    uint constant MAXMESSAGELENGTH = 280;
 
     Umswap public template;
     Umswap[] public umswaps;
-    mapping(bytes32 => bool) exists;
+    mapping(Umswap => bool) umswapExists;
+    mapping(bytes32 => bool) setExists;
 
     error NotERC721();
     error InvalidName();
+    error InvalidMessage();
+    error InvalidUmswap();
     error DuplicateSet();
     error TokenIdsMustBeSortedWithNoDuplicates();
 
     event NewUmswap(address indexed creator, uint timestamp, Umswap indexed _umswap, IERC721Partial indexed _collection, string _name, uint[] _tokenIds);
+    event Message(address indexed from, uint timestamp, address indexed to, Umswap indexed umswap, string topic, string message);
     event Withdrawn(address owner, uint timestamp, address indexed token, uint tokens, uint tokenId);
 
     constructor() {
@@ -599,14 +604,27 @@ contract UmswapFactory is Owned, TipHandler, CloneFactory {
             }
         }
         bytes32 key = keccak256(abi.encodePacked(_collection, _name, _tokenIds));
-        if (exists[key]) {
+        if (setExists[key]) {
             revert DuplicateSet();
         }
-        exists[key] = true;
+        setExists[key] = true;
         Umswap umswap = Umswap(payable(createClone(address(template))));
         umswap.initUmswap(msg.sender, _collection, genSymbol(umswaps.length), _name, _tokenIds);
         umswaps.push(umswap);
+        umswapExists[umswap] = true;
         emit NewUmswap(msg.sender, block.timestamp, umswap, _collection, _name, _tokenIds);
+        handleTips(integrator, address(this));
+    }
+
+    function message(address _to, Umswap _umswap, string calldata _topic, string calldata _message, address integrator) public payable {
+        bytes memory messageBytes = bytes(_message);
+        if (messageBytes.length < 1 || messageBytes.length > MAXMESSAGELENGTH) {
+            revert InvalidMessage();
+        }
+        if (_umswap != Umswap(address(0)) && !umswapExists[_umswap]) {
+            revert InvalidUmswap();
+        }
+        emit Message(msg.sender, block.timestamp, _to, _umswap, _topic, _message);
         handleTips(integrator, address(this));
     }
 
