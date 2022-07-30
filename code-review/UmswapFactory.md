@@ -364,7 +364,8 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
     }
 
     uint8 constant DECIMALS = 18;
-    uint constant MAXRATING = 10;
+    uint constant MAXRATINGSCORE = 10;
+    uint constant MAXRATINGMESSAGELENGTH = 48;
 
     address private creator;
     IERC721Partial private collection;
@@ -383,6 +384,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
     error InsufficientTokensToBurn();
     error InvalidTokenId(uint tokenId);
     error MaxRatingExceeded(uint max);
+    error InvalidRatingMessage();
 
     function initUmswap(address _creator, IERC721Partial _collection, string calldata _symbol, string calldata _name, uint[] calldata tokenIds) public {
         creator = _creator;
@@ -455,8 +457,12 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
     }
 
     function rate(uint score, string calldata message, address integrator) public payable reentrancyGuard {
-        if (score > MAXRATING) {
-            revert MaxRatingExceeded(MAXRATING);
+        if (score > MAXRATINGSCORE) {
+            revert MaxRatingExceeded(MAXRATINGSCORE);
+        }
+        bytes memory messageBytes = bytes(message);
+        if (messageBytes.length > MAXRATINGMESSAGELENGTH) {
+            revert InvalidRatingMessage();
         }
         Rating storage rating = ratings[msg.sender];
         if (rating.account == address(0)) {
