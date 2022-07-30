@@ -360,7 +360,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
 
     struct Rating {
         address account;
-        uint64 rate;
+        uint64 score;
     }
 
     uint8 constant DECIMALS = 18;
@@ -378,7 +378,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
     address[] public raters;
 
     event Swapped(address indexed account, uint indexed timestamp, uint[] inTokenIds, uint[] outTokenIds, uint64[3] stats);
-    event Rated(address indexed account, uint indexed timestamp, uint rate, string message, uint64[3] stats);
+    event Rated(address indexed account, uint indexed timestamp, uint score, string message, uint64[3] stats);
 
     error InsufficientTokensToBurn();
     error InvalidTokenId(uint tokenId);
@@ -454,20 +454,20 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         handleTips(integrator, owner);
     }
 
-    function rate(uint _rate, string calldata message, address integrator) public payable reentrancyGuard {
-        if (_rate > MAXRATING) {
+    function rate(uint score, string calldata message, address integrator) public payable reentrancyGuard {
+        if (score > MAXRATING) {
             revert MaxRatingExceeded(MAXRATING);
         }
-        Rating storage _rating = ratings[msg.sender];
-        if (_rating.account == address(0)) {
-            ratings[msg.sender] = Rating(msg.sender, uint64(_rate));
+        Rating storage rating = ratings[msg.sender];
+        if (rating.account == address(0)) {
+            ratings[msg.sender] = Rating(msg.sender, uint64(score));
             raters.push(msg.sender);
         } else {
-            stats[uint(Stats.TotalRatings)] -= _rating.rate;
-            _rating.rate = uint64(_rate);
+            stats[uint(Stats.TotalRatings)] -= rating.score;
+            rating.score = uint64(score);
         }
-        stats[uint(Stats.TotalRatings)] += uint64(_rate);
-        emit Rated(msg.sender, block.timestamp, _rate, message, stats);
+        stats[uint(Stats.TotalRatings)] += uint64(score);
+        emit Rated(msg.sender, block.timestamp, score, message, stats);
         handleTips(integrator, owner);
     }
 
