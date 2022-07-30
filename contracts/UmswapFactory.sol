@@ -1,15 +1,11 @@
-/**
- *Submitted for verification at Etherscan.io on 2022-07-30
-*/
-
 pragma solidity ^0.8.0;
 
 // ----------------------------------------------------------------------------
-// Umswap v0.8.6 testing
+// Umswap v0.8.7 testing
 //
 // https://github.com/bokkypoobah/Umswap
 //
-// Deployed to 0x39D61eDC9E951C93A0A714c008006c5093992db3
+// Deployed to
 //
 // SPDX-License-Identifier: MIT
 //
@@ -529,6 +525,7 @@ contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
     bytes constant UMSYMBOLPREFIX = "UMS";
     bytes4 constant ERC721_INTERFACE = 0x80ac58cd;
     uint constant MAXNAMELENGTH = 48;
+    uint constant MAXTOPICLENGTH = 48;
     uint constant MAXMESSAGELENGTH = 280;
 
     Umswap public template;
@@ -538,12 +535,13 @@ contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
 
     error NotERC721();
     error InvalidName();
+    error InvalidTopic();
     error InvalidMessage();
     error InvalidUmswap();
     error DuplicateSet();
     error TokenIdsMustBeSortedWithNoDuplicates();
 
-    event NewUmswap(address indexed creator, uint timestamp, Umswap indexed _umswap, IERC721Partial indexed _collection, string _name, uint[] _tokenIds);
+    event NewUmswap(address indexed creator, uint timestamp, Umswap indexed umswap, IERC721Partial indexed collection, string name, uint[] tokenIds);
     event Message(address indexed from, uint timestamp, address indexed to, Umswap indexed umswap, string topic, string message);
     event Withdrawn(address owner, uint timestamp, address indexed token, uint tokens, uint tokenId);
 
@@ -602,34 +600,38 @@ contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
         return true;
     }
 
-    function newUmswap(IERC721Partial _collection, string calldata _name, uint[] calldata _tokenIds, address integrator) public payable reentrancyGuard {
-        if (!isERC721(address(_collection))) {
+    function newUmswap(IERC721Partial collection, string calldata name, uint[] calldata tokenIds, address integrator) public payable reentrancyGuard {
+        if (!isERC721(address(collection))) {
             revert NotERC721();
         }
-        if (!isValidName(_name)) {
+        if (!isValidName(name)) {
             revert InvalidName();
         }
-        if (_tokenIds.length > 0) {
-            for (uint i = 1; i < _tokenIds.length; i = onePlus(i)) {
-                if (_tokenIds[i - 1] >= _tokenIds[i]) {
+        if (tokenIds.length > 0) {
+            for (uint i = 1; i < tokenIds.length; i = onePlus(i)) {
+                if (tokenIds[i - 1] >= tokenIds[i]) {
                     revert TokenIdsMustBeSortedWithNoDuplicates();
                 }
             }
         }
-        bytes32 key = keccak256(abi.encodePacked(_collection, _name, _tokenIds));
+        bytes32 key = keccak256(abi.encodePacked(collection, name, tokenIds));
         if (setExists[key]) {
             revert DuplicateSet();
         }
         setExists[key] = true;
         Umswap umswap = Umswap(payable(createClone(address(template))));
-        umswap.initUmswap(msg.sender, _collection, genSymbol(umswaps.length), _name, _tokenIds);
+        umswap.initUmswap(msg.sender, collection, genSymbol(umswaps.length), name, tokenIds);
         umswaps.push(umswap);
         umswapExists[umswap] = true;
-        emit NewUmswap(msg.sender, block.timestamp, umswap, _collection, _name, _tokenIds);
+        emit NewUmswap(msg.sender, block.timestamp, umswap, collection, name, tokenIds);
         handleTips(integrator, address(this));
     }
 
-    function message(address _to, Umswap _umswap, string calldata _topic, string calldata _message, address integrator) public payable reentrancyGuard {
+    function message(address to, Umswap _umswap, string calldata topic, string calldata _message, address integrator) public payable reentrancyGuard {
+        bytes memory topicBytes = bytes(topic);
+        if (topicBytes.length > MAXTOPICLENGTH) {
+            revert InvalidTopic();
+        }
         bytes memory messageBytes = bytes(_message);
         if (messageBytes.length < 1 || messageBytes.length > MAXMESSAGELENGTH) {
             revert InvalidMessage();
@@ -637,7 +639,7 @@ contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
         if (_umswap != Umswap(address(0)) && !umswapExists[_umswap]) {
             revert InvalidUmswap();
         }
-        emit Message(msg.sender, block.timestamp, _to, _umswap, _topic, _message);
+        emit Message(msg.sender, block.timestamp, to, _umswap, topic, _message);
         handleTips(integrator, address(this));
     }
 
@@ -672,23 +674,23 @@ contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
     }
 
     function getUmswaps(uint[] memory indices) public view returns (
-        Umswap[] memory _umswaps,
-        string[] memory _symbols,
-        string[] memory _names,
-        uint[][] memory _tokenIds,
-        address[] memory _creators,
-        uint[][] memory _stats
+        Umswap[] memory umswaps_,
+        string[] memory symbols,
+        string[] memory names,
+        uint[][] memory tokenIds,
+        address[] memory creators,
+        uint[][] memory stats
     ) {
         uint length = indices.length;
-        _umswaps = new Umswap[](length);
-        _symbols = new string[](length);
-        _names = new string[](length);
-        _tokenIds = new uint[][](length);
-        _creators = new address[](length);
-        _stats = new uint[][](length);
+        umswaps_ = new Umswap[](length);
+        symbols = new string[](length);
+        names = new string[](length);
+        tokenIds = new uint[][](length);
+        creators = new address[](length);
+        stats = new uint[][](length);
         for (uint i = 0; i < length; i = onePlus(i)) {
-            _umswaps[i] = umswaps[i];
-            (_symbols[i], _names[i], _tokenIds[i], _creators[i], _stats[i]) = umswaps[i].getInfo();
+            umswaps_[i] = umswaps[i];
+            (symbols[i], names[i], tokenIds[i], creators[i], stats[i]) = umswaps[i].getInfo();
         }
     }
 }

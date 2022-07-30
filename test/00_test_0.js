@@ -358,13 +358,18 @@ describe("umswap", function () {
     await data.printEvents("user2->message(0x0, 0x0, '(long message)', ...)", await sendMessage3Tx.wait());
 
     await expect(
-      data.umswapFactory.connect(data.user2Signer).message(ZERO_ADDRESS, data.user0, "Should Fail - Invalid Umswap", "Hello world!", data.integrator, { value: ethers.utils.parseEther("0.55555") })
+      data.umswapFactory.connect(data.user2Signer).message(ZERO_ADDRESS, data.user0, "Should Fail - InvalidTopic    1234567890123456789", "Hello world!", data.integrator, { value: ethers.utils.parseEther("0.55555") })
+    ).to.be.revertedWithCustomError(data.umswapFactory, "InvalidTopic");
+    console.log("        Tested message(...) for error 'InvalidTopic'");
+
+    await expect(
+      data.umswapFactory.connect(data.user2Signer).message(ZERO_ADDRESS, data.user0, "Should Fail - InvalidUmswap", "Hello world!", data.integrator, { value: ethers.utils.parseEther("0.55555") })
     ).to.be.revertedWithCustomError(data.umswapFactory, "InvalidUmswap");
     console.log("        Tested message(...) for error 'InvalidUmswap'");
 
     const blah2 = "Blah".repeat(280/4) + "a";
     await expect(
-      data.umswapFactory.connect(data.user2Signer).message(ZERO_ADDRESS, data.user0, "Should Fail", blah2, data.integrator, { value: ethers.utils.parseEther("0.55555") })
+      data.umswapFactory.connect(data.user2Signer).message(ZERO_ADDRESS, data.user0, "Should Fail - InvalidMessage", blah2, data.integrator, { value: ethers.utils.parseEther("0.55555") })
     ).to.be.revertedWithCustomError(data.umswapFactory, "InvalidMessage");
     console.log("        Tested message(...) for error 'InvalidMessage'");
 
