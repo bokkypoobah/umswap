@@ -289,7 +289,7 @@ describe("umswap", function () {
     console.log("        Tested newUmswap(...) for error 'NotERC721'");
 
     await expect(
-      data.umswapFactory.newUmswap(data.erc721Mock.address, "name%", [111, 222, 333], data.integrator, { value: ethers.utils.parseEther("0.1111") })
+      data.umswapFactory.newUmswap(data.erc721Mock.address, "name🤪", [111, 222, 333], data.integrator, { value: ethers.utils.parseEther("0.1111") })
     ).to.be.revertedWithCustomError(data.umswapFactory, "InvalidName");
     console.log("        Tested newUmswap(...) for error 'InvalidName'");
 
@@ -315,7 +315,7 @@ describe("umswap", function () {
     console.log("      06. Test 06 - TODO: Umswap Additional Tests");
 
     const tokenIds = [111, 333, 555];
-    const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "Odd TokenIds: - test", tokenIds, data.integrator, { value: ethers.utils.parseEther("0.1111") });
+    const newUmswapTx = await data.umswapFactory.newUmswap(data.erc721Mock.address, "Test Name :#'()+,-", tokenIds, data.integrator, { value: ethers.utils.parseEther("0.1111") });
     await data.printEvents("deployer->factory.newUmswap(erc721Mock, " + JSON.stringify(tokenIds) + ")", await newUmswapTx.wait());
 
     const umswapsLength = await data.umswapFactory.getUmswapsLength();
