@@ -9,20 +9,16 @@ Source file [../../contracts/UmswapFactory.sol](../../contracts/UmswapFactory.so
 <hr />
 
 ```solidity
-/**
- *Submitted for verification at Etherscan.io on 2022-07-31
-*/
-
 pragma solidity ^0.8.0;
 
 // ----------------------------------------------------------------------------
-// Umswap v0.8.7 testing
+// Umswap v0.8.8 testing
 //
 // https://github.com/bokkypoobah/Umswap
 //
 // Deployments:
-// - UmswapFactory 0xb9969521413D036eAb5Ff2095cDc31BF4600AF9e
-// - Template Umswap 0x18aAb01d645C016AFB80dFbb03A22763A6a5B456
+// - UmswapFactory
+// - Template Umswap
 //
 // SPDX-License-Identifier: MIT
 //
@@ -261,6 +257,8 @@ contract Owned {
         initialised = true;
     }
 
+    /// @dev Only owner can transfer ownership to new address
+    /// @param newOwner New owner address
     function transferOwnership(address newOwner) public onlyOwner {
         emit OwnershipTransferred(owner, newOwner);
         owner = newOwner;
@@ -337,13 +335,15 @@ contract BasicToken is IERC20, Owned {
 
 
 contract TipHandler {
+    uint constant INTEGRATORPERCENTAGE = 80;
+
     event ThankYou(address indexed account, uint indexed timestamp, address indexed integrator, uint integratorTip, uint remainingTip);
 
     function handleTips(address integrator, address remainder) internal {
         if (msg.value > 0) {
             uint integratorTip;
             if (integrator != address(0) && integrator != remainder) {
-                integratorTip = msg.value * 4 / 5;
+                integratorTip = msg.value * INTEGRATORPERCENTAGE / 100;
                 if (integratorTip > 0) {
                     payable(integrator).transfer(integratorTip);
                 }
@@ -358,11 +358,11 @@ contract TipHandler {
 }
 
 
-/// @author BokkyPooBah, Bok Consulting Pty Ltd
 /// @title ERC-721 pool
+/// @author BokkyPooBah, Bok Consulting Pty Ltd
 contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
 
-    enum Stats { SwappedIn, SwappedOut, TotalRatings }
+    enum Stats { SwappedIn, SwappedOut, TotalScores }
 
     struct Rating {
         address account;
@@ -371,7 +371,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
 
     uint8 constant DECIMALS = 18;
     uint constant MAXRATINGSCORE = 10;
-    uint constant MAXRATINGMESSAGELENGTH = 48;
+    uint constant MAXRATINGTEXTLENGTH = 48;
 
     address private creator;
     IERC721Partial private collection;
@@ -385,7 +385,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
     address[] public raters;
 
     event Swapped(address indexed account, uint indexed timestamp, uint[] inTokenIds, uint[] outTokenIds, uint64[3] stats);
-    event Rated(address indexed account, uint indexed timestamp, uint score, string message, uint64[3] stats);
+    event Rated(address indexed account, uint indexed timestamp, uint score, string text, uint64[3] stats);
 
     error InsufficientTokensToBurn();
     error InvalidTokenId(uint tokenId);
@@ -419,6 +419,9 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         }
     }
 
+    /// @dev Is tokenId valid?
+    /// @param tokenId TokenId to check
+    /// @return True if valid
     function isValidTokenId(uint tokenId) public view returns (bool) {
         if (tokenIds16.length > 0) {
             return ArrayUtils.includes16(tokenIds16, tokenId);
@@ -433,6 +436,10 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         }
     }
 
+    /// @dev Swap tokens into and out of the Umswap, with a optional ETH tip
+    /// @param inTokenIds TokenIds to be transferred in
+    /// @param outTokenIds TokenIds to be transferred out
+    /// @param integrator Any sent ETH tip will be split with this address if non-address(0)
     function swap(uint[] calldata inTokenIds, uint[] calldata outTokenIds, address integrator) public payable reentrancyGuard {
         if (outTokenIds.length > inTokenIds.length) {
             uint tokensToBurn = (outTokenIds.length - inTokenIds.length) * 10 ** DECIMALS;
@@ -462,12 +469,16 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         handleTips(integrator, owner);
     }
 
-    function rate(uint score, string calldata message, address integrator) public payable reentrancyGuard {
+    /// @dev Rate a Umswap, with a optional ETH tip. Ratings scores can be updated forever
+    /// @param score Score between 0 and `MAXRATINGSCORE` inclusive
+    /// @param text Length between 1 and `MAXRATINGTEXTLENGTH`
+    /// @param integrator Any sent ETH tip will be split with this address if non-address(0)
+    function rate(uint score, string calldata text, address integrator) public payable reentrancyGuard {
         if (score > MAXRATINGSCORE) {
             revert MaxRatingExceeded(MAXRATINGSCORE);
         }
-        bytes memory messageBytes = bytes(message);
-        if (messageBytes.length > MAXRATINGMESSAGELENGTH) {
+        bytes memory textBytes = bytes(text);
+        if (textBytes.length > MAXRATINGTEXTLENGTH) {
             revert InvalidRatingMessage();
         }
         Rating storage rating = ratings[msg.sender];
@@ -475,21 +486,31 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
             ratings[msg.sender] = Rating(msg.sender, uint64(score));
             raters.push(msg.sender);
         } else {
-            stats[uint(Stats.TotalRatings)] -= rating.score;
+            stats[uint(Stats.TotalScores)] -= rating.score;
             rating.score = uint64(score);
         }
-        stats[uint(Stats.TotalRatings)] += uint64(score);
-        emit Rated(msg.sender, block.timestamp, score, message, stats);
+        stats[uint(Stats.TotalScores)] += uint64(score);
+        emit Rated(msg.sender, block.timestamp, score, text, stats);
         handleTips(integrator, owner);
     }
 
+    /// @dev Send an ETH tip
+    /// @param integrator Any sent ETH tip will be split with this address if non-address(0)
     function tip(address integrator) public payable reentrancyGuard {
         handleTips(integrator, owner);
     }
 
-    function getInfo() public view returns (string memory symbol_, string memory name_, uint[] memory tokenIds_, address creator_, uint[] memory stats_) {
+    /// @dev Get info
+    /// @return symbol_ Symbol
+    /// @return name_ Name
+    /// @return collection_ Collection
+    /// @return tokenIds_ TokenIds
+    /// @return creator_ Creator
+    /// @return stats_ Stats
+    function getInfo() public view returns (string memory symbol_, string memory name_, IERC721Partial collection_, uint[] memory tokenIds_, address creator_, uint[] memory stats_) {
         symbol_ = _symbol;
         name_ = _name;
+        collection_ = collection;
         if (tokenIds16.length > 0) {
             tokenIds_ = new uint[](tokenIds16.length);
             for (uint i = 0; i < tokenIds16.length; i = onePlus(i)) {
@@ -517,7 +538,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         stats_ = new uint[](5);
         stats_[0] = stats[uint(Stats.SwappedIn)];
         stats_[1] = stats[uint(Stats.SwappedOut)];
-        stats_[2] = stats[uint(Stats.TotalRatings)];
+        stats_[2] = stats[uint(Stats.TotalScores)];
         stats_[3] = _totalSupply;
         stats_[4] = raters.length;
     }
@@ -533,6 +554,8 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
 }
 
 
+/// @title Factory to deploy cloned Umswaps instances
+/// @author BokkyPooBah, Bok Consulting Pty Ltd
 contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
 
     bytes1 constant SPACE = 0x20;
@@ -542,7 +565,7 @@ contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
     bytes4 constant ERC721_INTERFACE = 0x80ac58cd;
     uint constant MAXNAMELENGTH = 48;
     uint constant MAXTOPICLENGTH = 48;
-    uint constant MAXMESSAGELENGTH = 280;
+    uint constant MAXTEXTLENGTH = 280;
 
     Umswap public template;
     Umswap[] public umswaps;
@@ -594,6 +617,9 @@ contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
         s = string(b);
     }
 
+    /// @dev Is name valid? Length between 1 and `MAXNAMELENGTH`. Characters between SPACE and TILDE inclusive. No leading, trailing or repeating SPACEs
+    /// @param str Name to check
+    /// @return True if valid
     function isValidName(string memory str) public pure returns (bool) {
         bytes memory b = bytes(str);
         if (b.length < 1 || b.length > MAXNAMELENGTH) {
@@ -616,6 +642,11 @@ contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
         return true;
     }
 
+    /// @dev Create new Umswap, with a optional ETH tip
+    /// @param collection ERC-721 contract address
+    /// @param name Name. See `isValidName` for valid names
+    /// @param tokenIds List of valid tokenIds in this Umswap. Set to [] for any tokenIds in the collection
+    /// @param integrator Any sent ETH tip will be split with this address if non-address(0)
     function newUmswap(IERC721Partial collection, string calldata name, uint[] calldata tokenIds, address integrator) public payable reentrancyGuard {
         if (!isERC721(address(collection))) {
             revert NotERC721();
@@ -643,29 +674,42 @@ contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
         handleTips(integrator, address(this));
     }
 
-    function message(address to, Umswap umswap, string calldata topic, string calldata _message, address integrator) public payable reentrancyGuard {
+    /// @dev Send message, with a optional ETH tip
+    /// @param to Destination address, or address(0) for general messages
+    /// @param umswap Specific umswap address, or address(0) for general messages
+    /// @param topic Message topic. Length between 0 and `MAXTOPICLENGTH`
+    /// @param text Message text. Length between 1 and `MAXTEXTLENGTH`
+    /// @param integrator Any sent ETH tip will be split with this address if non-address(0)
+    function sendMessage(address to, Umswap umswap, string calldata topic, string calldata text, address integrator) public payable reentrancyGuard {
         bytes memory topicBytes = bytes(topic);
         if (topicBytes.length > MAXTOPICLENGTH) {
             revert InvalidTopic();
         }
-        bytes memory messageBytes = bytes(_message);
-        if (messageBytes.length < 1 || messageBytes.length > MAXMESSAGELENGTH) {
+        bytes memory messageBytes = bytes(text);
+        if (messageBytes.length < 1 || messageBytes.length > MAXTEXTLENGTH) {
             revert InvalidMessage();
         }
         if (umswap != Umswap(address(0)) && !umswapExists[umswap]) {
             revert InvalidUmswap();
         }
-        emit Message(msg.sender, block.timestamp, to, umswap, topic, _message);
+        emit Message(msg.sender, block.timestamp, to, umswap, topic, text);
         handleTips(integrator, address(this));
     }
 
+    /// @dev Send an ETH tip
+    /// @param integrator Any sent ETH tip will be split with this address if non-address(0)
     function tip(address integrator) public payable reentrancyGuard {
         handleTips(integrator, address(this));
     }
 
+    /// @dev Receive ETH
     receive() external payable {
     }
 
+    /// @dev Only owner can withdraw ETH tips & other ERC-20/ERC-721 tokens sent to this contract
+    /// @param token ERC-20/ERC-721 token contract address. Set to address(0) for ETH withdrawals
+    /// @param tokens ETH/ERC-20 tokens to withdraw. Set to 0 for the full balance
+    /// @param tokenId ERC-721 tokenId. Set to 0 for ETH/ERC-20 withdrawals
     function withdraw(address token, uint tokens, uint tokenId) public onlyOwner {
         if (token == address(0)) {
             if (tokens == 0) {
@@ -693,6 +737,7 @@ contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
         Umswap[] memory umswaps_,
         string[] memory symbols,
         string[] memory names,
+        IERC721Partial[] memory collections,
         uint[][] memory tokenIds,
         address[] memory creators,
         uint[][] memory stats
@@ -701,12 +746,13 @@ contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
         umswaps_ = new Umswap[](length);
         symbols = new string[](length);
         names = new string[](length);
+        collections = new IERC721Partial[](length);
         tokenIds = new uint[][](length);
         creators = new address[](length);
         stats = new uint[][](length);
         for (uint i = 0; i < length; i = onePlus(i)) {
             umswaps_[i] = umswaps[i];
-            (symbols[i], names[i], tokenIds[i], creators[i], stats[i]) = umswaps[i].getInfo();
+            (symbols[i], names[i], collections[i], tokenIds[i], creators[i], stats[i]) = umswaps[i].getInfo();
         }
     }
 }
