@@ -626,7 +626,7 @@ contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
         handleTips(integrator, address(this));
     }
 
-    function message(address to, Umswap _umswap, string calldata topic, string calldata _message, address integrator) public payable reentrancyGuard {
+    function message(address to, Umswap umswap, string calldata topic, string calldata _message, address integrator) public payable reentrancyGuard {
         bytes memory topicBytes = bytes(topic);
         if (topicBytes.length > MAXTOPICLENGTH) {
             revert InvalidTopic();
@@ -635,10 +635,10 @@ contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
         if (messageBytes.length < 1 || messageBytes.length > MAXMESSAGELENGTH) {
             revert InvalidMessage();
         }
-        if (_umswap != Umswap(address(0)) && !umswapExists[_umswap]) {
+        if (umswap != Umswap(address(0)) && !umswapExists[umswap]) {
             revert InvalidUmswap();
         }
-        emit Message(msg.sender, block.timestamp, to, _umswap, topic, _message);
+        emit Message(msg.sender, block.timestamp, to, umswap, topic, _message);
         handleTips(integrator, address(this));
     }
 
