@@ -22,6 +22,7 @@ UI being built at [https://bokkypoobah.github.io/aenus/#/umswap/](https://bokkyp
 * 2022-07-31 [UmswapFactory 0.8.7 testing](deployed/UmswapFactory_0.8.7_0xb9969521413D036eAb5Ff2095cDc31BF4600AF9e.sol) deployed to [0xb9969521413D036eAb5Ff2095cDc31BF4600AF9e](https://etherscan.io/address/0xb9969521413D036eAb5Ff2095cDc31BF4600AF9e#code)
 
 * 2022-08-01 [UmswapFactory 0.8.8 testing](deployed/UmswapFactory_0.8.8_0x06cD34744eb3bE01808790Df7D1AeB63355b27Ea.sol) deployed to [0x06cD34744eb3bE01808790Df7D1AeB63355b27Ea](https://etherscan.io/address/0x06cD34744eb3bE01808790Df7D1AeB63355b27Ea#code)
+  * [Bug bounty](https://twitter.com/BokkyPooBah/status/1553875661248270337) offer on this contract
 
 <br />
 
