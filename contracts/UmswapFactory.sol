@@ -1,17 +1,13 @@
-/**
- *Submitted for verification at Etherscan.io on 2022-07-31
-*/
-
 pragma solidity ^0.8.0;
 
 // ----------------------------------------------------------------------------
-// Umswap v0.8.7 testing
+// Umswap v0.8.8 testing
 //
 // https://github.com/bokkypoobah/Umswap
 //
 // Deployments:
-// - UmswapFactory 0xb9969521413D036eAb5Ff2095cDc31BF4600AF9e
-// - Template Umswap 0x18aAb01d645C016AFB80dFbb03A22763A6a5B456
+// - UmswapFactory
+// - Template Umswap
 //
 // SPDX-License-Identifier: MIT
 //
@@ -476,9 +472,10 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         handleTips(integrator, owner);
     }
 
-    function getInfo() public view returns (string memory symbol_, string memory name_, uint[] memory tokenIds_, address creator_, uint[] memory stats_) {
+    function getInfo() public view returns (string memory symbol_, string memory name_, IERC721Partial collection_, uint[] memory tokenIds_, address creator_, uint[] memory stats_) {
         symbol_ = _symbol;
         name_ = _name;
+        collection_ = collection;
         if (tokenIds16.length > 0) {
             tokenIds_ = new uint[](tokenIds16.length);
             for (uint i = 0; i < tokenIds16.length; i = onePlus(i)) {
@@ -682,6 +679,7 @@ contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
         Umswap[] memory umswaps_,
         string[] memory symbols,
         string[] memory names,
+        IERC721Partial[] memory collections,
         uint[][] memory tokenIds,
         address[] memory creators,
         uint[][] memory stats
@@ -690,12 +688,13 @@ contract UmswapFactory is Owned, TipHandler, ReentrancyGuard, CloneFactory {
         umswaps_ = new Umswap[](length);
         symbols = new string[](length);
         names = new string[](length);
+        collections = new IERC721Partial[](length);
         tokenIds = new uint[][](length);
         creators = new address[](length);
         stats = new uint[][](length);
         for (uint i = 0; i < length; i = onePlus(i)) {
             umswaps_[i] = umswaps[i];
-            (symbols[i], names[i], tokenIds[i], creators[i], stats[i]) = umswaps[i].getInfo();
+            (symbols[i], names[i], collections[i], tokenIds[i], creators[i], stats[i]) = umswaps[i].getInfo();
         }
     }
 }

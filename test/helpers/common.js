@@ -158,11 +158,13 @@ class Data {
     }
     let umswapSymbol = "??????";
     let umswapTotalSupply = 0;
+    let umswapDecimals = null;
     if (this.umswap != null) {
       umswapSymbol = await this.umswap.symbol();
       umswapTotalSupply = ethers.utils.formatEther(await this.umswap.totalSupply());
+      umswapDecimals = await this.umswap.decimals();
     }
-    let umswapTitle = umswapSymbol.toString().substring(0, 10) + " " + umswapTotalSupply;
+    let umswapTitle = umswapSymbol.toString().substring(0, 10) + " (" + umswapDecimals + ") " + umswapTotalSupply;
     if (umswapTitle.length < 23) {
       umswapTitle = " ".repeat(23 - umswapTitle.length) + umswapTitle;
     }
@@ -189,22 +191,23 @@ class Data {
       let indices = generateRange(0, getUmswapsLength - 1, 1);
       const getUmswaps = await this.umswapFactory.getUmswaps(indices);
       // console.log("getUmswaps: " + JSON.stringify(getUmswaps, null, 2));
-      console.log("            # Address              Creator              Symbol   Name                               TotalSupply   In  Out  Rts  Rt# TokenIds                      ");
-      console.log("          --- -------------------- -------------------- -------- ------------------------------ --------------- ---- ---- ---- ---- ------------------------------");
+      console.log("            # Address              Creator              Symbol   Name                           ERC-721 Collection       TotalSupply   In  Out  Rts  Rt# TokenIds                      ");
+      console.log("          --- -------------------- -------------------- -------- ------------------------------ -------------------- --------------- ---- ---- ---- ---- ------------------------------");
       for (let i = 0; i < getUmswaps[0].length; i++) {
-        const stats = getUmswaps[5][i];
+        const stats = getUmswaps[6][i];
         // console.log("stats: " + JSON.stringify(stats, null, 2));
         // console.log("stats[0]: " + stats[0]);
         const ratingsLength = stats[4];
         console.log("          " + this.padLeft(i, 3) + " " + this.padRight(this.getShortAccountName(getUmswaps[0][i]), 20) + " " +
-          this.padRight(this.getShortAccountName(getUmswaps[4][i]), 20) + " " + getUmswaps[1][i] + " " +
+          this.padRight(this.getShortAccountName(getUmswaps[5][i]), 20) + " " + getUmswaps[1][i] + " " +
           this.padRight(getUmswaps[2][i], 30) + " " +
+          this.padRight(this.getShortAccountName(getUmswaps[3][i]), 20) + " " +
           this.padLeft(ethers.utils.formatEther(stats[3]), 15) + " " +
           this.padLeft(stats[0], 4) + " " +
           this.padLeft(stats[1], 4) + " " +
           this.padLeft(stats[2], 4) + " " +
           this.padLeft(ratingsLength, 4) + " " +
-          this.padRight(JSON.stringify(getUmswaps[3][i].map((x) => { return parseInt(x.toString()); })), 30)
+          this.padRight(JSON.stringify(getUmswaps[4][i].map((x) => { return parseInt(x.toString()); })), 30)
         );
         if (ratingsLength > 0 && i == 0 && this.umswap != null) {
           console.log();
