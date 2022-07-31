@@ -1,6 +1,4 @@
-# umswap - Frictionless tokenised ERC-721 pools
-
-
+# umswap - "Like WETH, but for ERC-721s"
 
 Umswaps are subsets of ERC-721 NFT collections pooled into ERC-20 tokens.
 
