@@ -246,6 +246,8 @@ contract Owned {
         initialised = true;
     }
 
+    /// @dev Only owner can transfer ownership to new address
+    /// @param newOwner New owner address
     function transferOwnership(address newOwner) public onlyOwner {
         emit OwnershipTransferred(owner, newOwner);
         owner = newOwner;
@@ -349,7 +351,7 @@ contract TipHandler {
 /// @author BokkyPooBah, Bok Consulting Pty Ltd
 contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
 
-    enum Stats { SwappedIn, SwappedOut, TotalRatings }
+    enum Stats { SwappedIn, SwappedOut, TotalScores }
 
     struct Rating {
         address account;
@@ -358,7 +360,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
 
     uint8 constant DECIMALS = 18;
     uint constant MAXRATINGSCORE = 10;
-    uint constant MAXRATINGMESSAGELENGTH = 48;
+    uint constant MAXRATINGTEXTLENGTH = 48;
 
     address private creator;
     IERC721Partial private collection;
@@ -372,7 +374,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
     address[] public raters;
 
     event Swapped(address indexed account, uint indexed timestamp, uint[] inTokenIds, uint[] outTokenIds, uint64[3] stats);
-    event Rated(address indexed account, uint indexed timestamp, uint score, string message, uint64[3] stats);
+    event Rated(address indexed account, uint indexed timestamp, uint score, string text, uint64[3] stats);
 
     error InsufficientTokensToBurn();
     error InvalidTokenId(uint tokenId);
@@ -406,6 +408,9 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         }
     }
 
+    /// @dev Is tokenId valid?
+    /// @param tokenId TokenId to check
+    /// @return True if valid
     function isValidTokenId(uint tokenId) public view returns (bool) {
         if (tokenIds16.length > 0) {
             return ArrayUtils.includes16(tokenIds16, tokenId);
@@ -420,6 +425,10 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         }
     }
 
+    /// @dev Swap tokens into and out of the Umswap, with a optional ETH tip
+    /// @param inTokenIds TokenIds to be transferred in
+    /// @param outTokenIds TokenIds to be transferred out
+    /// @param integrator Any sent ETH tip will be split with this address if non-address(0)
     function swap(uint[] calldata inTokenIds, uint[] calldata outTokenIds, address integrator) public payable reentrancyGuard {
         if (outTokenIds.length > inTokenIds.length) {
             uint tokensToBurn = (outTokenIds.length - inTokenIds.length) * 10 ** DECIMALS;
@@ -449,12 +458,16 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         handleTips(integrator, owner);
     }
 
-    function rate(uint score, string calldata message, address integrator) public payable reentrancyGuard {
+    /// @dev Rate a Umswap, with a optional ETH tip. Ratings scores can be updated forever
+    /// @param score Score between 0 and `MAXRATINGSCORE` inclusive
+    /// @param text Length between 1 and `MAXRATINGTEXTLENGTH`
+    /// @param integrator Any sent ETH tip will be split with this address if non-address(0)
+    function rate(uint score, string calldata text, address integrator) public payable reentrancyGuard {
         if (score > MAXRATINGSCORE) {
             revert MaxRatingExceeded(MAXRATINGSCORE);
         }
-        bytes memory messageBytes = bytes(message);
-        if (messageBytes.length > MAXRATINGMESSAGELENGTH) {
+        bytes memory textBytes = bytes(text);
+        if (textBytes.length > MAXRATINGTEXTLENGTH) {
             revert InvalidRatingMessage();
         }
         Rating storage rating = ratings[msg.sender];
@@ -462,18 +475,27 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
             ratings[msg.sender] = Rating(msg.sender, uint64(score));
             raters.push(msg.sender);
         } else {
-            stats[uint(Stats.TotalRatings)] -= rating.score;
+            stats[uint(Stats.TotalScores)] -= rating.score;
             rating.score = uint64(score);
         }
-        stats[uint(Stats.TotalRatings)] += uint64(score);
-        emit Rated(msg.sender, block.timestamp, score, message, stats);
+        stats[uint(Stats.TotalScores)] += uint64(score);
+        emit Rated(msg.sender, block.timestamp, score, text, stats);
         handleTips(integrator, owner);
     }
 
+    /// @dev Send an ETH tip
+    /// @param integrator Any sent ETH tip will be split with this address if non-address(0)
     function tip(address integrator) public payable reentrancyGuard {
         handleTips(integrator, owner);
     }
 
+    /// @dev Get info
+    /// @return symbol_ Symbol
+    /// @return name_ Name
+    /// @return collection_ Collection
+    /// @return tokenIds_ TokenIds
+    /// @return creator_ Creator
+    /// @return stats_ Stats
     function getInfo() public view returns (string memory symbol_, string memory name_, IERC721Partial collection_, uint[] memory tokenIds_, address creator_, uint[] memory stats_) {
         symbol_ = _symbol;
         name_ = _name;
@@ -505,7 +527,7 @@ contract Umswap is BasicToken, TipHandler, ReentrancyGuard {
         stats_ = new uint[](5);
         stats_[0] = stats[uint(Stats.SwappedIn)];
         stats_[1] = stats[uint(Stats.SwappedOut)];
-        stats_[2] = stats[uint(Stats.TotalRatings)];
+        stats_[2] = stats[uint(Stats.TotalScores)];
         stats_[3] = _totalSupply;
         stats_[4] = raters.length;
     }
