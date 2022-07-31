@@ -19,6 +19,8 @@ Umswaps are created by UmswapFactory.
 
 * 2022-07-30 [UmswapFactory 0.8.6 testing](deployed/UmswapFactory_0.8.6_0x39D61eDC9E951C93A0A714c008006c5093992db3.sol) deployed to [0x39D61eDC9E951C93A0A714c008006c5093992db3](https://etherscan.io/address/0x39D61eDC9E951C93A0A714c008006c5093992db3#code)
 
+* 2022-07-31 [UmswapFactory 0.8.7 testing](deployed/UmswapFactory_0.8.7_0xb9969521413D036eAb5Ff2095cDc31BF4600AF9e.sol) deployed to [0xb9969521413D036eAb5Ff2095cDc31BF4600AF9e](https://etherscan.io/address/0xb9969521413D036eAb5Ff2095cDc31BF4600AF9e#code)
+
 <br />
 
 <hr />
