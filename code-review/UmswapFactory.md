@@ -9,6 +9,10 @@ Source file [../../contracts/UmswapFactory.sol](../../contracts/UmswapFactory.so
 <hr />
 
 ```solidity
+/**
+ *Submitted for verification at Etherscan.io on 2022-07-31
+*/
+
 pragma solidity ^0.8.0;
 
 // ----------------------------------------------------------------------------
@@ -17,8 +21,8 @@ pragma solidity ^0.8.0;
 // https://github.com/bokkypoobah/Umswap
 //
 // Deployments:
-// - UmswapFactory
-// - Template Umswap
+// - UmswapFactory 0x06cD34744eb3bE01808790Df7D1AeB63355b27Ea
+// - Template Umswap 0x057bDb7B37F35fd212547507eEf000A01c6acbff
 //
 // SPDX-License-Identifier: MIT
 //
