@@ -204,6 +204,51 @@ contract ReentrancyGuard {
 }
 
 
+/// @notice TokenIdList to map [token] => [enabled]
+library TokenIdList {
+    struct TokenId {
+        uint64 timestamp;
+        uint192 index;
+        uint tokenId;
+    }
+    struct Data {
+        bool initialised;
+        mapping(uint => TokenId) entries;
+        uint[] index;
+    }
+
+    event TokenIdAdded(uint indexed tokenId);
+    event TokenIdRemoved(uint indexed tokenId);
+
+    function init(Data storage self) internal {
+        require(!self.initialised);
+        self.initialised = true;
+    }
+    function add(Data storage self, uint tokenId) internal {
+        require(self.entries[tokenId].timestamp == 0, "Cannot add duplicate");
+        self.index.push(tokenId);
+        self.entries[tokenId] = TokenId(uint64(block.timestamp), uint192(self.index.length - 1), tokenId);
+        emit TokenIdAdded(tokenId);
+    }
+    function remove(Data storage self, uint tokenId) internal {
+        require(self.entries[tokenId].timestamp > 0, "Not registered");
+        uint removeIndex = self.entries[tokenId].index;
+        emit TokenIdRemoved(tokenId);
+        uint lastIndex = self.index.length - 1;
+        uint lastIndexKey = self.index[lastIndex];
+        self.index[removeIndex] = lastIndexKey;
+        self.entries[lastIndexKey].index = uint192(removeIndex);
+        delete self.entries[tokenId];
+        if (self.index.length > 0) {
+            self.index.pop();
+        }
+    }
+    function length(Data storage self) internal view returns (uint) {
+        return self.index.length;
+    }
+}
+
+
 /// @notice Basic token = ERC20 + symbol + name + decimals + mint + ownership
 contract BasicToken is IERC20 {
 
@@ -281,6 +326,8 @@ contract BasicToken is IERC20 {
 /// @title ERC-721 pool
 /// @author BokkyPooBah, Bok Consulting Pty Ltd
 contract Umswap is BasicToken, ReentrancyGuard {
+    using TokenIdList for TokenIdList.Data;
+    using TokenIdList for TokenIdList.TokenId;
 
     enum Stats { SwappedIn, SwappedOut, TotalScores }
 
@@ -295,14 +342,19 @@ contract Umswap is BasicToken, ReentrancyGuard {
 
     address private creator;
     IERC721Partial private collection;
-    uint16[] private tokenIds16;
-    uint32[] private tokenIds32;
-    uint64[] private tokenIds64;
-    uint[] private tokenIds256;
+    uint16[] private validTokenIds16;
+    uint32[] private validTokenIds32;
+    uint64[] private validTokenIds64;
+    uint[] private validTokenIds256;
     uint64[3] private stats;
 
     mapping(address => Rating) public ratings;
     address[] public raters;
+    TokenIdList.Data private tokenIds;
+
+    // Duplicated from library
+    event TokenIdAdded(uint indexed tokenId);
+    event TokenIdRemoved(uint indexed tokenId);
 
     event Swapped(address indexed account, uint indexed timestamp, uint[] inTokenIds, uint[] outTokenIds, uint64[3] stats);
     event Rated(address indexed account, uint indexed timestamp, uint score, string text, uint64[3] stats);
@@ -312,30 +364,30 @@ contract Umswap is BasicToken, ReentrancyGuard {
     error MaxRatingExceeded(uint max);
     error InvalidRatingMessage();
 
-    function initUmswap(address _creator, IERC721Partial _collection, string calldata _symbol, string calldata _name, uint[] calldata tokenIds) public {
+    function initUmswap(address _creator, IERC721Partial _collection, string calldata _symbol, string calldata _name, uint[] calldata _tokenIds) public {
         creator = _creator;
         collection = _collection;
         super.initBasicToken(_symbol, _name, DECIMALS);
         uint maxTokenId;
-        for (uint i = 0; i < tokenIds.length; i = onePlus(i)) {
-            if (tokenIds[i] > maxTokenId) {
-                maxTokenId = tokenIds[i];
+        for (uint i = 0; i < _tokenIds.length; i = onePlus(i)) {
+            if (_tokenIds[i] > maxTokenId) {
+                maxTokenId = _tokenIds[i];
             }
         }
         if (maxTokenId < 2 ** 16) {
-            for (uint i = 0; i < tokenIds.length; i = onePlus(i)) {
-                tokenIds16.push(uint16(tokenIds[i]));
+            for (uint i = 0; i < _tokenIds.length; i = onePlus(i)) {
+                validTokenIds16.push(uint16(_tokenIds[i]));
             }
         } else if (maxTokenId < 2 ** 32) {
-            for (uint i = 0; i < tokenIds.length; i = onePlus(i)) {
-                tokenIds32.push(uint32(tokenIds[i]));
+            for (uint i = 0; i < _tokenIds.length; i = onePlus(i)) {
+                validTokenIds32.push(uint32(_tokenIds[i]));
             }
         } else if (maxTokenId < 2 ** 64) {
-            for (uint i = 0; i < tokenIds.length; i = onePlus(i)) {
-                tokenIds64.push(uint64(tokenIds[i]));
+            for (uint i = 0; i < _tokenIds.length; i = onePlus(i)) {
+                validTokenIds64.push(uint64(_tokenIds[i]));
             }
         } else {
-            tokenIds256 = tokenIds;
+            validTokenIds256 = _tokenIds;
         }
     }
 
@@ -343,14 +395,14 @@ contract Umswap is BasicToken, ReentrancyGuard {
     /// @param tokenId TokenId to check
     /// @return True if valid
     function isValidTokenId(uint tokenId) public view returns (bool) {
-        if (tokenIds16.length > 0) {
-            return ArrayUtils.includes16(tokenIds16, tokenId);
-        } else if (tokenIds32.length > 0) {
-            return ArrayUtils.includes32(tokenIds32, tokenId);
-        } else if (tokenIds64.length > 0) {
-            return ArrayUtils.includes64(tokenIds64, tokenId);
-        } else if (tokenIds256.length > 0) {
-            return ArrayUtils.includes256(tokenIds256, tokenId);
+        if (validTokenIds16.length > 0) {
+            return ArrayUtils.includes16(validTokenIds16, tokenId);
+        } else if (validTokenIds32.length > 0) {
+            return ArrayUtils.includes32(validTokenIds32, tokenId);
+        } else if (validTokenIds64.length > 0) {
+            return ArrayUtils.includes64(validTokenIds64, tokenId);
+        } else if (validTokenIds256.length > 0) {
+            return ArrayUtils.includes256(validTokenIds256, tokenId);
         } else {
             return true;
         }
@@ -360,6 +412,9 @@ contract Umswap is BasicToken, ReentrancyGuard {
     /// @param inTokenIds TokenIds to be transferred in
     /// @param outTokenIds TokenIds to be transferred out
     function swap(uint[] calldata inTokenIds, uint[] calldata outTokenIds) public reentrancyGuard {
+        if (!tokenIds.initialised) {
+            tokenIds.init();
+        }
         if (outTokenIds.length > inTokenIds.length) {
             uint tokensToBurn = (outTokenIds.length - inTokenIds.length) * 10 ** DECIMALS;
             if (tokensToBurn > this.balanceOf(msg.sender)) {
@@ -372,11 +427,13 @@ contract Umswap is BasicToken, ReentrancyGuard {
                 revert InvalidTokenId(inTokenIds[i]);
             }
             collection.transferFrom(msg.sender, address(this), inTokenIds[i]);
+            tokenIds.add(inTokenIds[i]);
         }
         for (uint i = 0; i < outTokenIds.length; i = onePlus(i)) {
             if (!isValidTokenId(outTokenIds[i])) {
                 revert InvalidTokenId(outTokenIds[i]);
             }
+            tokenIds.remove(outTokenIds[i]);
             collection.transferFrom(address(this), msg.sender, outTokenIds[i]);
         }
         if (outTokenIds.length < inTokenIds.length) {
@@ -414,35 +471,40 @@ contract Umswap is BasicToken, ReentrancyGuard {
     /// @return symbol_ Symbol
     /// @return name_ Name
     /// @return collection_ Collection
+    /// @return validTokenIds_ Valid tokenIds
     /// @return tokenIds_ TokenIds
     /// @return creator_ Creator
     /// @return stats_ Stats
-    function getInfo() public view returns (string memory symbol_, string memory name_, IERC721Partial collection_, uint[] memory tokenIds_, address creator_, uint[] memory stats_) {
+    function getInfo() public view returns (string memory symbol_, string memory name_, IERC721Partial collection_, uint[] memory validTokenIds_, uint[] memory tokenIds_, address creator_, uint[] memory stats_) {
         symbol_ = _symbol;
         name_ = _name;
         collection_ = collection;
-        if (tokenIds16.length > 0) {
-            tokenIds_ = new uint[](tokenIds16.length);
-            for (uint i = 0; i < tokenIds16.length; i = onePlus(i)) {
-                tokenIds_[i] = tokenIds16[i];
+        if (validTokenIds16.length > 0) {
+            validTokenIds_ = new uint[](validTokenIds16.length);
+            for (uint i = 0; i < validTokenIds16.length; i = onePlus(i)) {
+                validTokenIds_[i] = validTokenIds16[i];
             }
-        } else if (tokenIds32.length > 0) {
-            tokenIds_ = new uint[](tokenIds32.length);
-            for (uint i = 0; i < tokenIds32.length; i = onePlus(i)) {
-                tokenIds_[i] = tokenIds32[i];
+        } else if (validTokenIds32.length > 0) {
+            validTokenIds_ = new uint[](validTokenIds32.length);
+            for (uint i = 0; i < validTokenIds32.length; i = onePlus(i)) {
+                validTokenIds_[i] = validTokenIds32[i];
             }
-        } else if (tokenIds64.length > 0) {
-            tokenIds_ = new uint[](tokenIds64.length);
-            for (uint i = 0; i < tokenIds64.length; i = onePlus(i)) {
-                tokenIds_[i] = tokenIds64[i];
+        } else if (validTokenIds64.length > 0) {
+            validTokenIds_ = new uint[](validTokenIds64.length);
+            for (uint i = 0; i < validTokenIds64.length; i = onePlus(i)) {
+                validTokenIds_[i] = validTokenIds64[i];
             }
-        } else if (tokenIds256.length > 0) {
-            tokenIds_ = new uint[](tokenIds256.length);
-            for (uint i = 0; i < tokenIds256.length; i = onePlus(i)) {
-                tokenIds_[i] = tokenIds256[i];
+        } else if (validTokenIds256.length > 0) {
+            validTokenIds_ = new uint[](validTokenIds256.length);
+            for (uint i = 0; i < validTokenIds256.length; i = onePlus(i)) {
+                validTokenIds_[i] = validTokenIds256[i];
             }
         } else {
-            tokenIds_ = new uint[](0);
+            validTokenIds_ = new uint[](0);
+        }
+        tokenIds_ = new uint[](tokenIds.length());
+        for (uint i = 0; i < tokenIds.length(); i = onePlus(i)) {
+            tokenIds_[i] = tokenIds.index[i];
         }
         creator_ = creator;
         stats_ = new uint[](5);
@@ -610,6 +672,7 @@ contract UmswapFactory is CloneFactory {
         string[] memory symbols,
         string[] memory names,
         IERC721Partial[] memory collections,
+        uint[][] memory validTokenIds,
         uint[][] memory tokenIds,
         address[] memory creators,
         uint[][] memory stats
@@ -619,12 +682,13 @@ contract UmswapFactory is CloneFactory {
         symbols = new string[](length);
         names = new string[](length);
         collections = new IERC721Partial[](length);
+        validTokenIds = new uint[][](length);
         tokenIds = new uint[][](length);
         creators = new address[](length);
         stats = new uint[][](length);
         for (uint i = 0; i < length; i = onePlus(i)) {
             umswaps_[i] = umswaps[i];
-            (symbols[i], names[i], collections[i], tokenIds[i], creators[i], stats[i]) = umswaps[i].getInfo();
+            (symbols[i], names[i], collections[i], validTokenIds[i], tokenIds[i], creators[i], stats[i]) = umswaps[i].getInfo();
         }
     }
 }
