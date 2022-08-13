@@ -458,7 +458,15 @@ contract Umswap is BasicToken, ReentrancyGuard {
         emit Rated(msg.sender, block.timestamp, score, text, stats);
     }
 
+    function isApprovedForAll(address tokenOwner) internal view returns (bool b) {
+        try IERC721Partial(collection).isApprovedForAll(tokenOwner, address(this)) returns (bool _b) {
+            b = _b;
+        } catch {
+        }
+    }
+
     /// @dev Get info
+    /// @param tokenOwner To check collection.isApprovedForAll(tokenOwner, this)
     /// @return symbol_ Symbol
     /// @return name_ Name
     /// @return collection_ Collection
@@ -466,7 +474,7 @@ contract Umswap is BasicToken, ReentrancyGuard {
     /// @return tokenIds_ TokenIds
     /// @return creator_ Creator
     /// @return stats_ Stats
-    function getInfo() public view returns (string memory symbol_, string memory name_, IERC721Partial collection_, uint[] memory validTokenIds_, uint[] memory tokenIds_, address creator_, uint[] memory stats_) {
+    function getInfo(address tokenOwner) public view returns (string memory symbol_, string memory name_, IERC721Partial collection_, uint[] memory validTokenIds_, uint[] memory tokenIds_, address creator_, uint[] memory stats_) {
         symbol_ = _symbol;
         name_ = _name;
         collection_ = collection;
@@ -498,12 +506,13 @@ contract Umswap is BasicToken, ReentrancyGuard {
             tokenIds_[i] = tokenIds.index[i];
         }
         creator_ = creator;
-        stats_ = new uint[](5);
+        stats_ = new uint[](6);
         stats_[0] = stats[uint(Stats.SwappedIn)];
         stats_[1] = stats[uint(Stats.SwappedOut)];
         stats_[2] = stats[uint(Stats.TotalScores)];
         stats_[3] = _totalSupply;
         stats_[4] = raters.length;
+        stats_[5] = isApprovedForAll(tokenOwner) ? 1 : 0;
     }
 
     function getRatings(uint[] memory indices) public view returns (Rating[] memory ratings_) {
@@ -658,7 +667,7 @@ contract UmswapFactory is CloneFactory {
         return umswaps.length;
     }
 
-    function getUmswaps(uint[] memory indices) public view returns (
+    function getUmswaps(address tokenOwner, uint[] memory indices) public view returns (
         Umswap[] memory umswaps_,
         string[] memory symbols,
         string[] memory names,
@@ -679,7 +688,7 @@ contract UmswapFactory is CloneFactory {
         stats = new uint[][](length);
         for (uint i = 0; i < length; i = onePlus(i)) {
             umswaps_[i] = umswaps[i];
-            (symbols[i], names[i], collections[i], validTokenIds[i], tokenIds[i], creators[i], stats[i]) = umswaps[i].getInfo();
+            (symbols[i], names[i], collections[i], validTokenIds[i], tokenIds[i], creators[i], stats[i]) = umswaps[i].getInfo(tokenOwner);
         }
     }
 }

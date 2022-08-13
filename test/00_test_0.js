@@ -64,6 +64,7 @@ describe("umswap", function () {
     const umswapAddress = await data.umswapFactory.umswaps(0);
     const umswap  = await ethers.getContractAt("Umswap", umswapAddress);
     data.setUmswap(umswap);
+    await data.printState("Before setApprovalForAll");
 
     const approval1Tx = await data.erc721Mock.connect(data.user0Signer).setApprovalForAll(umswapAddress, true);
     await data.printEvents("user0->erc721Mock.setApprovalForAll(umswap, true)", await approval1Tx.wait());
@@ -210,6 +211,11 @@ describe("umswap", function () {
       data.umswapFactory.newUmswap(data.erc721Mock.address, "name2", [111, 222, 333])
     ).to.be.revertedWithCustomError(data.umswapFactory, "DuplicateSet");
     console.log("        Tested newUmswap(...) for error 'DuplicateSet'");
+
+    await expect(
+      data.erc721Mock.connect(data.user0Signer)["safeTransferFrom(address,address,uint256)"](data.user0, data.umswapFactory.address, 111)
+    ).to.be.revertedWith("ERC721: transfer to non ERC721Receiver implementer");
+    console.log("        Tested ERC-721 safeTransferFrom(user, umswapFactory, 111) for error 'ERC721: transfer to non ERC721Receiver implementer'");
   });
 
 
@@ -231,6 +237,11 @@ describe("umswap", function () {
     const approval1Tx = await data.erc721Mock.connect(data.user0Signer).setApprovalForAll(umswapAddress, true);
     await data.printEvents("user0->erc721Mock.setApprovalForAll(umswap, true)", await approval1Tx.wait());
     await data.printState("Before Any Umswaps");
+
+    await expect(
+      data.erc721Mock.connect(data.user0Signer)["safeTransferFrom(address,address,uint256)"](data.user0, umswapAddress, 111)
+    ).to.be.revertedWith("ERC721: transfer to non ERC721Receiver implementer");
+    console.log("        Tested ERC-721 safeTransferFrom(user, umswap, 111) for error 'ERC721: transfer to non ERC721Receiver implementer'");
 
     const swapInIds = [111, 333];
     const swapIn1Tx = await umswap.connect(data.user0Signer).swap(swapInIds, []);

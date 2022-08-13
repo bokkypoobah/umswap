@@ -21,7 +21,7 @@ class Data {
     this.umswap = null;
 
     this.gasPrice = ethers.utils.parseUnits("20", "gwei");
-    this.ethUsd = ethers.utils.parseUnits("1186.00", 18);
+    this.ethUsd = ethers.utils.parseUnits("2000.00", 18);
 
     this.verbose = false;
   }
@@ -189,10 +189,10 @@ class Data {
     if (this.umswapFactory != null) {
       const getUmswapsLength = await this.umswapFactory.getUmswapsLength();
       let indices = generateRange(0, getUmswapsLength - 1, 1);
-      const getUmswaps = await this.umswapFactory.getUmswaps(indices);
+      const getUmswaps = await this.umswapFactory.getUmswaps(this.user0, indices);
       // console.log("getUmswaps: " + JSON.stringify(getUmswaps, null, 2));
-      console.log("            # Address              Creator              Symbol   Name                           ERC-721 Collection       TotalSupply   In  Out  Rts  Rt# TokenIds                      ");
-      console.log("          --- -------------------- -------------------- -------- ------------------------------ -------------------- --------------- ---- ---- ---- ---- ------------------------------");
+      console.log("            # Address              Creator              Symbol   Name                           ERC-721 Collection       TotalSupply   In  Out  Rts  Rt# Aprv TokenIds                      ");
+      console.log("          --- -------------------- -------------------- -------- ------------------------------ -------------------- --------------- ---- ---- ---- ---- ---- ------------------------------");
       for (let i = 0; i < getUmswaps[0].length; i++) {
         const stats = getUmswaps[7][i];
         // console.log("stats: " + JSON.stringify(stats, null, 2));
@@ -207,6 +207,7 @@ class Data {
           this.padLeft(stats[1], 4) + " " +
           this.padLeft(stats[2], 4) + " " +
           this.padLeft(ratingsLength, 4) + " " +
+          this.padLeft(stats[5], 4) + " " +
           this.padRight(JSON.stringify(getUmswaps[4][i].map((x) => { return parseInt(x.toString()); })) + "/" + JSON.stringify(getUmswaps[5][i].map((x) => { return parseInt(x.toString()); })), 30)
         );
         if (ratingsLength > 0 && i == 0 && this.umswap != null) {
