@@ -217,9 +217,6 @@ library TokenIdList {
         uint[] index;
     }
 
-    event TokenIdAdded(uint indexed tokenId);
-    event TokenIdRemoved(uint indexed tokenId);
-
     function init(Data storage self) internal {
         require(!self.initialised);
         self.initialised = true;
@@ -228,12 +225,10 @@ library TokenIdList {
         require(self.entries[tokenId].timestamp == 0, "Cannot add duplicate");
         self.index.push(tokenId);
         self.entries[tokenId] = TokenId(uint64(block.timestamp), uint192(self.index.length - 1), tokenId);
-        emit TokenIdAdded(tokenId);
     }
     function remove(Data storage self, uint tokenId) internal {
         require(self.entries[tokenId].timestamp > 0, "Not registered");
         uint removeIndex = self.entries[tokenId].index;
-        emit TokenIdRemoved(tokenId);
         uint lastIndex = self.index.length - 1;
         uint lastIndexKey = self.index[lastIndex];
         self.index[removeIndex] = lastIndexKey;
@@ -351,10 +346,6 @@ contract Umswap is BasicToken, ReentrancyGuard {
     mapping(address => Rating) public ratings;
     address[] public raters;
     TokenIdList.Data private tokenIds;
-
-    // Duplicated from library
-    event TokenIdAdded(uint indexed tokenId);
-    event TokenIdRemoved(uint indexed tokenId);
 
     event Swapped(address indexed account, uint indexed timestamp, uint[] inTokenIds, uint[] outTokenIds, uint64[3] stats);
     event Rated(address indexed account, uint indexed timestamp, uint score, string text, uint64[3] stats);
