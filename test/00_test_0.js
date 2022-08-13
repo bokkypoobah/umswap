@@ -216,6 +216,11 @@ describe("umswap", function () {
       data.erc721Mock.connect(data.user0Signer)["safeTransferFrom(address,address,uint256)"](data.user0, data.umswapFactory.address, 111)
     ).to.be.revertedWith("ERC721: transfer to non ERC721Receiver implementer");
     console.log("        Tested ERC-721 safeTransferFrom(user, umswapFactory, 111) for error 'ERC721: transfer to non ERC721Receiver implementer'");
+
+    await expect(
+      data.user0Signer.sendTransaction({ to: data.umswapFactory.address, value: ethers.utils.parseEther("1.0") })
+    ).to.be.reverted;
+    console.log("        Tested sending ETH to umswapFactory for revert");
   });
 
 
@@ -286,6 +291,11 @@ describe("umswap", function () {
     ).to.be.revertedWithCustomError(data.umswapFactory, "InvalidMessage");
     console.log("        Tested sendMessage(...) for error 'InvalidMessage'");
 
-    await data.printState("users 1 & 2 sent messages");
+    await expect(
+      data.user0Signer.sendTransaction({ to: umswapAddress, value: ethers.utils.parseEther("1.0") })
+    ).to.be.reverted;
+    console.log("        Tested sending ETH to umswap for revert");
+
+    await data.printState("end");
   });
 });
