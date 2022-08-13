@@ -153,6 +153,47 @@ library ArrayUtils {
 }
 
 
+library TokenIdList {
+    struct TokenId {
+        uint64 timestamp;
+        uint192 index;
+        uint tokenId;
+    }
+    struct Data {
+        mapping(uint => TokenId) entries;
+        uint[] index;
+    }
+
+    error CannotAddDuplicate();
+    error NotFound();
+
+    function add(Data storage self, uint tokenId) internal {
+        if (self.entries[tokenId].timestamp > 0) {
+            revert CannotAddDuplicate();
+        }
+        self.index.push(tokenId);
+        self.entries[tokenId] = TokenId(uint64(block.timestamp), uint192(self.index.length - 1), tokenId);
+    }
+    function remove(Data storage self, uint tokenId) internal {
+        if (self.entries[tokenId].timestamp == 0) {
+            revert NotFound();
+        }
+        uint removeIndex = self.entries[tokenId].index;
+        uint lastIndex = self.index.length - 1;
+        uint lastIndexKey = self.index[lastIndex];
+        self.index[removeIndex] = lastIndexKey;
+        self.entries[lastIndexKey].index = uint192(removeIndex);
+        delete self.entries[tokenId];
+        if (self.index.length > 0) {
+            self.index.pop();
+        }
+    }
+    function length(Data storage self) internal view returns (uint) {
+        return self.index.length;
+    }
+}
+
+
 /// @notice ERC20 https://eips.ethereum.org/EIPS/eip-20 with optional symbol, name and decimals
 interface IERC20 {
     function totalSupply() external view returns (uint);
@@ -200,46 +241,6 @@ contract ReentrancyGuard {
         _executing = 1;
         _;
         _executing = 2;
-    }
-}
-
-
-/// @notice TokenIdList to map [token] => [enabled]
-library TokenIdList {
-    struct TokenId {
-        uint64 timestamp;
-        uint192 index;
-        uint tokenId;
-    }
-    struct Data {
-        bool initialised;
-        mapping(uint => TokenId) entries;
-        uint[] index;
-    }
-
-    function init(Data storage self) internal {
-        require(!self.initialised);
-        self.initialised = true;
-    }
-    function add(Data storage self, uint tokenId) internal {
-        require(self.entries[tokenId].timestamp == 0, "Cannot add duplicate");
-        self.index.push(tokenId);
-        self.entries[tokenId] = TokenId(uint64(block.timestamp), uint192(self.index.length - 1), tokenId);
-    }
-    function remove(Data storage self, uint tokenId) internal {
-        require(self.entries[tokenId].timestamp > 0, "Not registered");
-        uint removeIndex = self.entries[tokenId].index;
-        uint lastIndex = self.index.length - 1;
-        uint lastIndexKey = self.index[lastIndex];
-        self.index[removeIndex] = lastIndexKey;
-        self.entries[lastIndexKey].index = uint192(removeIndex);
-        delete self.entries[tokenId];
-        if (self.index.length > 0) {
-            self.index.pop();
-        }
-    }
-    function length(Data storage self) internal view returns (uint) {
-        return self.index.length;
     }
 }
 
@@ -403,9 +404,6 @@ contract Umswap is BasicToken, ReentrancyGuard {
     /// @param inTokenIds TokenIds to be transferred in
     /// @param outTokenIds TokenIds to be transferred out
     function swap(uint[] calldata inTokenIds, uint[] calldata outTokenIds) public reentrancyGuard {
-        if (!tokenIds.initialised) {
-            tokenIds.init();
-        }
         if (outTokenIds.length > inTokenIds.length) {
             uint tokensToBurn = (outTokenIds.length - inTokenIds.length) * 10 ** DECIMALS;
             if (tokensToBurn > this.balanceOf(msg.sender)) {
