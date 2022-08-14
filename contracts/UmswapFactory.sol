@@ -517,8 +517,7 @@ contract Umswap is BasicToken, ReentrancyGuard {
         uint length = indices.length;
         ratings_ = new Rating[](length);
         for (uint i = 0; i < length; i = onePlus(i)) {
-            address rater = raters[i];
-            ratings_[i] = ratings[rater];
+            ratings_[i] = ratings[raters[i]];
         }
     }
 }
