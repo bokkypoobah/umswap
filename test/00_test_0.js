@@ -284,9 +284,14 @@ describe("umswap", function () {
     console.log("        Tested sendMessage(...) for error 'InvalidTopic'");
 
     await expect(
-      data.umswapFactory.connect(data.user2Signer).sendMessage(ZERO_ADDRESS, data.user0, "Should Fail - InvalidUmswap", "Hello world!")
-    ).to.be.revertedWithCustomError(data.umswapFactory, "InvalidUmswap");
-    console.log("        Tested sendMessage(...) for error 'InvalidUmswap'");
+      data.umswapFactory.connect(data.user2Signer).sendMessage(ZERO_ADDRESS, data.user0, "Should Fail - InvalidUmswapOrCollection - EOA", "Hello world!")
+    ).to.be.revertedWithCustomError(data.umswapFactory, "InvalidUmswapOrCollection");
+    console.log("        Tested sendMessage(...) for error 'InvalidUmswapOrCollection - EOA'");
+
+    await expect(
+      data.umswapFactory.connect(data.user2Signer).sendMessage(ZERO_ADDRESS, data.umswapFactory.address, "Should Fail - InvalidUmswapOrCollection", "Hello world!")
+    ).to.be.revertedWithCustomError(data.umswapFactory, "InvalidUmswapOrCollection");
+    console.log("        Tested sendMessage(...) for error 'InvalidUmswapOrCollection - Contract'");
 
     const blah2 = "Blah".repeat(280/4) + "a";
     await expect(

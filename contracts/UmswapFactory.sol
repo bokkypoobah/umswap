@@ -545,7 +545,7 @@ contract UmswapFactory is CloneFactory {
     error InvalidName();
     error InvalidTopic();
     error InvalidMessage();
-    error InvalidUmswap();
+    error InvalidUmswapOrCollection();
     error DuplicateSet();
     error TokenIdsMustBeSortedWithNoDuplicates();
 
@@ -655,7 +655,7 @@ contract UmswapFactory is CloneFactory {
             revert InvalidMessage();
         }
         if (umswapOrCollection != address(0) && !umswapExists[Umswap(umswapOrCollection)] && !isERC721(umswapOrCollection)) {
-            revert InvalidUmswap();
+            revert InvalidUmswapOrCollection();
         }
         emit Message(msg.sender, block.timestamp, to, umswapOrCollection, topic, text);
     }
