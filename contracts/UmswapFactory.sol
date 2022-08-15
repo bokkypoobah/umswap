@@ -550,7 +550,7 @@ contract UmswapFactory is CloneFactory {
     error TokenIdsMustBeSortedWithNoDuplicates();
 
     event NewUmswap(address indexed creator, uint timestamp, Umswap indexed umswap, IERC721Partial indexed collection, string name, uint[] tokenIds);
-    event Message(address indexed from, uint timestamp, address indexed to, Umswap indexed umswap, string topic, string message);
+    event Message(address indexed from, uint timestamp, address indexed to, address indexed umswapOrCollection, string topic, string message);
     event Withdrawn(address owner, uint timestamp, address indexed token, uint tokens, uint tokenId);
 
     constructor() {
@@ -642,22 +642,22 @@ contract UmswapFactory is CloneFactory {
 
     /// @dev Send message
     /// @param to Destination address, or address(0) for general messages
-    /// @param umswap Specific umswap address, or address(0) for general messages
+    /// @param umswapOrCollection Specific umswap or ERC-721 contract address, or address(0) for general messages
     /// @param topic Message topic. Length between 0 and `MAXTOPICLENGTH`
     /// @param text Message text. Length between 1 and `MAXTEXTLENGTH`
-    function sendMessage(address to, Umswap umswap, string calldata topic, string calldata text) public {
+    function sendMessage(address to, address umswapOrCollection, string calldata topic, string calldata text) public {
         bytes memory topicBytes = bytes(topic);
         if (topicBytes.length > MAXTOPICLENGTH) {
             revert InvalidTopic();
         }
-        bytes memory messageBytes = bytes(text);
-        if (messageBytes.length < 1 || messageBytes.length > MAXTEXTLENGTH) {
+        bytes memory textBytes = bytes(text);
+        if (textBytes.length < 1 || textBytes.length > MAXTEXTLENGTH) {
             revert InvalidMessage();
         }
-        if (umswap != Umswap(address(0)) && !umswapExists[umswap]) {
+        if (umswapOrCollection != address(0) && !umswapExists[Umswap(umswapOrCollection)] && !isERC721(umswapOrCollection)) {
             revert InvalidUmswap();
         }
-        emit Message(msg.sender, block.timestamp, to, umswap, topic, text);
+        emit Message(msg.sender, block.timestamp, to, umswapOrCollection, topic, text);
     }
 
     function getUmswapsLength() public view returns (uint _length) {

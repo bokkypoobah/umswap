@@ -224,7 +224,7 @@ describe("umswap", function () {
   });
 
 
-  it("05. Test 05", async function () {
+  it.only("05. Test 05", async function () {
     console.log("      05. Test 05 - Umswap Additional Tests");
 
     const tokenIds = [111, 333, 555];
@@ -271,9 +271,12 @@ describe("umswap", function () {
     const sendMessage2Tx =  await data.umswapFactory.connect(data.user1Signer).sendMessage(ZERO_ADDRESS, umswap.address, "Topic 2", "Hello world! - specific umswap");
     await data.printEvents("user1->sendMessage(0x0, umswap, 'Hello world!', ...)", await sendMessage2Tx.wait());
 
+    const sendMessage3Tx =  await data.umswapFactory.connect(data.user1Signer).sendMessage(ZERO_ADDRESS, data.erc721Mock.address, "Topic 2", "Hello world! - specific umswap");
+    await data.printEvents("user1->sendMessage(0x0, ERC-721, 'Hello world!', ...)", await sendMessage3Tx.wait());
+
     const blah1 = "🤪 Blah ".repeat(280/10);
-    const sendMessage3Tx =  await data.umswapFactory.connect(data.user2Signer).sendMessage(ZERO_ADDRESS, ZERO_ADDRESS, "Topic 3", blah1);
-    await data.printEvents("user2->sendMessage(0x0, 0x0, '(long message)', ...)", await sendMessage3Tx.wait());
+    const sendMessage4Tx =  await data.umswapFactory.connect(data.user2Signer).sendMessage(ZERO_ADDRESS, ZERO_ADDRESS, "Topic 3", blah1);
+    await data.printEvents("user2->sendMessage(0x0, 0x0, '(long message)', ...)", await sendMessage4Tx.wait());
 
     await expect(
       data.umswapFactory.connect(data.user2Signer).sendMessage(ZERO_ADDRESS, data.user0, "Should Fail - InvalidTopic    1234567890123456789", "Hello world!")
