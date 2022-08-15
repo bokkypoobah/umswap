@@ -224,7 +224,7 @@ describe("umswap", function () {
   });
 
 
-  it.only("05. Test 05", async function () {
+  it("05. Test 05", async function () {
     console.log("      05. Test 05 - Umswap Additional Tests");
 
     const tokenIds = [111, 333, 555];
