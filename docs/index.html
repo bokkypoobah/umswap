@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Proof of Pepes Info</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta name="description" content="Proof of Pepes Info (c) Bok Consulting Pty Ltd 2022" />
+    <meta name="author" content="BokkyPooBah" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@BokkyPooBah" />
+    <meta name="twitter:creator" content="@BokkyPooBah" />
+    <link type="text/css" rel="stylesheet" href="css/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="css/bootstrap-vue.min.css"/>
+    <link type="text/css" rel="stylesheet" href="css/bootstrap-vue-icons.min.css"/>
+    <script src="js/vue.js"></script>
+    <script src="js/bootstrap-vue.min.js"></script>
+    <script src="js/bootstrap-vue-icons.min.js"></script>
+    <script src="js/ethers-5.6.umd.min.js" type="application/javascript"></script>
+    <script src="deploymentData.js"></script>
+    <script src="info.js"></script>
+
+    <link rel="apple-touch-icon" sizes="57x57" href="images/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="images/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="images/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="images/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="images/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="images/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="images/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="images/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+    <link rel="manifest" href="images/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="images/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+  </head>
+  <body>
+    <div id="app">
+      <b-container fluid class="m-0 p-0">
+        <b-navbar toggleable="sm" variant="light">
+          <b-navbar-brand to="/" variant="primary">
+            <b-avatar rounded variant="light" size="3.0rem" src="images/proofofpepe_3821_a11f890acaced0ef6d456736e9533adf.svg" v-b-popover.hover.bottom="'gm'" class="ml-0"></b-avatar>
+            <em v-b-popover.hover.bottom="'Gm gm gm'">Proof of Pepes Info</em>
+          </b-navbar-brand>
+          <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
+        </b-navbar>
+
+        <b-card no-body class="p-0 mt-0">
+          <b-card-body class="m-0 p-1">
+            <div class="d-flex flex-wrap m-0 p-0">
+              <div class="mt-1 pr-1">
+                <b-form-input type="text" size="sm" v-model.trim="searchAccount" debounce="600" placeholder="🔍 ens1, addy1, ..."></b-form-input>
+              </div>
+              <div class="mt-1">
+                <b-form-select size="sm" v-model="layer" :options="layerOptions" v-b-popover.hover.top="'Filter by layer'"></b-form-select>
+              </div>
+              <div class="mt-1 flex-grow-1">
+              </div>
+              <div class="mt-1 pr-1">
+                <b-button :disabled="sync.section != null" size="sm" @click="retrievePrices" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Retrieve asking prices via the @reservoir0x API'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Prices</b-button>
+              </div>
+              <div class="mt-1">
+                <b-button :disabled="sync.section != null" size="sm" @click="retrieveOwners" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Retrieve ownership and ENS via the web3 connection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Owners</b-button>
+              </div>
+              <div class="mt-1 flex-grow-1">
+              </div>
+              <div class="mt-2" style="width: 200px;">
+                <b-progress v-if="sync.section != null" height="1.5rem" :max="sync.total" show-progress :animated="sync.section != null" :variant="sync.section != null ? 'success' : 'secondary'" v-b-popover.hover.top="'Click on the Sync(ing) button to (un)pause'">
+                  <b-progress-bar :value="sync.completed">
+                    {{ sync.total == null ? (sync.completed + ' ' + sync.section) : (sync.completed + '/' + sync.total + ' ' + ((sync.completed / sync.total) * 100).toFixed(0) + '% ' + sync.section) }}
+                  </b-progress-bar>
+                </b-progress>
+              </div>
+              <div class="mt-1 flex-grow-1">
+              </div>
+              <div class="mt-1">
+                <div v-if="!ownerView">
+                  <font size="-2" v-b-popover.hover.top="'# owners'">{{ filteredSortedTokensByOwners.length }}</font>
+                </div>
+              </div>
+              <div class="mt-1 pr-1">
+                <b-button size="sm" :pressed.sync="ownerView" variant="link" v-b-popover.hover.top="'By owners or tokens'"><span v-if="ownerView"><b-icon-people-fill shift-v="+1" font-scale="1.0"></b-icon-people-fill></span><span v-else><b-icon-people shift-v="+1" font-scale="1.0"></b-icon-people></span></b-button>
+              </div>
+              <div class="mt-1">
+                <b-button size="sm" :pressed.sync="showInfo" variant="link" v-b-popover.hover.top="'Show info'"><span v-if="showInfo"><b-icon-info-circle-fill shift-v="+1" font-scale="1.0"></b-icon-info-circle-fill></span><span v-else><b-icon-info-circle shift-v="+1" font-scale="1.0"></b-icon-info-circle></span></b-button>
+              </div>
+              <div class="mt-1 flex-grow-1">
+              </div>
+
+              <div class="mt-1 pr-1">
+                <div v-if="ownerView">
+                  <b-form-select size="sm" v-model="ownerSortOption" :options="ownerSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
+                </div>
+                <div v-else>
+                  <b-form-select size="sm" v-model="sortOption" :options="sortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
+                </div>
+              </div>
+              <div class="mt-1 pr-1">
+                <div v-if="ownerView">
+                  <font size="-2" v-b-popover.hover.top="'# owners'">{{ filteredSortedTokensByOwners.length }}</font>
+                </div>
+                <div v-else>
+                  <font size="-2" v-b-popover.hover.top="'# tokens'">{{ filteredSortedCollectionTokens.length }}</font>
+                </div>
+              </div>
+              <div class="mt-1 pr-1">
+                <div v-if="ownerView">
+                  <b-pagination size="sm" v-model="ownerCurrentPage" :total-rows="filteredSortedTokensByOwners.length" :per-page="ownerPageSize" style="height: 0;"></b-pagination>
+                </div>
+                <div v-else>
+                  <b-pagination size="sm" v-model="currentPage" :total-rows="filteredSortedCollectionTokens.length" :per-page="pageSize" style="height: 0;"></b-pagination>
+                </div>
+              </div>
+              <div class="mt-1 pl-1">
+                <div v-if="ownerView">
+                  <b-form-select size="sm" v-model="ownerPageSize" :options="pageSizes" v-b-popover.hover.top="'Owner Page size'"></b-form-select>
+                </div>
+                <div v-else>
+                  <b-form-select size="sm" v-model="pageSize" :options="pageSizes" v-b-popover.hover.top="'Page size'"></b-form-select>
+                </div>
+              </div>
+            </div>
+            <b-card v-if="layer != null" no-header no-body class="m-0 mt-1 p-1 border-1">
+              <b-card-group deck class="m-1 ml-0 p-0">
+                <div v-for="trait in traitOptions">
+                  <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 7rem;">
+                    <b-avatar button @click="toggleTrait(layer, trait.value)" rounded size="7rem" :src="getSVG(layer, trait.value)">
+                      <template v-if="selectedTraits[layer] && selectedTraits[layer][trait.value]" #badge><b-icon icon="check"></b-icon></template>
+                    </b-avatar>
+                    <b-card-text class="text-right">
+                      <div class="d-flex justify-content-between m-0 p-0">
+                        <div>
+                          <font size="-2">
+                            <b-badge variant="light" v-b-popover.hover.bottom="'blah'">{{ trait.text }}</b-badge>
+                          </font>
+                        </div>
+                        <div class="flex-grow-1">
+                        </div>
+                        <div>
+                          <font size="-2">
+                            <b-badge variant="light" v-b-popover.hover.bottom="'#tokens'">{{ collectionTokensAttributesWithCounts[layer][trait.value] && collectionTokensAttributesWithCounts[layer][trait.value].length || 0 }}</b-badge>
+                          </font>
+                        </div>
+                      </div>
+                    </b-card-text>
+                  </b-card>
+                </div>
+              </b-card-group>
+            </b-card>
+            <div v-if="showInfo">
+              <b-card no-header no-body class="m-2 p-1">
+                <b-card-body class="m-0 p-0">
+                  <b-card-text class="m-1 p-1">
+                    <b-form-group label-cols="2" label-size="sm" label-align="right" label="Collection:" class="mx-0 my-1 p-0">
+                      <b-form-input type="text" readonly size="sm" :value="info.name" class="w-50"></b-form-input>
+                    </b-form-group>
+                    <b-form-group label-cols="2" label-size="sm" label-align="right" label="Collection Address:" class="mx-0 my-1 p-0">
+                      <b-link :href="'https://etherscan.io/token/' + contractAddress" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ contractAddress }}</b-link>
+                    </b-form-group>
+                    <b-form-group label-cols="2" label-size="sm" label-align="right" label="Collection Owner:" class="mx-0 my-1 p-0">
+                      <b-link :href="'https://twitter.com/proofofpepe'" v-b-popover.hover.bottom="'View in Twitter.com'" target="_blank">@proofofpepe</b-link>
+                    </b-form-group>
+                    <b-form-group label-cols="2" label-size="sm" label-align="right" label="Markets:" class="mx-0 my-1 p-0">
+                      <b-link :href="'https://opensea.io/collection/proofofpepe'" target="_blank">OpenSea.io</b-link>,
+                      <b-link :href="'https://looksrare.org/collections/' + contractAddress" target="_blank">LooksRare.org</b-link>,
+                      <b-link :href="'https://x2y2.io/collection/proofofpepe/items'" target="_blank">X2Y2.io</b-link>,
+                      <b-link :href="'https://sudoswap.xyz/#/browse/pools/' + contractAddress" target="_blank">sudoswap.xyz</b-link>,
+                      <b-link :href="'https://www.gem.xyz/collection/proofofpepe/'" target="_blank">gem.xyz</b-link>
+                    </b-form-group>
+                    <b-form-group label-cols="2" label-size="sm" label-align="right" label="This Dapp GitHub:" class="mx-0 my-1 p-0">
+                      <b-link :href="'https://github.com/bokkypoobah/ProofOfPepesInfo'" v-b-popover.hover.bottom="'View in GitHub.com. Feel free to clone and improve'" target="_blank">https://github.com/bokkypoobah/ProofOfPepesInfo</b-link>
+                    </b-form-group>
+                    <b-form-group label-cols="2" label-size="sm" label-align="right" label="" class="mx-0 mt-3 p-0">
+                      Enjoy. And hello, from the past.
+                      <br />
+                      (c) BokkyPooBah / Bok Consulting Pty Ltd 2022. The MIT Licence.
+                    </b-form-group>
+                  </b-card-text>
+                </b-card-body>
+              </b-card>
+            </div>
+            <div v-if="!ownerView">
+              <b-card-group deck class="m-1 ml-0 p-0">
+                <div v-for="token in pagedFilteredCollectionTokens">
+                  <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 15rem;">
+                    <b-avatar button rounded size="15rem" :src="token.svg"></b-avatar>
+                    <b-card-text class="text-right">
+                      <div class="d-flex justify-content-between m-0 p-0">
+                        <div>
+                          <font size="-2">
+                            <b-button size="sm" :id="'popover-target-' + token.tokenId" variant="link" class="m-0 p-0">
+                              {{ token.tokenId }}
+                            </b-button>
+                            <b-popover :target="'popover-target-' + token.tokenId" placement="right">
+                              <template #title>{{ token.tokenId }}</template>
+                              <b-link :href="'https://opensea.io/assets/ethereum/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'View in opensea.io'" target="_blank">
+                                OpenSea
+                              </b-link>
+                              <br />
+                              <b-link :href="'https://looksrare.org/collections/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'View in looksrare.org'" target="_blank">
+                                LooksRare
+                              </b-link>
+                              <br />
+                              <b-link :href="'https://x2y2.io/eth/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'View in x2y2.io'" target="_blank">
+                                X2Y2
+                              </b-link>
+                              <br />
+                              <b-link :href="'https://app.indeliblelabs.io/api/png/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'Server generated PNG'" target="_blank">
+                                PNG Image
+                              </b-link>
+                            </b-popover>
+                          </font>
+                        </div>
+                        <div class="flex-grow-1">
+                        </div>
+                        <div>
+                          <font size="-1">
+                            <b-badge variant="transparent" v-b-popover.hover.bottom="'On '">{{ owner(token.tokenId) }}</b-badge>
+                          </font>
+                        </div>
+                        <div class="flex-grow-1">
+                        </div>
+                        <div v-if="token.price && token.price.price">
+                          <font size="-1">
+                            <b-badge variant="success" v-b-popover.hover.bottom="'On ' + token.price.source">{{ token.price.price }}</b-badge>
+                          </font>
+                        </div>
+                      </div>
+                    </b-card-text>
+                  </b-card>
+                </div>
+              </b-card-group>
+            </div>
+            <div v-else>
+              <b-table small :fields="ownersFields" :items="pagedFilteredSortedTokensByOwners" responsive="sm" class="m-1">
+                <template #cell(index)="data">
+                  {{ ((ownerCurrentPage - 1) * ownerPageSize) + parseInt(data.index) + 1 }}
+                </template>
+                <template #cell(owner)="data">
+                  {{ owner(data.item.tokenIds[0]) }}
+                  {{ data.item.tokenIds.length + '(' + (data.item.tokenIds.length*100/totalSupply).toFixed(2) + '%)' }}
+                </template>
+                <template #cell(tokens1)="data">
+                  <b-card-group deck class="m-1 ml-0 p-0">
+                    <div v-for="tokenId in data.item.tokenIds">
+                      <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 7rem;">
+                        <b-avatar button rounded size="7rem" :src="tokens[tokenId].svg"></b-avatar>
+                        <b-card-text class="text-right">
+                          <div class="d-flex justify-content-between m-0 p-0">
+                            <font size="-2">
+                              <b-button size="sm" :id="'popover-target-' + tokenId" variant="link" class="m-0 p-0">
+                                {{ tokenId }}
+                              </b-button>
+                              <b-popover :target="'popover-target-' + tokenId" placement="right">
+                                <template #title>{{ tokenId }}</template>
+                                <b-link :href="'https://opensea.io/assets/ethereum/' + contractAddress + '/' + tokenId" v-b-popover.hover.bottom="'View in opensea.io'" target="_blank">
+                                  OpenSea
+                                </b-link>
+                                <br />
+                                <b-link :href="'https://looksrare.org/collections/' + contractAddress + '/' + tokenId" v-b-popover.hover.bottom="'View in looksrare.org'" target="_blank">
+                                  LooksRare
+                                </b-link>
+                                <br />
+                                <b-link :href="'https://x2y2.io/eth/' + contractAddress + '/' + tokenId" v-b-popover.hover.bottom="'View in x2y2.io'" target="_blank">
+                                  X2Y2
+                                </b-link>
+                                <br />
+                                <b-link :href="'https://app.indeliblelabs.io/api/png/' + contractAddress + '/' + tokenId" v-b-popover.hover.bottom="'Server generated PNG'" target="_blank">
+                                  PNG Image
+                                </b-link>
+                              </b-popover>
+                            </font>
+                          </div>
+                          <div class="flex-grow-1">
+                          </div>
+                        </b-card-text>
+                      </b-card>
+                    </div>
+                  </b-card-group>
+                </template>
+              </b-table>
+            </div>
+          </b-card-body>
+        </b-card>
+      </b-container>
+    </div>
+
+    <script>
+      window.app = new Vue({
+        el: '#app',
+        data: {
+          info: INFO[0],
+          showInfo: false,
+          ownerView: false,
+          currentPage: 0,
+          ownerCurrentPage: 1,
+          sortOption: 'priceasc',
+          ownerSortOption: 'countdsc',
+          pageSize: 100,
+          ownerPageSize: 100,
+          currentPage: 1,
+          sortOptions: [
+            { value: 'idasc', text: '▲ Id' },
+            { value: 'iddsc', text: '▼ Id' },
+            { value: 'priceasc', text: '▲ Price' },
+            { value: 'pricedsc', text: '▼ Price' },
+            { value: 'random', text: 'Random' },
+          ],
+          ownerSortOptions: [
+            { value: 'countasc', text: '▲ Count' },
+            { value: 'countdsc', text: '▼ Count' },
+            { value: 'random', text: 'Random' },
+          ],
+          pageSizes: [
+            { value: 10, text: '10' },
+            { value: 50, text: '50' },
+            { value: 100, text: '100' },
+            { value: 500, text: '500' },
+            { value: 1000, text: '1k' },
+            { value: 2500, text: '2.5k' },
+            { value: 10000, text: '10k' },
+          ],
+          ownersFields: [
+            { key: 'index', label: '#' },
+            { key: 'owner', label: 'Owner' },
+            { key: 'tokens1', label: 'Tokens' },
+          ],
+          searchAccount: null,
+          layer: null,
+          prices: {},
+          owners: {},
+          ensMap: {},
+          selectedTraits: {},
+          sync: {
+            section: null,
+            // ? error: false,
+            total: null,
+            completed: null,
+          },
+        },
+        computed: {
+          contractAddress() {
+            return INFO[0].address;
+          },
+          tokens() {
+            return INFO[0].tokenData;
+          },
+          totalSupply() {
+            return ethers.BigNumber.from(INFO[0].totalSupply).toNumber();
+          },
+          layerOptions() {
+            const results = [];
+            results.push({ value: null, text: '(select layer)' });
+            for (const item of INFO[0].layers) {
+              results.push({ value: item.layerIndex, text: item.name });
+            }
+            return results;
+          },
+          traitOptions() {
+            const results = [];
+            if (this.layer != null) {
+              let traitIndex = 0;
+              for (const trait of INFO[0].layers[this.layer].traits) {
+                results.push({ value: traitIndex.toString().padStart(3, '0'), text: trait.name, mimeType: trait.mimeType, base64: trait.base64 });
+                traitIndex++;
+              }
+            }
+            return results;
+          },
+          collectionTokensAttributesWithCounts() {
+            const collator = {};
+            for (const tokenId of Object.keys(INFO[0].tokenData)) {
+              const token = INFO[0].tokenData[tokenId];
+              const traits = token.hash.match(/.{1,3}/g);
+              for (let layerIndex in traits) {
+                const traitIndex = traits[layerIndex];
+                if (!collator[layerIndex]) {
+                  collator[layerIndex] = {};
+                }
+                if (!collator[layerIndex][traitIndex]) {
+                  collator[layerIndex][traitIndex] = [tokenId];
+                } else {
+                  collator[layerIndex][traitIndex].push(tokenId);
+                }
+              }
+            }
+            return collator;
+          },
+          filteredCollectionTokens() {
+            let stage1Data = this.selectedTraits ? [] : [];
+            console.log("filteredCollectionTokens: " + JSON.stringify(this.selectedTraits));
+            if (Object.keys(this.selectedTraits).length == 0) {
+              for (const tokenId of Object.keys(INFO[0].tokenData)) {
+                const token = INFO[0].tokenData[tokenId];
+                const price = this.prices[token.tokenId] || null;
+                stage1Data.push({ ...token, price });
+              }
+            } else {
+              let selectedTokenIds = [];
+              for (const [trait, value] of Object.entries(this.selectedTraits)) {
+                console.log(trait + ' ' + JSON.stringify(value));
+                let thisTraitTokenIds = [];
+                for (const selectedValue of Object.keys(value)) {
+                  const tokenIds = this.collectionTokensAttributesWithCounts[trait][selectedValue] || [];
+                  thisTraitTokenIds = [...thisTraitTokenIds, ...tokenIds];
+                }
+                if (selectedTokenIds.length == 0) {
+                  selectedTokenIds = thisTraitTokenIds;
+                } else {
+                  selectedTokenIds = selectedTokenIds.filter(tokenId => thisTraitTokenIds.includes(tokenId));
+                }
+              }
+              for (const tokenId of selectedTokenIds) {
+                const token = INFO[0].tokenData[tokenId];
+                const price = this.prices[token.tokenId] || null;
+                stage1Data.push({ ...token, price });
+              }
+            }
+            let results = stage1Data;
+            if (this.searchAccount != null && this.searchAccount.length > 0) {
+              const searchAccounts = this.searchAccount.split(/[, \t\n]+/).map(s => s.toLowerCase());
+              results = [];
+              for (let i in stage1Data) {
+                const d = stage1Data[i];
+                const owner = this.owners[d.tokenId] || null;
+                const ensName = owner == null ? null : this.ensMap[owner];
+                for (searchAccount of searchAccounts) {
+                  if (owner != null && owner.toLowerCase().includes(searchAccount)) {
+                    results.push(d);
+                    break;
+                  } else if (ensName != null && ensName.includes(searchAccount)) {
+                    results.push(d);
+                    break;
+                  }
+                }
+              }
+            }
+            return results;
+          },
+          filteredSortedCollectionTokens() {
+            let results = this.filteredCollectionTokens;
+            if (this.sortOption == 'idasc') {
+              results.sort((a, b) => a.tokenId - b.tokenId);
+            } else if (this.sortOption == 'iddsc') {
+              results.sort((a, b) => b.tokenId - a.tokenId);
+            } else if (this.sortOption == 'priceasc') {
+              results.sort((a, b) => {
+                const pricea = a.price && a.price.price || null;
+                const priceb = b.price && b.price.price || null;
+                if (pricea == priceb) {
+                  return a.tokenId - b.tokenId;
+                } else if (pricea != null && priceb == null) {
+                  return -1;
+                } else if (pricea == null && priceb != null) {
+                  return 1;
+                } else {
+                  return pricea - priceb;
+                }
+              });
+            } else if (this.sortOption == 'pricedsc') {
+              results.sort((a, b) => {
+                const pricea = a.price && a.price.price || null;
+                const priceb = b.price && b.price.price || null;
+                if (pricea == priceb) {
+                  return a.tokenId - b.tokenId;
+                } else if (pricea != null && priceb == null) {
+                  return -1;
+                } else if (pricea == null && priceb != null) {
+                  return 1;
+                } else {
+                  return priceb - pricea;
+                }
+              });
+            } else {
+              results.sort(() => {
+                return Math.random() - 0.5;
+              });
+            }
+            return results;
+          },
+          pagedFilteredCollectionTokens() {
+            return this.filteredSortedCollectionTokens.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
+          },
+          filteredTokensByOwners() {
+            const collator = {};
+            for (result of Object.values(this.filteredCollectionTokens)) {
+              const owner = this.owners[result.tokenId];
+              if (!collator[owner]) {
+                collator[owner] = [result.tokenId];
+              } else {
+                collator[owner].push(result.tokenId);
+              }
+            }
+            const results = [];
+            for (const key of Object.keys(collator)) {
+              const tokenIds = collator[key];
+              results.push( { owner: key, count: tokenIds.length, tokenIds: tokenIds } );
+            }
+            return results;
+          },
+          filteredSortedTokensByOwners() {
+            let results = this.filteredTokensByOwners;
+            if (this.ownerSortOption == 'countasc') {
+              results.sort((a, b) => a.count - b.count);
+            } else if (this.ownerSortOption == 'countdsc') {
+              results.sort((a, b) => b.count - a.count);
+            } else {
+              results.sort(() => {
+                return Math.random() - 0.5;
+              });
+            }
+            return results;
+          },
+          pagedFilteredSortedTokensByOwners() {
+            return this.filteredSortedTokensByOwners.slice((this.ownerCurrentPage - 1) * this.ownerPageSize, this.ownerCurrentPage * this.ownerPageSize);
+          },
+        },
+        methods: {
+          toggleTrait(layer, trait) {
+            if (!this.selectedTraits[layer]) {
+              Vue.set(this.selectedTraits, layer, {});
+            }
+            if (this.selectedTraits[layer][trait]) {
+              Vue.delete(this.selectedTraits[layer], trait);
+              if (Object.keys(this.selectedTraits[layer]) == 0) {
+                Vue.delete(this.selectedTraits, layer);
+              }
+            } else {
+              Vue.set(this.selectedTraits[layer], trait, true);
+            }
+          },
+          async retrievePrices() {
+            let continuation = null;
+            let prices = {};
+            this.sync.completed = 0;
+            this.sync.total = this.totalSupply;
+            this.sync.section = "Prices";
+            do {
+              let url = "https://api.reservoir.tools/tokens/v5?contract=" + this.contractAddress + "&limit=100" +
+                (continuation != null ? "&continuation=" + continuation : '');
+              console.log("url: " + url);
+              const data = await fetch(url)
+                // .then(handleErrors)
+                .then(response => response.json())
+                .catch(function(error) {
+                   console.log("ERROR - updateCollection: " + error);
+                   // state.sync.error = true;
+                   return [];
+                });
+              continuation = data.continuation;
+              if (data && data.tokens) {
+                for (const token of data.tokens) {
+                  let price = null;
+                  let validUntil = null;
+                  let source = null;
+                  if (token.market.floorAsk.price) {
+                    price = token.market.floorAsk.price.amount.native;
+                    validUntil = token.market.floorAsk.validUntil;
+                    source = token.market.floorAsk.source.name;
+                  }
+                  prices[token.token.tokenId] = { price, validUntil, source, lastSell: token.token.lastSell, rarityRank: token.rarityRank };
+                }
+              }
+              this.sync.completed = Object.keys(prices).length;
+            } while (continuation != null /*&& !state.halt && !state.sync.error */);
+            this.prices = prices;
+            localStorage.setItem('popPrices', JSON.stringify(prices));
+            this.sync.section = null;
+          },
+          getSVG(layerIndex, traitIndex) {
+            return INFO[0].layers[layerIndex].traits[parseInt(traitIndex)].svg;
+          },
+          owner(tokenId, length = 24) {
+            const address = this.owners[tokenId] || null;
+            if (address in this.ensMap) {
+              return this.ensMap[address].substring(0, length);
+            }
+            return address == null ? null : address.substring(0, length);
+          },
+          async retrieveOwners() {
+            console.log("retrieveOwners");
+            let connected = true;
+            if (!window.ethereum) {
+              alert("Please use the https://metamask.io addon with Firefox, Chromium, Opera or Chrome, or any other other web3 browser, for web3 data retrieval. And refresh!");
+              connected = false;
+            } else if (!window.ethereum.isConnected()) {
+              try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                connected = window.ethereum.isConnected();
+              } catch (e) {
+                console.log("window.ethereum.request error: " + e.message);
+                connected = false;
+              }
+            }
+            if (connected) {
+              const provider = new ethers.providers.Web3Provider(window.ethereum);
+              const network = await provider.getNetwork();
+              const erc721Helper = new ethers.Contract(ERC721HELPERADDRESS, ERC721HELPERABI, provider);
+              const owners = {};
+              const NFTOWNERBATCHSIZE = 200; // 500 OK
+              this.sync.completed = 0;
+              this.sync.total = this.totalSupply;
+              this.sync.section = "Owners";
+              const generateRange = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
+              for (let i = 0; i < this.totalSupply; i += NFTOWNERBATCHSIZE) {
+                const to = (i + NFTOWNERBATCHSIZE > this.totalSupply) ? this.totalSupply : i + NFTOWNERBATCHSIZE;
+                const tokenIds = generateRange(i, to, 1);
+                const ownersResult = await erc721Helper.ownersByTokenIds(this.contractAddress, tokenIds);
+                for (let j = 0; j < ownersResult[0].length; j++) {
+                  owners[tokenIds[j]] = ownersResult[1][j];
+                }
+                this.sync.completed = Object.keys(owners).length;
+              }
+              this.owners = owners;
+              localStorage.setItem('popOwners', JSON.stringify(owners));
+              this.sync.section = "ENS";
+              const ensMap = {};
+              for (let i in owners) {
+                const owner = owners[i];
+                if (!ensMap[owner]) {
+                  ensMap[owner] = owner;
+                }
+              }
+              let addresses = Object.keys(ensMap);
+              this.sync.total = addresses.length;
+              this.sync.completed = 0;
+              const ensReverseRecordsContract = new ethers.Contract(ENSREVERSERECORDSADDRESS, ENSREVERSERECORDSABI, provider);
+              const ENSOWNERBATCHSIZE = 200; // 500 fails occassionally
+              for (let i = 0; i < addresses.length; i += ENSOWNERBATCHSIZE) {
+                const batch = addresses.slice(i, parseInt(i) + ENSOWNERBATCHSIZE);
+                const allnames = await ensReverseRecordsContract.getNames(batch);
+                for (let j = 0; j < batch.length; j++) {
+                  const address = batch[j];
+                  const name = allnames[j];
+                  ensMap[address] = name != null && name.length > 0 ? name : address;
+              //     // const normalized = normalize(address);
+                }
+                this.sync.completed = parseInt(this.sync.completed) + batch.length;
+              }
+              this.ensMap = ensMap;
+              localStorage.setItem('popENSMap', JSON.stringify(ensMap));
+              this.sync.section = null;
+            }
+          },
+        },
+        mounted() {
+          if (localStorage.getItem('popOwners')) {
+            this.owners = JSON.parse(localStorage.getItem('popOwners'));
+          }
+          if (localStorage.getItem('popENSMap')) {
+            this.ensMap = JSON.parse(localStorage.getItem('popENSMap'));
+          }
+          if (localStorage.getItem('popPrices')) {
+            this.prices = JSON.parse(localStorage.getItem('popPrices'));
+          }
+        },
+      })
+    </script>
+  </body>
+</html>

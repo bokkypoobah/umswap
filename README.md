@@ -305,3 +305,4 @@ See [test/00_test_0.js](test/00_test_0.js) for the testing scripts and [testIt.o
 npm install --save-dev hardhat
 OpenZeppelin v4.7.0
 npm install --save-dev @openzeppelin/test-helpers
+npm install --save-dev @nomicfoundation/hardhat-toolbox
