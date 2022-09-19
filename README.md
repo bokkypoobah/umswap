@@ -4,7 +4,7 @@ Umswaps are subsets of ERC-721 NFT collections pooled into ERC-20 tokens.
 
 Umswaps are created by UmswapFactory.
 
-UI being built at [https://bokkypoobah.github.io/aenus/#/umswap/](https://bokkypoobah.github.io/aenus/#/umswap/).
+UI being built at [https://bokkypoobah.github.io/umswap/](https://bokkypoobah.github.io/umswap/).
 
 <br />
 
