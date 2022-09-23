@@ -54,18 +54,18 @@
           <b-card-body class="m-0 p-1">
             <div class="d-flex flex-wrap m-0 p-0">
               <div class="mt-1 pr-1">
-                <b-form-input type="text" size="sm" v-model.trim="searchAccount" debounce="600" placeholder="🔍 ens1, addy1, ..."></b-form-input>
+                <b-form-input type="text" size="sm" v-model.trim="searchAccount" debounce="600" placeholder="🔍 nft name or addy"></b-form-input>
               </div>
               <div class="mt-1">
                 <b-form-select size="sm" v-model="layer" :options="layerOptions" v-b-popover.hover.top="'Filter by layer'"></b-form-select>
               </div>
               <div class="mt-1 flex-grow-1">
               </div>
-              <div v-if="false" class="mt-1 pr-1">
-                <b-button :disabled="sync.section != null" size="sm" @click="retrievePrices" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Retrieve asking prices via the @reservoir0x API'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Prices</b-button>
+              <div class="mt-1 pr-1">
+                <b-button :disabled="sync.section != null" size="sm" @click="retrieveOwners" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Sync UmswapFactory via the web3 connection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Overview</b-button>
               </div>
               <div class="mt-1">
-                <b-button :disabled="sync.section != null" size="sm" @click="retrieveOwners" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Sync UmswapFactory via the web3 connection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Sync</b-button>
+                <b-button :disabled="true" size="sm" @click="retrievePrices" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Retrieve collection info'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Collection</b-button>
               </div>
               <div class="mt-1 flex-grow-1">
               </div>
@@ -78,21 +78,21 @@
               </div>
               <div class="mt-1 flex-grow-1">
               </div>
-              <div class="mt-1">
+              <div v-if="false" class="mt-1">
                 <div v-if="!ownerView">
                   <font size="-2" v-b-popover.hover.top="'# owners'">{{ filteredSortedTokensByOwners.length }}</font>
                 </div>
               </div>
-              <div class="mt-1 pr-1">
+              <div v-if="false" class="mt-1 pr-1">
                 <b-button size="sm" :pressed.sync="ownerView" variant="link" v-b-popover.hover.top="'By owners or tokens'"><span v-if="ownerView"><b-icon-people-fill shift-v="+1" font-scale="1.0"></b-icon-people-fill></span><span v-else><b-icon-people shift-v="+1" font-scale="1.0"></b-icon-people></span></b-button>
               </div>
-              <div class="mt-1">
+              <div v-if="false" class="mt-1">
                 <b-button size="sm" :pressed.sync="showInfo" variant="link" v-b-popover.hover.top="'Show info'"><span v-if="showInfo"><b-icon-info-circle-fill shift-v="+1" font-scale="1.0"></b-icon-info-circle-fill></span><span v-else><b-icon-info-circle shift-v="+1" font-scale="1.0"></b-icon-info-circle></span></b-button>
               </div>
               <div class="mt-1 flex-grow-1">
               </div>
 
-              <div class="mt-1 pr-1">
+              <div v-if="false" class="mt-1 pr-1">
                 <div v-if="ownerView">
                   <b-form-select size="sm" v-model="ownerSortOption" :options="ownerSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
                 </div>
@@ -100,7 +100,7 @@
                   <b-form-select size="sm" v-model="sortOption" :options="sortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
                 </div>
               </div>
-              <div class="mt-1 pr-1">
+              <div v-if="false" class="mt-1 pr-1">
                 <div v-if="ownerView">
                   <font size="-2" v-b-popover.hover.top="'# owners'">{{ filteredSortedTokensByOwners.length }}</font>
                 </div>
@@ -108,7 +108,7 @@
                   <font size="-2" v-b-popover.hover.top="'# tokens'">{{ filteredSortedCollectionTokens.length }}</font>
                 </div>
               </div>
-              <div class="mt-1 pr-1">
+              <div v-if="false" class="mt-1 pr-1">
                 <div v-if="ownerView">
                   <b-pagination size="sm" v-model="ownerCurrentPage" :total-rows="filteredSortedTokensByOwners.length" :per-page="ownerPageSize" style="height: 0;"></b-pagination>
                 </div>
@@ -116,7 +116,7 @@
                   <b-pagination size="sm" v-model="currentPage" :total-rows="filteredSortedCollectionTokens.length" :per-page="pageSize" style="height: 0;"></b-pagination>
                 </div>
               </div>
-              <div class="mt-1 pl-1">
+              <div v-if="false" class="mt-1 pl-1">
                 <div v-if="ownerView">
                   <b-form-select size="sm" v-model="ownerPageSize" :options="pageSizes" v-b-popover.hover.top="'Owner Page size'"></b-form-select>
                 </div>
@@ -125,7 +125,7 @@
                 </div>
               </div>
             </div>
-            <b-card>
+            <b-card class="m-0 mt-1 p-1 border-1">
               <b-card-text>
                 <pre>
                   {{ collections }}
@@ -365,7 +365,7 @@
           },
           layerOptions() {
             const results = [];
-            results.push({ value: null, text: '(select layer)' });
+            results.push({ value: null, text: '(select collection)' });
             for (const item of INFO[0].layers) {
               results.push({ value: item.layerIndex, text: item.name });
             }
