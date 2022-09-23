@@ -54,7 +54,7 @@
           <b-card-body class="m-0 p-1">
             <div class="d-flex flex-wrap m-0 p-0">
               <div class="mt-1 pr-1">
-                <b-form-input type="text" size="sm" v-model.trim="searchAccount" debounce="600" placeholder="🔍 nft name or addy"></b-form-input>
+                <b-form-input type="text" size="sm" v-model.trim="searchCollection" debounce="600" v-b-popover.hover.top="'Filter by collection'" placeholder="collection name/addy"></b-form-input>
               </div>
               <div class="mt-1">
                 <b-form-select size="sm" v-model="layer" :options="layerOptions" v-b-popover.hover.top="'Filter by layer'"></b-form-select>
@@ -127,9 +127,8 @@
             </div>
             <b-card class="m-0 mt-1 p-1 border-1">
               <b-card-text>
-                <pre>
-                  {{ collections }}
-                </pre>
+                <b-table small fixed striped :items="filteredCollections" head-variant="light">
+                </b-table>
               </b-card-text>
             </b-card>
             <b-card v-if="layer != null" no-header no-body class="m-0 mt-1 p-1 border-1">
@@ -339,7 +338,7 @@
             { key: 'owner', label: 'Owner' },
             { key: 'tokens1', label: 'Tokens' },
           ],
-          searchAccount: null,
+          searchCollection: null,
           layer: null,
           collections: {},
           prices: {},
@@ -401,6 +400,20 @@
             }
             return collator;
           },
+          filteredCollections() {
+            const results = [];
+            const searchLower = this.searchCollection && this.searchCollection.toLowerCase() || null;
+            for (const [k, v] of Object.entries(this.collections)) {
+              if (searchLower == null ||
+                (v.symbol && v.symbol.toLowerCase().includes(searchLower)) ||
+                (v.name && v.name.toLowerCase().includes(searchLower)) ||
+                (v.address && v.address.toLowerCase().includes(searchLower))
+              ) {
+                results.push(v);
+              }
+            }
+            return results;
+          },
           filteredCollectionTokens() {
             let stage1Data = this.selectedTraits ? [] : [];
             console.log("filteredCollectionTokens: " + JSON.stringify(this.selectedTraits));
@@ -432,18 +445,18 @@
               }
             }
             let results = stage1Data;
-            if (this.searchAccount != null && this.searchAccount.length > 0) {
-              const searchAccounts = this.searchAccount.split(/[, \t\n]+/).map(s => s.toLowerCase());
+            if (this.searchCollection != null && this.searchCollection.length > 0) {
+              const searchCollections = this.searchCollection.split(/[, \t\n]+/).map(s => s.toLowerCase());
               results = [];
               for (let i in stage1Data) {
                 const d = stage1Data[i];
                 const owner = this.owners[d.tokenId] || null;
                 const ensName = owner == null ? null : this.ensMap[owner];
-                for (searchAccount of searchAccounts) {
-                  if (owner != null && owner.toLowerCase().includes(searchAccount)) {
+                for (searchCollection of searchCollections) {
+                  if (owner != null && owner.toLowerCase().includes(searchCollection)) {
                     results.push(d);
                     break;
-                  } else if (ensName != null && ensName.includes(searchAccount)) {
+                  } else if (ensName != null && ensName.includes(searchCollection)) {
                     results.push(d);
                     break;
                   }
