@@ -619,6 +619,38 @@
               const umswaps = await umswapFactory.getUmswaps(coinbase, umswapsIndices);
               console.log("umswaps: " + JSON.stringify(umswaps, null, 2));
 
+              const collections = {};
+              for (let i = 0; i < umswaps[0].length; i++) {
+                const index = umswapsIndices[i];
+                const address = umswaps[0][i];
+                const symbol = umswaps[1][i];
+                const name = umswaps[2][i];
+                const collection = umswaps[3][i];
+                const validTokenIds = umswaps[4][i];
+                const tokenIds = umswaps[5][i];
+                const creator = umswaps[6][i];
+                const stats = umswaps[7][i];
+                const swappedIn = stats[0].toString();
+                const swappedOut = stats[1].toString();
+                const totalScores = stats[2].toString();
+                const totalSupply = stats[3].toString();
+                const raters = stats[4].toString();
+                console.log(index + " " + address + " " + symbol + " " + name + " " + collection + " " +
+                  JSON.stringify(validTokenIds) + " " + JSON.stringify(tokenIds.map(e => e.toString())) + " " + creator +
+                  " swappedIn: " + swappedIn + " swappedOut: " + swappedOut + " totalScores: " + totalScores + " totalSupply: " + totalSupply + " raters: " + raters);
+                if (!(collection in collections)) {
+                  collections[collection] = { address: collection, type: null, symbol: null, name: null, totalSupply: null, reservoirInfo: null, allTokens: [], sampleTokens: [], umswaps: [] };
+                }
+                const umswap = { index, address, symbol, name, collection, validTokenIds, tokenIds, creator, swappedIn, swappedOut, totalScores, totalSupply, raters };
+                collections[collection].umswaps.push(umswap);
+
+                // if (index == state.filter.umswapIndex) {
+                //   logInfo("umswapModule", "mutations.doIt() - state.filter.umswapIndex: " + state.filter.umswapIndex);
+                //   state.umswap = umswap;
+                // }
+              }
+              console.log("collections: " + JSON.stringify(collections, null, 2));
+
               // function getUmswaps(address tokenOwner, uint[] memory indices) public view returns (
               //     Umswap[] memory umswaps_,
               //     string[] memory symbols,
