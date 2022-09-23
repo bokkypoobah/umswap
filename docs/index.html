@@ -125,6 +125,13 @@
                 </div>
               </div>
             </div>
+            <b-card>
+              <b-card-text>
+                <pre>
+                  {{ collections }}
+                </pre>
+              </b-card-text>
+            </b-card>
             <b-card v-if="layer != null" no-header no-body class="m-0 mt-1 p-1 border-1">
               <b-card-group deck class="m-1 ml-0 p-0">
                 <div v-for="trait in traitOptions">
@@ -334,6 +341,7 @@
           ],
           searchAccount: null,
           layer: null,
+          collections: {},
           prices: {},
           owners: {},
           ensMap: {},
@@ -683,6 +691,7 @@
                 // console.log("collection: " + JSON.stringify(collection, null, 2));
               }
               console.log("collections: " + JSON.stringify(collections, null, 2));
+              this.collections = collections;
 
 
               // const erc721Helper = new ethers.Contract(ERC721HELPERADDRESS, ERC721HELPERABI, provider);
@@ -734,15 +743,15 @@
           },
         },
         mounted() {
-          if (localStorage.getItem('umsOwners')) {
-            this.owners = JSON.parse(localStorage.getItem('umsOwners'));
-          }
-          if (localStorage.getItem('umsENSMap')) {
-            this.ensMap = JSON.parse(localStorage.getItem('umsENSMap'));
-          }
-          if (localStorage.getItem('umsPrices')) {
-            this.prices = JSON.parse(localStorage.getItem('umsPrices'));
-          }
+          // if (localStorage.getItem('umsOwners')) {
+          //   this.owners = JSON.parse(localStorage.getItem('umsOwners'));
+          // }
+          // if (localStorage.getItem('umsENSMap')) {
+          //   this.ensMap = JSON.parse(localStorage.getItem('umsENSMap'));
+          // }
+          // if (localStorage.getItem('umsPrices')) {
+          //   this.prices = JSON.parse(localStorage.getItem('umsPrices'));
+          // }
         },
       })
     </script>
