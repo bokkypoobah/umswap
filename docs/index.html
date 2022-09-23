@@ -17,6 +17,7 @@
     <script src="js/bootstrap-vue.min.js"></script>
     <script src="js/bootstrap-vue-icons.min.js"></script>
     <script src="js/ethers-5.6.umd.min.js" type="application/javascript"></script>
+    <script src="globals.js"></script>
     <script src="deploymentData.js"></script>
     <script src="info.js"></script>
 
@@ -60,11 +61,11 @@
               </div>
               <div class="mt-1 flex-grow-1">
               </div>
-              <div class="mt-1 pr-1">
+              <div v-if="false" class="mt-1 pr-1">
                 <b-button :disabled="sync.section != null" size="sm" @click="retrievePrices" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Retrieve asking prices via the @reservoir0x API'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Prices</b-button>
               </div>
               <div class="mt-1">
-                <b-button :disabled="sync.section != null" size="sm" @click="retrieveOwners" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Retrieve ownership and ENS via the web3 connection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Owners</b-button>
+                <b-button :disabled="sync.section != null" size="sm" @click="retrieveOwners" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Sync UmswapFactory via the web3 connection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Sync</b-button>
               </div>
               <div class="mt-1 flex-grow-1">
               </div>
@@ -570,7 +571,7 @@
               this.sync.completed = Object.keys(prices).length;
             } while (continuation != null /*&& !state.halt && !state.sync.error */);
             this.prices = prices;
-            localStorage.setItem('popPrices', JSON.stringify(prices));
+            localStorage.setItem('umsPrices', JSON.stringify(prices));
             this.sync.section = null;
           },
           getSVG(layerIndex, traitIndex) {
@@ -600,64 +601,92 @@
             }
             if (connected) {
               const provider = new ethers.providers.Web3Provider(window.ethereum);
+              const signer = provider.getSigner();
+              const coinbase = await signer.getAddress();
               const network = await provider.getNetwork();
+              const umswapFactory = new ethers.Contract(UMSWAPFACTORYADDRESS, UMSWAPFACTORYABI, provider);
               const erc721Helper = new ethers.Contract(ERC721HELPERADDRESS, ERC721HELPERABI, provider);
-              const owners = {};
-              const NFTOWNERBATCHSIZE = 200; // 500 OK
-              this.sync.completed = 0;
-              this.sync.total = this.totalSupply;
-              this.sync.section = "Owners";
-              const generateRange = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
-              for (let i = 0; i < this.totalSupply; i += NFTOWNERBATCHSIZE) {
-                const to = (i + NFTOWNERBATCHSIZE > this.totalSupply) ? this.totalSupply : i + NFTOWNERBATCHSIZE;
-                const tokenIds = generateRange(i, to, 1);
-                const ownersResult = await erc721Helper.ownersByTokenIds(this.contractAddress, tokenIds);
-                for (let j = 0; j < ownersResult[0].length; j++) {
-                  owners[tokenIds[j]] = ownersResult[1][j];
-                }
-                this.sync.completed = Object.keys(owners).length;
-              }
-              this.owners = owners;
-              localStorage.setItem('popOwners', JSON.stringify(owners));
-              this.sync.section = "ENS";
-              const ensMap = {};
-              for (let i in owners) {
-                const owner = owners[i];
-                if (!ensMap[owner]) {
-                  ensMap[owner] = owner;
-                }
-              }
-              let addresses = Object.keys(ensMap);
-              this.sync.total = addresses.length;
-              this.sync.completed = 0;
-              const ensReverseRecordsContract = new ethers.Contract(ENSREVERSERECORDSADDRESS, ENSREVERSERECORDSABI, provider);
-              const ENSOWNERBATCHSIZE = 200; // 500 fails occassionally
-              for (let i = 0; i < addresses.length; i += ENSOWNERBATCHSIZE) {
-                const batch = addresses.slice(i, parseInt(i) + ENSOWNERBATCHSIZE);
-                const allnames = await ensReverseRecordsContract.getNames(batch);
-                for (let j = 0; j < batch.length; j++) {
-                  const address = batch[j];
-                  const name = allnames[j];
-                  ensMap[address] = name != null && name.length > 0 ? name : address;
-              //     // const normalized = normalize(address);
-                }
-                this.sync.completed = parseInt(this.sync.completed) + batch.length;
-              }
-              this.ensMap = ensMap;
-              localStorage.setItem('popENSMap', JSON.stringify(ensMap));
+              const block = await provider.getBlock("latest");
+              const blockNumber = block.number;
+
+              console.log("BlockNumber: " + blockNumber);
+
+              const umswapsLength = await umswapFactory.getUmswapsLength();
+              console.log("umswapsLength: " + umswapsLength);
+              // state.umswapFactory.umswapsLength = umswapsLength;
+              var umswapsIndices = generateRange(0, parseInt(umswapsLength) - 1, 1);
+              console.log("umswapsIndices: " + JSON.stringify(umswapsIndices));
+              const umswaps = await umswapFactory.getUmswaps(coinbase, umswapsIndices);
+              console.log("umswaps: " + JSON.stringify(umswaps, null, 2));
+
+              // function getUmswaps(address tokenOwner, uint[] memory indices) public view returns (
+              //     Umswap[] memory umswaps_,
+              //     string[] memory symbols,
+              //     string[] memory names,
+              //     IERC721Partial[] memory collections,
+              //     uint[][] memory validTokenIds,
+              //     uint[][] memory tokenIds,
+              //     address[] memory creators,
+              //     uint[][] memory stats
+
+
+              // const erc721Helper = new ethers.Contract(ERC721HELPERADDRESS, ERC721HELPERABI, provider);
+              // const owners = {};
+              // const NFTOWNERBATCHSIZE = 200; // 500 OK
+              // this.sync.completed = 0;
+              // this.sync.total = this.totalSupply;
+              // this.sync.section = "Owners";
+              // const generateRange = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
+              // for (let i = 0; i < this.totalSupply; i += NFTOWNERBATCHSIZE) {
+              //   const to = (i + NFTOWNERBATCHSIZE > this.totalSupply) ? this.totalSupply : i + NFTOWNERBATCHSIZE;
+              //   const tokenIds = generateRange(i, to, 1);
+              //   const ownersResult = await erc721Helper.ownersByTokenIds(this.contractAddress, tokenIds);
+              //   for (let j = 0; j < ownersResult[0].length; j++) {
+              //     owners[tokenIds[j]] = ownersResult[1][j];
+              //   }
+              //   this.sync.completed = Object.keys(owners).length;
+              // }
+              // this.owners = owners;
+              // localStorage.setItem('umsOwners', JSON.stringify(owners));
+              // this.sync.section = "ENS";
+              // const ensMap = {};
+              // for (let i in owners) {
+              //   const owner = owners[i];
+              //   if (!ensMap[owner]) {
+              //     ensMap[owner] = owner;
+              //   }
+              // }
+              // let addresses = Object.keys(ensMap);
+              // this.sync.total = addresses.length;
+              // this.sync.completed = 0;
+              // const ensReverseRecordsContract = new ethers.Contract(ENSREVERSERECORDSADDRESS, ENSREVERSERECORDSABI, provider);
+              // const ENSOWNERBATCHSIZE = 200; // 500 fails occassionally
+              // for (let i = 0; i < addresses.length; i += ENSOWNERBATCHSIZE) {
+              //   const batch = addresses.slice(i, parseInt(i) + ENSOWNERBATCHSIZE);
+              //   const allnames = await ensReverseRecordsContract.getNames(batch);
+              //   for (let j = 0; j < batch.length; j++) {
+              //     const address = batch[j];
+              //     const name = allnames[j];
+              //     ensMap[address] = name != null && name.length > 0 ? name : address;
+              // //     // const normalized = normalize(address);
+              //   }
+              //   this.sync.completed = parseInt(this.sync.completed) + batch.length;
+              // }
+              // this.ensMap = ensMap;
+              // localStorage.setItem('umsENSMap', JSON.stringify(ensMap));
               this.sync.section = null;
             }
           },
         },
         mounted() {
-          if (localStorage.getItem('popOwners')) {
-            this.owners = JSON.parse(localStorage.getItem('popOwners'));
+          if (localStorage.getItem('umsOwners')) {
+            this.owners = JSON.parse(localStorage.getItem('umsOwners'));
           }
-          if (localStorage.getItem('popENSMap')) {
-            this.ensMap = JSON.parse(localStorage.getItem('popENSMap'));
+          if (localStorage.getItem('umsENSMap')) {
+            this.ensMap = JSON.parse(localStorage.getItem('umsENSMap'));
           }
-          if (localStorage.getItem('popPrices')) {
-            this.prices = JSON.parse(localStorage.getItem('popPrices'));
+          if (localStorage.getItem('umsPrices')) {
+            this.prices = JSON.parse(localStorage.getItem('umsPrices'));
           }
         },
       })
