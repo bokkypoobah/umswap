@@ -92,6 +92,9 @@
               <div class="mt-1 flex-grow-1">
               </div>
 
+              <div v-if="!collection" class="mt-1 pr-1">
+                <b-form-select size="sm" v-model="collectionSortOption" :options="collectionSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
+              </div>
               <div v-if="false" class="mt-1 pr-1">
                 <div v-if="ownerView">
                   <b-form-select size="sm" v-model="ownerSortOption" :options="ownerSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
@@ -127,7 +130,7 @@
             </div>
             <b-card class="m-0 mt-1 p-1 border-1">
               <b-card-text>
-                <b-table small fixed striped :items="filteredCollections" head-variant="light">
+                <b-table small fixed striped :items="filteredSortedCollections" head-variant="light">
                 </b-table>
               </b-card-text>
             </b-card>
@@ -304,14 +307,23 @@
         data: {
           info: INFO[0],
           showInfo: false,
+          collection: null, // TODO
           ownerView: false,
           currentPage: 0,
           ownerCurrentPage: 1,
+          collectionSortOption: 'nameasc', // TODO
           sortOption: 'priceasc',
           ownerSortOption: 'countdsc',
           pageSize: 100,
           ownerPageSize: 100,
           currentPage: 1,
+          collectionSortOptions: [  // TODO
+            { value: 'symbolasc', text: '▲ Symbol' },
+            { value: 'symboldsc', text: '▼ Symbol' },
+            { value: 'nameasc', text: '▲ Name' },
+            { value: 'namedsc', text: '▼ Name' },
+            { value: 'random', text: 'Random' },
+          ],
           sortOptions: [
             { value: 'idasc', text: '▲ Id' },
             { value: 'iddsc', text: '▼ Id' },
@@ -401,7 +413,7 @@
             return collator;
           },
           filteredCollections() {
-            const results = [];
+            const results = this.collectionSortOption ? [] : [];
             const searchLower = this.searchCollection && this.searchCollection.toLowerCase() || null;
             for (const [k, v] of Object.entries(this.collections)) {
               if (searchLower == null ||
@@ -411,6 +423,23 @@
               ) {
                 results.push(v);
               }
+            }
+            return results;
+          },
+          filteredSortedCollections() {
+            let results = this.filteredCollections;
+            if (this.sortOption == 'symbolasc') {
+              results.sort((a, b) => ('' + a.symbol).localeCompare(b.symbol))
+            } else if (this.sortOption == 'symboldsc') {
+              results.sort((a, b) => ('' + b.symbol).localeCompare(a.symbol))
+            } else if (this.sortOption == 'nameasc') {
+              results.sort((a, b) => ('' + a.name).localeCompare(b.name))
+            } else if (this.sortOption == 'namedsc') {
+              results.sort((a, b) => ('' + b.name).localeCompare(a.name))
+            } else {
+              results.sort(() => {
+                return Math.random() - 0.5;
+              });
             }
             return results;
           },
