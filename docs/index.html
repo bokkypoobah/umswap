@@ -635,9 +635,9 @@
                 const totalScores = stats[2].toString();
                 const totalSupply = stats[3].toString();
                 const raters = stats[4].toString();
-                console.log(index + " " + address + " " + symbol + " " + name + " " + collection + " " +
-                  JSON.stringify(validTokenIds) + " " + JSON.stringify(tokenIds.map(e => e.toString())) + " " + creator +
-                  " swappedIn: " + swappedIn + " swappedOut: " + swappedOut + " totalScores: " + totalScores + " totalSupply: " + totalSupply + " raters: " + raters);
+                // console.log(index + " " + address + " " + symbol + " " + name + " " + collection + " " +
+                //   JSON.stringify(validTokenIds) + " " + JSON.stringify(tokenIds.map(e => e.toString())) + " " + creator +
+                //   " swappedIn: " + swappedIn + " swappedOut: " + swappedOut + " totalScores: " + totalScores + " totalSupply: " + totalSupply + " raters: " + raters);
                 if (!(collection in collections)) {
                   collections[collection] = { address: collection, type: null, symbol: null, name: null, totalSupply: null, reservoirInfo: null, allTokens: [], sampleTokens: [], umswaps: [] };
                 }
@@ -649,17 +649,40 @@
                 //   state.umswap = umswap;
                 // }
               }
-              console.log("collections: " + JSON.stringify(collections, null, 2));
+              // console.log("collections: " + JSON.stringify(collections, null, 2));
 
-              // function getUmswaps(address tokenOwner, uint[] memory indices) public view returns (
-              //     Umswap[] memory umswaps_,
-              //     string[] memory symbols,
-              //     string[] memory names,
-              //     IERC721Partial[] memory collections,
-              //     uint[][] memory validTokenIds,
-              //     uint[][] memory tokenIds,
-              //     address[] memory creators,
-              //     uint[][] memory stats
+              for (const [address, collection] of Object.entries(collections)) {
+                const info = await erc721Helper.tokenInfo([address]);
+                collection.type = info[0][0].toString();
+                collection.symbol = info[1][0].toString();
+                collection.name = info[2][0].toString();
+                collection.totalSupply = info[3][0].toString();
+
+                let infoUrl = "https://api.reservoir.tools/collection/v2?id=" + address;
+                // logInfo("umswapModule", "mutations.doIt() - infoUrl: " + infoUrl);
+                const reservoirInfo = await fetch(infoUrl)
+                  .then(handleErrors)
+                  .then(response => response.json())
+                  .catch(function(error) {
+                     console.log("ERROR - doIt: " + error);
+                     // Want to work around API data unavailablity - state.sync.error = true;
+                     return [];
+                  });
+                collection.reservoirInfo = reservoirInfo && reservoirInfo.collection || null;
+
+                let tokensUrl = "https://api.reservoir.tools/tokens/details/v4?contract=" + address + "&limit=22";
+                const reservoirTokens = await fetch(tokensUrl)
+                  .then(handleErrors)
+                  .then(response => response.json())
+                  .catch(function(error) {
+                     console.log("ERROR - doIt: " + error);
+                     // Want to work around API data unavailablity - state.sync.error = true;
+                     return [];
+                  });
+                collection.sampleTokens = reservoirTokens && reservoirTokens.tokens || null;
+                // console.log("collection: " + JSON.stringify(collection, null, 2));
+              }
+              console.log("collections: " + JSON.stringify(collections, null, 2));
 
 
               // const erc721Helper = new ethers.Contract(ERC721HELPERADDRESS, ERC721HELPERABI, provider);
