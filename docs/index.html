@@ -148,9 +148,11 @@
                 <div class="mt-0 pr-1">
                   <b-button :disabled="sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 40px;" v-b-popover.hover.top="'Sync UmswapFactory and collection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download></b-button>
                 </div>
+                <!-- TODO
                 <div class="mt-0 pr-1">
-                  <b-form-input type="text" size="sm" v-model.trim="searchCollection" debounce="600" v-b-popover.hover.top="'Filter by partial Umswap pool address, symbol or name'" placeholder="🔍 pool"></b-form-input>
+                  <b-form-input type="text" size="sm" v-model.trim="selectedPool" debounce="600" v-b-popover.hover.top="'Filter by partial Umswap pool address, symbol or name'" placeholder="🔍 pool"></b-form-input>
                 </div>
+                -->
                 <div class="mt-0 pr-1">
                   <b-form-select size="sm" v-model="selectedPool" :options="poolsOptions" v-b-popover.hover.top="'Umswap Pool'"></b-form-select>
                 </div>
@@ -164,19 +166,15 @@
                 <div class="mt-0 flex-grow-1">
                 </div>
                 <div class="mt-0 pr-1">
-                  <b-form-select v-if="!selectedCollection" size="sm" v-model="collectionsSortOption" :options="collectionsSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
                   <b-form-select v-if="selectedCollection" size="sm" v-model="poolsSortOption" :options="poolsSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
                 </div>
                 <div class="mt-0 pr-1">
-                  <font v-if="!selectedCollection" size="-2" v-b-popover.hover.top="'# collections'">{{ filteredCollections.length }}</font>
                   <font v-if="selectedCollection" size="-2" v-b-popover.hover.top="'# pools'">{{ filteredPools.length }}</font>
                 </div>
                 <div class="mt-0 pr-1">
-                  <b-pagination v-if="!selectedCollection" size="sm" v-model="collectionsCurrentPage" :total-rows="filteredSortedCollections.length" :per-page="collectionsPageSize" style="height: 0;"></b-pagination>
                   <b-pagination v-if="selectedCollection" size="sm" v-model="collectionsCurrentPage" :total-rows="filteredSortedCollections.length" :per-page="collectionsPageSize" style="height: 0;"></b-pagination>
                 </div>
                 <div class="mt-0 pl-1">
-                  <b-form-select v-if="!selectedCollection" size="sm" v-model="collectionsPageSize" :options="pageSizes" v-b-popover.hover.top="'Collections Page size'"></b-form-select>
                   <b-form-select v-if="selectedCollection" size="sm" v-model="poolsPageSize" :options="pageSizes" v-b-popover.hover.top="'Collections Page size'"></b-form-select>
                 </div>
               </div>
@@ -221,10 +219,13 @@
                 -->
                 <!-- <b-card v-if="selectedPool != null" no-header no-body class="m-0 mt-1 p-1 border-1"> -->
                   <!-- <b-card-body class="m-0 mt-1 p-0"> -->
-                    <b-card v-if="getSelectedPoolRecord && getSelectedPoolRecord.validTokenIds && getSelectedPoolRecord.validTokenIds.length > 0" title="Valid Tokens" class="m-1" body-class="m-1 p-1">
+                    <b-card v-if="getSelectedPoolRecord && getSelectedPoolRecord.validTokenIds && getSelectedPoolRecord.validTokenIds.length > 0" sub-title="Tokens Valid In This Pool" class="mx-0 my-1" body-class="m-1 p-1">
                       {{ getSelectedPoolRecord.validTokenIds.join(", ") }}
                     </b-card>
-                    <b-card v-if="getSelectedPoolRecord" title="Tokens In Pool" class="m-1" body-class="m-1 p-1">
+                    <b-card v-if="getSelectedPoolRecord" sub-title="Tokens Currently In This Pool" class="mx-0 my-1" body-class="m-1 p-1">
+                      {{ getSelectedPoolRecord.tokenIds.join(", ") }}
+                    </b-card>
+                    <b-card v-if="getSelectedPoolRecord" sub-title="Your Tokens Valid In This Pool" class="mx-0 my-1" body-class="m-1 p-1">
                       {{ getSelectedPoolRecord.tokenIds.join(", ") }}
                     </b-card>
                     <!-- Blah -->
