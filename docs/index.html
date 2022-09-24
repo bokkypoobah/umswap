@@ -52,47 +52,43 @@
         <b-card no-body class="p-0 mt-0">
           <b-card-body class="m-0 p-1">
             <div class="d-flex flex-wrap m-0 p-0">
-              <div class="mt-1 pr-1">
+              <div class="mt-0 pr-1">
                 <b-form-input type="text" size="sm" v-model.trim="searchCollections" debounce="600" v-b-popover.hover.top="'Filter by ERC-721 NFT collection'" placeholder="collection name/addy"></b-form-input>
               </div>
-              <div class="mt-1 pr-1">
+              <div class="mt-0 pr-1">
                 <b-form-select size="sm" v-model="selectedCollection" :options="collectionsOptions" v-b-popover.hover.top="'ERC-721 NFT Collection'"></b-form-select>
               </div>
-              <div class="mt-1 flex-grow-1">
-              </div>
-              <div class="mt-1 pr-1">
-                <b-button :disabled="sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Sync UmswapFactory via the web3 connection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Sync</b-button>
+              <div class="mt-0 pr-1">
+                <b-button :disabled="selectedCollection != null || sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Sync UmswapFactory via the web3 connection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Sync Overview</b-button>
                 <!-- <b-button v-if="selectedCollection" :disabled="sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Sync collection info'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Pools</b-button> -->
               </div>
-              <div class="mt-1 flex-grow-1">
-              </div>
-              <div class="mt-2" style="width: 200px;">
+              <div class="mt-1" style="width: 200px;">
                 <b-progress v-if="sync.section != null" height="1.5rem" :max="sync.total" show-progress :animated="sync.section != null" :variant="sync.section != null ? 'success' : 'secondary'" v-b-popover.hover.top="'Click on the Sync(ing) button to (un)pause'">
                   <b-progress-bar :value="sync.completed">
                     {{ sync.total == null ? (sync.completed + ' ' + sync.section) : (sync.completed + '/' + sync.total + ' ' + ((sync.completed / sync.total) * 100).toFixed(0) + '% ' + sync.section) }}
                   </b-progress-bar>
                 </b-progress>
               </div>
-              <div class="mt-1 flex-grow-1">
+              <div class="mt-0 flex-grow-1">
               </div>
-              <div v-if="false" class="mt-1">
+              <div v-if="false" class="mt-0">
                 <div v-if="!ownerView">
                   <font size="-2" v-b-popover.hover.top="'# owners'">{{ filteredSortedTokensByOwners.length }}</font>
                 </div>
               </div>
-              <div v-if="false" class="mt-1 pr-1">
+              <div v-if="false" class="mt-0 pr-1">
                 <b-button size="sm" :pressed.sync="ownerView" variant="link" v-b-popover.hover.top="'By owners or tokens'"><span v-if="ownerView"><b-icon-people-fill shift-v="+1" font-scale="1.0"></b-icon-people-fill></span><span v-else><b-icon-people shift-v="+1" font-scale="1.0"></b-icon-people></span></b-button>
               </div>
-              <div class="mt-1">
+              <div class="mt-0">
                 <b-button size="sm" :pressed.sync="showInfo" variant="link" v-b-popover.hover.top="'Show info'"><span v-if="showInfo"><b-icon-info-circle-fill shift-v="+1" font-scale="1.0"></b-icon-info-circle-fill></span><span v-else><b-icon-info-circle shift-v="+1" font-scale="1.0"></b-icon-info-circle></span></b-button>
               </div>
-              <div class="mt-1 flex-grow-1">
+              <div class="mt-0 flex-grow-1">
               </div>
 
-              <div class="mt-1 pr-1">
+              <div class="mt-0 pr-1">
                 <b-form-select :disabled="selectedCollection != null" size="sm" v-model="collectionsSortOption" :options="collectionsSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
               </div>
-              <div v-if="false" class="mt-1 pr-1">
+              <div v-if="false" class="mt-0 pr-1">
                 <div v-if="ownerView">
                   <b-form-select size="sm" v-model="ownerSortOption" :options="ownerSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
                 </div>
@@ -100,10 +96,10 @@
                   <b-form-select size="sm" v-model="sortOption" :options="sortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
                 </div>
               </div>
-              <div class="mt-1 pr-1">
+              <div class="mt-0 pr-1">
                 <font size="-2" v-b-popover.hover.top="'# collections'">{{ selectedCollection ? 1 : filteredCollections.length }}</font>
               </div>
-              <div v-if="false" class="mt-1 pr-1">
+              <div v-if="false" class="mt-0 pr-1">
                 <div v-if="ownerView">
                   <font size="-2" v-b-popover.hover.top="'# owners'">{{ filteredSortedTokensByOwners.length }}</font>
                 </div>
@@ -111,11 +107,11 @@
                   <font size="-2" v-b-popover.hover.top="'# tokens'">{{ filteredSortedCollectionTokens.length }}</font>
                 </div>
               </div>
-              <div class="mt-1 pr-1">
+              <div class="mt-0 pr-1">
                 <b-pagination :disabled="selectedCollection != null" size="sm" v-model="collectionsCurrentPage" :total-rows="filteredSortedCollections.length" :per-page="collectionsPageSize" style="height: 0;"></b-pagination>
               </div>
               <!--
-              <div v-if="false" class="mt-1 pr-1">
+              <div v-if="false" class="mt-0 pr-1">
                 <div v-if="ownerView">
                   <b-pagination size="sm" v-model="ownerCurrentPage" :total-rows="filteredSortedTokensByOwners.length" :per-page="ownerPageSize" style="height: 0;"></b-pagination>
                 </div>
@@ -124,7 +120,7 @@
                 </div>
               </div>
               -->
-              <div class="mt-1 pl-1">
+              <div class="mt-0 pl-1">
                 <b-form-select :disabled="selectedCollection != null" size="sm" v-model="collectionsPageSize" :options="pageSizes" v-b-popover.hover.top="'Collections Page size'"></b-form-select>
               </div>
               <!--
@@ -247,54 +243,40 @@
               </b-card-body>
             </b-card>
 
-            <b-card v-if="selectedCollection" no-header no-body class="m-0 mt-0 p-1 border-0">
+            <b-card v-if="selectedCollection" no-header no-body class="m-0 mt-1 p-1 border-1">
 
               <div class="d-flex flex-wrap m-0 p-0">
-                <div v-if="!selectedCollection" class="mt-1 pr-1">
-                  <b-form-input type="text" size="sm" v-model.trim="searchCollections" debounce="600" v-b-popover.hover.top="'Filter by ERC-721 NFT collection'" placeholder="collection name/addy"></b-form-input>
-                </div>
-                <div class="mt-1 pr-1">
-                  <b-form-select size="sm" v-model="selectedCollection" :options="collectionsOptions" v-b-popover.hover.top="'ERC-721 NFT Collection'"></b-form-select>
-                </div>
-                <div v-if="selectedCollection" class="mt-1">
+                <div class="mt-0 pr-1">
                   <b-form-input type="text" size="sm" v-model.trim="searchCollection" debounce="600" v-b-popover.hover.top="'Filter by tokenId'" placeholder="tokenId"></b-form-input>
                 </div>
-                <div class="mt-1 flex-grow-1">
+                <div class="mt-0 pr-1">
+                  <b-button :disabled="sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Sync collection info'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Collection</b-button>
                 </div>
-                <div class="mt-1 pr-1">
-                  <b-button v-if="!selectedCollection" :disabled="sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Sync UmswapFactory via the web3 connection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Sync</b-button>
-                  <b-button v-if="selectedCollection" :disabled="sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Sync collection info'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Pools</b-button>
-                </div>
-                <div class="mt-1 flex-grow-1">
-                </div>
-                <div class="mt-2" style="width: 200px;">
+                <div class="mt-1" style="width: 200px;">
                   <b-progress v-if="sync.section != null" height="1.5rem" :max="sync.total" show-progress :animated="sync.section != null" :variant="sync.section != null ? 'success' : 'secondary'" v-b-popover.hover.top="'Click on the Sync(ing) button to (un)pause'">
                     <b-progress-bar :value="sync.completed">
                       {{ sync.total == null ? (sync.completed + ' ' + sync.section) : (sync.completed + '/' + sync.total + ' ' + ((sync.completed / sync.total) * 100).toFixed(0) + '% ' + sync.section) }}
                     </b-progress-bar>
                   </b-progress>
                 </div>
-                <div class="mt-1 flex-grow-1">
+                <div class="mt-0 flex-grow-1">
                 </div>
-                <div v-if="false" class="mt-1">
+                <div v-if="false" class="mt-0">
                   <div v-if="!ownerView">
                     <font size="-2" v-b-popover.hover.top="'# owners'">{{ filteredSortedTokensByOwners.length }}</font>
                   </div>
                 </div>
-                <div v-if="false" class="mt-1 pr-1">
+                <div v-if="false" class="mt-0 pr-1">
                   <b-button size="sm" :pressed.sync="ownerView" variant="link" v-b-popover.hover.top="'By owners or tokens'"><span v-if="ownerView"><b-icon-people-fill shift-v="+1" font-scale="1.0"></b-icon-people-fill></span><span v-else><b-icon-people shift-v="+1" font-scale="1.0"></b-icon-people></span></b-button>
                 </div>
-                <div class="mt-1">
-                  <b-button size="sm" :pressed.sync="showInfo" variant="link" v-b-popover.hover.top="'Show info'"><span v-if="showInfo"><b-icon-info-circle-fill shift-v="+1" font-scale="1.0"></b-icon-info-circle-fill></span><span v-else><b-icon-info-circle shift-v="+1" font-scale="1.0"></b-icon-info-circle></span></b-button>
-                </div>
-                <div class="mt-1 flex-grow-1">
+                <div class="mt-0 flex-grow-1">
                 </div>
 
-                <div class="mt-1 pr-1">
+                <div class="mt-0 pr-1">
                   <b-form-select v-if="!selectedCollection" size="sm" v-model="collectionsSortOption" :options="collectionsSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
                   <b-form-select v-if="selectedCollection" size="sm" v-model="poolsSortOption" :options="poolsSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
                 </div>
-                <div v-if="false" class="mt-1 pr-1">
+                <div v-if="false" class="mt-0 pr-1">
                   <div v-if="ownerView">
                     <b-form-select size="sm" v-model="ownerSortOption" :options="ownerSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
                   </div>
@@ -302,11 +284,11 @@
                     <b-form-select size="sm" v-model="sortOption" :options="sortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
                   </div>
                 </div>
-                <div class="mt-1 pr-1">
+                <div class="mt-0 pr-1">
                   <font v-if="!selectedCollection" size="-2" v-b-popover.hover.top="'# collections'">{{ filteredCollections.length }}</font>
                   <font v-if="selectedCollection" size="-2" v-b-popover.hover.top="'# pools'">{{ filteredPools.length }}</font>
                 </div>
-                <div v-if="false" class="mt-1 pr-1">
+                <div v-if="false" class="mt-0 pr-1">
                   <div v-if="ownerView">
                     <font size="-2" v-b-popover.hover.top="'# owners'">{{ filteredSortedTokensByOwners.length }}</font>
                   </div>
@@ -314,12 +296,12 @@
                     <font size="-2" v-b-popover.hover.top="'# tokens'">{{ filteredSortedCollectionTokens.length }}</font>
                   </div>
                 </div>
-                <div class="mt-1 pr-1">
+                <div class="mt-0 pr-1">
                   <b-pagination v-if="!selectedCollection" size="sm" v-model="collectionsCurrentPage" :total-rows="filteredSortedCollections.length" :per-page="collectionsPageSize" style="height: 0;"></b-pagination>
                   <b-pagination v-if="selectedCollection" size="sm" v-model="collectionsCurrentPage" :total-rows="filteredSortedCollections.length" :per-page="collectionsPageSize" style="height: 0;"></b-pagination>
                 </div>
                 <!--
-                <div v-if="false" class="mt-1 pr-1">
+                <div v-if="false" class="mt-0 pr-1">
                   <div v-if="ownerView">
                     <b-pagination size="sm" v-model="ownerCurrentPage" :total-rows="filteredSortedTokensByOwners.length" :per-page="ownerPageSize" style="height: 0;"></b-pagination>
                   </div>
@@ -328,12 +310,12 @@
                   </div>
                 </div>
                 -->
-                <div class="mt-1 pl-1">
+                <div class="mt-0 pl-1">
                   <b-form-select v-if="!selectedCollection" size="sm" v-model="collectionsPageSize" :options="pageSizes" v-b-popover.hover.top="'Collections Page size'"></b-form-select>
                   <b-form-select v-if="selectedCollection" size="sm" v-model="poolsPageSize" :options="pageSizes" v-b-popover.hover.top="'Collections Page size'"></b-form-select>
                 </div>
                 <!--
-                <div v-if="false" class="mt-1 pl-1">
+                <div v-if="false" class="mt-0 pl-1">
                   <div v-if="ownerView">
                     <b-form-select size="sm" v-model="ownerPageSize" :options="pageSizes" v-b-popover.hover.top="'Owner Page size'"></b-form-select>
                   </div>
