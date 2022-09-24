@@ -59,7 +59,7 @@
                 <b-form-input type="text" size="sm" v-model.trim="searchCollections" debounce="600" v-b-popover.hover.top="'Filter by partial ERC-721 NFT collection address, symbol or name'" placeholder="🔍 collection"></b-form-input>
               </div>
               <div class="mt-0 pr-1">
-                <b-form-select size="sm" v-model="selectedCollection" :options="collectionsOptions" v-b-popover.hover.top="'ERC-721 NFT Collection'"></b-form-select>
+                <b-form-select size="sm" v-model="selectedCollection" :options="collectionsOptions" @change="selectedCollectionChanged" v-b-popover.hover.top="'ERC-721 NFT Collection'"></b-form-select>
               </div>
               <div class="mt-1" style="width: 200px;">
                 <b-progress v-if="sync.section != null" height="1.5rem" :max="sync.total" show-progress :animated="sync.section != null" :variant="sync.section != null ? 'success' : 'secondary'" v-b-popover.hover.top="'Click on the Sync(ing) button to (un)pause'">
@@ -180,7 +180,7 @@
               </div>
 
               <b-card-body class="m-0 mt-1 p-0">
-                <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='poolsRowSelected' :fields="poolsFields" :items="selectedPool ? [getSelectedPoolRecord] : pagedFilteredPools" head-variant="light" class="m-0">
+                <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='poolsRowSelected' :fields="poolsFields" :items="selectedPool != null ? [getSelectedPoolRecord] : pagedFilteredPools" head-variant="light" class="m-0">
                   <template #cell(address)="data">
                     <b-link :href="'https://etherscan.io/token/' + data.item.address" v-b-popover.hover.bottom="'View Umswap pool contract in Etherscan.io'" target="_blank">
                       {{ data.item.address }}
@@ -319,6 +319,7 @@
           searchCollection: null,
           layer: null,
           collections: {},
+          collection: {},
           prices: {},
           owners: {},
           ensMap: {},
@@ -628,6 +629,10 @@
               this.selectedPool = this.selectedPool != null ? null : item[0].address;
             }
           },
+          selectedCollectionChanged(event) {
+            console.log("selectedCollectionChanged: " + JSON.stringify(event));
+            this.selectedPool = null;
+          },
           toggleTrait(layer, trait) {
             if (!this.selectedTraits[layer]) {
               Vue.set(this.selectedTraits, layer, {});
@@ -717,6 +722,9 @@
 
               const umswapsLength = await umswapFactory.getUmswapsLength();
               var umswapsIndices = generateRange(0, parseInt(umswapsLength) - 1, 1);
+              this.sync.completed = 0;
+              this.sync.total = parseInt(umswapsLength);
+              this.sync.section = "Umswaps";
               const umswaps = await umswapFactory.getUmswaps(coinbase, umswapsIndices);
 
               const collections = {};
@@ -741,8 +749,13 @@
                 }
                 const umswap = { index, address, symbol, name, collection, validTokenIds, tokenIds, creator, swappedIn, swappedOut, totalScores, totalSupply, raters, isApprovedForAll };
                 collections[collection].umswaps.push(umswap);
+                this.sync.completed = i + 1;
               }
 
+              this.sync.section = null;
+              this.sync.completed = 0;
+              this.sync.total = Object.keys(collections).length;
+              this.sync.section = "Collection Info";
               for (const [address, collection] of Object.entries(collections)) {
                 const info = await erc721Helper.tokenInfo([address]);
                 collection.type = info[0][0].toString();
@@ -771,10 +784,14 @@
                      return [];
                   });
                 collection.sampleTokens = reservoirTokens && reservoirTokens.tokens || null;
+                this.sync.completed++;
               }
               this.collections = collections;
               localStorage.setItem('umsCollections', JSON.stringify(collections));
 
+              if (this.selectedCollection != null) {
+                console.log("Sync collections");
+              }
               // const erc721Helper = new ethers.Contract(ERC721HELPERADDRESS, ERC721HELPERABI, provider);
               // const owners = {};
               // const NFTOWNERBATCHSIZE = 200; // 500 OK
