@@ -296,8 +296,10 @@
           poolsOptions() {
             const results = [];
             results.push({ value: null, text: '(select pool)' });
-            for (const collection of this.filteredSortedCollections) {
-              results.push({ value: collection.address, text: collection.symbol + ': ' + collection.name });
+            if (this.collections[this.selectedCollection]) {
+              for (const umswap of this.collections[this.selectedCollection].umswaps) {
+                results.push({ value: umswap.address, text: umswap.symbol + ': ' + umswap.name });
+              }
             }
             return results;
           },
