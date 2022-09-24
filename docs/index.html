@@ -70,10 +70,8 @@
               </div>
               <div class="mt-0 flex-grow-1">
               </div>
-              <div class="mt-0">
+              <div class="mt-0 pr-1">
                 <b-button size="sm" :pressed.sync="showInfo" variant="link" v-b-popover.hover.top="'Show info'"><span v-if="showInfo"><b-icon-info-circle-fill shift-v="+1" font-scale="1.0"></b-icon-info-circle-fill></span><span v-else><b-icon-info-circle shift-v="+1" font-scale="1.0"></b-icon-info-circle></span></b-button>
-              </div>
-              <div class="mt-0 flex-grow-1">
               </div>
               <div class="mt-0 pr-1">
                 <b-form-select :disabled="selectedCollection != null" size="sm" v-model="collectionsSortOption" :options="collectionsSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
