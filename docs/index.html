@@ -166,16 +166,16 @@
                 <div class="mt-0 flex-grow-1">
                 </div>
                 <div class="mt-0 pr-1">
-                  <b-form-select v-if="selectedCollection" size="sm" v-model="poolsSortOption" :options="poolsSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
+                  <b-form-select :disabled="selectedPool != null" size="sm" v-model="poolsSortOption" :options="poolsSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
                 </div>
                 <div class="mt-0 pr-1">
-                  <font v-if="selectedCollection" size="-2" v-b-popover.hover.top="'# pools'">{{ filteredPools.length }}</font>
+                  <font v-if="selectedCollection" size="-2" v-b-popover.hover.top="'# pools'">{{ selectedPool != null ? 1 : filteredPools.length }}</font>
                 </div>
                 <div class="mt-0 pr-1">
-                  <b-pagination v-if="selectedCollection" size="sm" v-model="collectionsCurrentPage" :total-rows="filteredSortedCollections.length" :per-page="collectionsPageSize" style="height: 0;"></b-pagination>
+                  <b-pagination :disabled="selectedPool != null" size="sm" v-model="collectionsCurrentPage" :total-rows="filteredSortedCollections.length" :per-page="collectionsPageSize" style="height: 0;"></b-pagination>
                 </div>
                 <div class="mt-0 pl-1">
-                  <b-form-select v-if="selectedCollection" size="sm" v-model="poolsPageSize" :options="pageSizes" v-b-popover.hover.top="'Collections Page size'"></b-form-select>
+                  <b-form-select :disabled="selectedPool != null" size="sm" v-model="poolsPageSize" :options="pageSizes" v-b-popover.hover.top="'Collections Page size'"></b-form-select>
                 </div>
               </div>
 
@@ -619,12 +619,12 @@
           },
           collectionsRowSelected(item) {
             if (item && item.length > 0) {
-              this.selectedCollection = item[0].address;
+              this.selectedCollection = this.selectedCollection != null ? null : item[0].address;
             }
           },
           poolsRowSelected(item) {
             if (item && item.length > 0) {
-              this.selectedPool = item[0].address;
+              this.selectedPool = this.selectedPool != null ? null : item[0].address;
             }
           },
           toggleTrait(layer, trait) {
