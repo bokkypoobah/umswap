@@ -53,18 +53,21 @@
         <b-card no-body class="p-0 mt-0">
           <b-card-body class="m-0 p-1">
             <div class="d-flex flex-wrap m-0 p-0">
-              <div class="mt-1 pr-1">
+              <div v-if="!selectedCollection" class="mt-1 pr-1">
                 <b-form-input type="text" size="sm" v-model.trim="searchCollection" debounce="600" v-b-popover.hover.top="'Filter by collection'" placeholder="collection name/addy"></b-form-input>
+              </div>
+              <div v-if="selectedCollection" class="mt-1 pr-1">
+                <b-form-input type="text" size="sm" v-model.trim="searchCollection" debounce="600" v-b-popover.hover.top="'Filter by collection'" placeholder="tokenId"></b-form-input>
               </div>
               <div class="mt-1">
                 <b-form-select size="sm" v-model="selectedCollection" :options="collectionsOptions" v-b-popover.hover.top="'Filter by layer'"></b-form-select>
               </div>
               <div class="mt-1 flex-grow-1">
               </div>
-              <div class="mt-1 pr-1">
+              <div v-if="!selectedCollection" class="mt-1 pr-1">
                 <b-button :disabled="sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Sync UmswapFactory via the web3 connection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Overview</b-button>
               </div>
-              <div class="mt-1">
+              <div v-if="selectedCollection" class="mt-1">
                 <b-button :disabled="true" size="sm" @click="retrievePrices" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Retrieve collection info'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Collection</b-button>
               </div>
               <div class="mt-1 flex-grow-1">
@@ -209,10 +212,9 @@
               </b-card>
             </div>
 
-            <b-card no-header no-body class="m-0 mt-1 p-0 border-0">
+            <b-card v-if="!selectedCollection" no-header no-body class="m-0 mt-1 p-0 border-0">
               <b-card-body class="m-0 ml-0 p-0">
-
-                <b-table small fixed striped :fields="collectionsFields" :items="pagedFilteredCollections" head-variant="light">
+                <b-table small fixed striped selectable select-mode="single" @row-selected='selectedCollection=$event[0].address;' :fields="collectionsFields" :items="pagedFilteredCollections" head-variant="light">
                   <template #cell(address)="data">
                     <b-link :href="'https://opensea.io/collection/' + data.item.reservoirInfo.slug" v-b-popover.hover.bottom="'View collection in Opensea.io'" target="_blank">
                       {{ data.item.address }}
@@ -225,15 +227,10 @@
                     {{ data.item.umswaps.map(e => e.tokenIds.length).reduce((r, n) => r + n) }}
                   </template>
                 </b-table>
-
-                <!--
-                <b-table small fixed striped :items="pagedFilteredCollections" head-variant="light">
-                </b-table>
-                -->
               </b-card-body>
             </b-card>
 
-            <b-card no-header no-body class="m-0 mt-1 p-0 border-0">
+            <b-card v-if="selectedCollection" no-header no-body class="m-0 mt-1 p-0 border-0">
               <b-card-body class="m-0 ml-0 p-0">
                 {{ selectedCollection }}
               </b-card-body>
@@ -435,8 +432,8 @@
             const results = [];
             results.push({ value: null, text: '(select collection)' });
             for (const collection of this.filteredSortedCollections) {
-              console.log(JSON.stringify(collection));
-              // results.push({ value: collection, text: '(select collection)' });
+              console.log("collectionsOptions: " + JSON.stringify(collection));
+              results.push({ value: collection.address, text: collection.symbol + ' ' + collection.name });
             }
             return results;
           },
