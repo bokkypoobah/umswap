@@ -86,7 +86,7 @@
               <div v-if="false" class="mt-1 pr-1">
                 <b-button size="sm" :pressed.sync="ownerView" variant="link" v-b-popover.hover.top="'By owners or tokens'"><span v-if="ownerView"><b-icon-people-fill shift-v="+1" font-scale="1.0"></b-icon-people-fill></span><span v-else><b-icon-people shift-v="+1" font-scale="1.0"></b-icon-people></span></b-button>
               </div>
-              <div v-if="false" class="mt-1">
+              <div class="mt-1">
                 <b-button size="sm" :pressed.sync="showInfo" variant="link" v-b-popover.hover.top="'Show info'"><span v-if="showInfo"><b-icon-info-circle-fill shift-v="+1" font-scale="1.0"></b-icon-info-circle-fill></span><span v-else><b-icon-info-circle shift-v="+1" font-scale="1.0"></b-icon-info-circle></span></b-button>
               </div>
               <div class="mt-1 flex-grow-1">
@@ -143,38 +143,6 @@
             </div>
 
 
-            <b-card no-header no-body class="m-0 mt-1 p-0 border-0">
-              <b-card-body class="m-0 ml-0 p-0">
-
-                <b-table small fixed striped :fields="collectionsFields" :items="pagedFilteredCollections" head-variant="light">
-                  <template #cell(address)="data">
-                    {{ data.item.address }}
-                    <!--
-                    <b-link :href="'https://opensea.io/collection/' + data.item.address" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">
-                      {{ data.item.address }}
-                    </b-link>
-                    -->
-                  </template>
-                  <template #cell(pools)="data">
-                    {{ data.item.address }}
-                  </template>
-                  <template #cell(nftsInPool)="data">
-                    {{ data.item.address }}
-                  </template>
-                </b-table>
-
-                <!--
-                { key: 'address', label: 'Address', thStyle: 'width: 20%;' },
-                { key: 'symbol', label: 'Symbol', thStyle: 'width: 10%;' },
-                { key: 'name', label: 'Name', thStyle: 'width: 25%;' },
-                { key: 'pools', label: '#Pools', thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
-                { key: 'nftsInPool', label: '#NFTs in Pools', thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
-                <b-table small fixed striped :items="pagedFilteredCollections" head-variant="light">
-                </b-table>
-                -->
-              </b-card-body>
-            </b-card>
-
 
             <b-card v-if="layer != null" no-header no-body class="m-0 mt-1 p-1 border-1">
               <b-card-group deck class="m-1 ml-0 p-0">
@@ -207,12 +175,15 @@
               <b-card no-header no-body class="m-2 p-1">
                 <b-card-body class="m-0 p-0">
                   <b-card-text class="m-1 p-1">
+                    <!--
                     <b-form-group label-cols="2" label-size="sm" label-align="right" label="Collection:" class="mx-0 my-1 p-0">
                       <b-form-input type="text" readonly size="sm" :value="info.name" class="w-50"></b-form-input>
                     </b-form-group>
+                    -->
                     <b-form-group label-cols="2" label-size="sm" label-align="right" label="Collection Address:" class="mx-0 my-1 p-0">
-                      <b-link :href="'https://etherscan.io/token/' + contractAddress" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ contractAddress }}</b-link>
+                      <b-link :href="'https://etherscan.io/token/' + umswapFactoryAddress + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ umswapFactoryAddress }}</b-link>
                     </b-form-group>
+                    <!--
                     <b-form-group label-cols="2" label-size="sm" label-align="right" label="Collection Owner:" class="mx-0 my-1 p-0">
                       <b-link :href="'https://twitter.com/proofofpepe'" v-b-popover.hover.bottom="'View in Twitter.com'" target="_blank">@proofofpepe</b-link>
                     </b-form-group>
@@ -223,8 +194,9 @@
                       <b-link :href="'https://sudoswap.xyz/#/browse/pools/' + contractAddress" target="_blank">sudoswap.xyz</b-link>,
                       <b-link :href="'https://www.gem.xyz/collection/proofofpepe/'" target="_blank">gem.xyz</b-link>
                     </b-form-group>
+                    -->
                     <b-form-group label-cols="2" label-size="sm" label-align="right" label="This Dapp GitHub:" class="mx-0 my-1 p-0">
-                      <b-link :href="'https://github.com/bokkypoobah/ProofOfPepesInfo'" v-b-popover.hover.bottom="'View in GitHub.com. Feel free to clone and improve'" target="_blank">https://github.com/bokkypoobah/ProofOfPepesInfo</b-link>
+                      <b-link :href="'https://github.com/bokkypoobah/umswap'" v-b-popover.hover.bottom="'View in GitHub.com. Feel free to clone and improve'" target="_blank">https://github.com/bokkypoobah/umswap</b-link>
                     </b-form-group>
                     <b-form-group label-cols="2" label-size="sm" label-align="right" label="" class="mx-0 mt-3 p-0">
                       Enjoy. And hello, from the past.
@@ -235,6 +207,39 @@
                 </b-card-body>
               </b-card>
             </div>
+
+            <b-card no-header no-body class="m-0 mt-1 p-0 border-0">
+              <b-card-body class="m-0 ml-0 p-0">
+
+                <b-table small fixed striped :fields="collectionsFields" :items="pagedFilteredCollections" head-variant="light">
+                  <template #cell(address)="data">
+                    {{ data.item.address }}
+                    <!--
+                    <b-link :href="'https://opensea.io/collection/' + data.item.address" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">
+                      {{ data.item.address }}
+                    </b-link>
+                    -->
+                  </template>
+                  <template #cell(pools)="data">
+                    {{ data.item.address }}
+                  </template>
+                  <template #cell(nftsInPool)="data">
+                    {{ data.item.address }}
+                  </template>
+                </b-table>
+
+                <!--
+                { key: 'address', label: 'Address', thStyle: 'width: 20%;' },
+                { key: 'symbol', label: 'Symbol', thStyle: 'width: 10%;' },
+                { key: 'name', label: 'Name', thStyle: 'width: 25%;' },
+                { key: 'pools', label: '#Pools', thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
+                { key: 'nftsInPool', label: '#NFTs in Pools', thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
+                <b-table small fixed striped :items="pagedFilteredCollections" head-variant="light">
+                </b-table>
+                -->
+              </b-card-body>
+            </b-card>
+            
             <!--
             <div v-if="!ownerView">
               <b-card-group deck class="m-1 ml-0 p-0">
@@ -417,8 +422,8 @@
           },
         },
         computed: {
-          contractAddress() {
-            return INFO[0].address;
+          umswapFactoryAddress() {
+            return UMSWAPFACTORYADDRESS;
           },
           tokens() {
             return INFO[0].tokenData;
