@@ -155,6 +155,12 @@
                     </b-link>
                     -->
                   </template>
+                  <template #cell(pools)="data">
+                    {{ data.item.address }}
+                  </template>
+                  <template #cell(nftsInPool)="data">
+                    {{ data.item.address }}
+                  </template>
                 </b-table>
 
                 <!--
@@ -478,13 +484,13 @@
           filteredSortedCollections() {
             let results = this.filteredCollections;
             if (this.sortOption == 'symbolasc') {
-              results.sort((a, b) => ('' + a.symbol).localeCompare(b.symbol))
-            } else if (this.sortOption == 'symboldsc') {
               results.sort((a, b) => ('' + b.symbol).localeCompare(a.symbol))
+            } else if (this.sortOption == 'symboldsc') {
+              results.sort((a, b) => ('' + a.symbol).localeCompare(b.symbol))
             } else if (this.sortOption == 'nameasc') {
-              results.sort((a, b) => ('' + a.name).localeCompare(b.name))
-            } else if (this.sortOption == 'namedsc') {
               results.sort((a, b) => ('' + b.name).localeCompare(a.name))
+            } else if (this.sortOption == 'namedsc') {
+              results.sort((a, b) => ('' + a.name).localeCompare(b.name))
             } else {
               results.sort(() => {
                 return Math.random() - 0.5;
