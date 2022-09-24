@@ -250,7 +250,7 @@
 
             <b-card v-if="selectedCollection" no-header no-body class="m-0 mt-1 p-0 border-0">
               <b-card-body class="m-0 ml-0 p-0">
-                {{ selectedCollection }}
+                {{ collections[selectedCollection] }}
               </b-card-body>
             </b-card>
 
@@ -369,7 +369,7 @@
         data: {
           info: INFO[0],
           showInfo: false,
-          selectedCollection: null, // TODO
+          selectedCollection: null,
           ownerView: false,
           collectionsCurrentPage: 1,
           currentPage: 0,
@@ -451,7 +451,6 @@
             const results = [];
             results.push({ value: null, text: '(select collection)' });
             for (const collection of this.filteredSortedCollections) {
-              console.log("collectionsOptions: " + JSON.stringify(collection));
               results.push({ value: collection.address, text: collection.symbol + ' ' + collection.name });
             }
             return results;
@@ -874,6 +873,24 @@
           if (localStorage.getItem('umsCollections')) {
             this.collections = JSON.parse(localStorage.getItem('umsCollections'));
           }
+          // console.log("mounted: " + window.location.href);
+          if (window.location.href.indexOf("0x") >= 0) {
+            this.selectedCollection = window.location.href.replace(/^.*0x/, "0x");
+            // console.log("selectedCollection: " + selectedCollection);
+          }
+          // let uri = window.location.href.split('?');
+          // if (uri.length == 2) {
+          //   let vars = uri[1].split('&');
+          //   let getVars = {};
+          //   let tmp = '';
+          //   vars.forEach(function(v) {
+          //     tmp = v.split('=');
+          //     if(tmp.length == 2)
+          //       getVars[tmp[0]] = tmp[1];
+          //   });
+          //   console.log(getVars);
+          //   // do
+          // }
           // if (localStorage.getItem('umsENSMap')) {
           //   this.ensMap = JSON.parse(localStorage.getItem('umsENSMap'));
           // }
