@@ -223,9 +223,14 @@
               </b-card>
             </div>
 
-            <b-card v-if="!selectedCollection" no-header no-body class="m-0 mt-1 p-0 border-0">
-              <b-card-body class="m-0 ml-0 p-0">
-                <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='selectedCollection=$event && $event.length > 0 && $event[0].address || null;' :fields="collectionsFields" :items="pagedFilteredCollections" head-variant="light" v-b-popover.hover.top="'Select an NFT collection'">
+            <!-- <b-card v-if="!selectedCollection" no-header no-body class="m-0 mt-1 p-0 border-0"> -->
+            <b-card no-header no-body class="m-0 mt-1 p-0 border-0">
+              <b-card-body class="m-0 p-0">
+                <!--
+                collectionsRowSelected
+                <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='selectedCollection=$event && $event.length > 0 && $event[0].address || null;' :fields="collectionsFields" :items="selectedCollection ? [collections[selectedCollection]] : pagedFilteredCollections" head-variant="light" v-b-popover.hover.top="'Select an NFT collection'" class="m-0">
+                -->
+                <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='collectionsRowSelected' :fields="collectionsFields" :items="selectedCollection ? [collections[selectedCollection]] : pagedFilteredCollections" head-variant="light" class="m-0">
                   <template #cell(address)="data">
                     <b-link :href="'https://etherscan.io/token/' + data.item.address" v-b-popover.hover.bottom="'View ERC-721 NFT collection contract in Etherscan.io'" target="_blank">
                       {{ data.item.address }}
@@ -250,8 +255,8 @@
             </b-card>
 
             <b-card v-if="selectedCollection" no-header no-body class="m-0 mt-1 p-0 border-0">
-              <b-card-body class="m-0 ml-0 p-0">
-                <b-table small fixed striped selectable responsive hover select-mode="single" :items="pagedFilteredPools" head-variant="light" v-b-popover.hover.top="'Select an NFT collection'">
+              <b-card-body class="m-0 p-0">
+                <b-table small fixed striped selectable responsive hover select-mode="single" :items="pagedFilteredPools" head-variant="light" v-b-popover.hover.top="'Select a pool'" class="m-0">
                 </b-table>
 
                 <br />
@@ -720,6 +725,11 @@
           // },
         },
         methods: {
+          collectionsRowSelected(item) {
+            if (item && item.length > 0) {
+              this.selectedCollection = item[0].address;
+            }
+          },
           toggleTrait(layer, trait) {
             if (!this.selectedTraits[layer]) {
               Vue.set(this.selectedTraits, layer, {});
