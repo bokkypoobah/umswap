@@ -54,21 +54,21 @@
           <b-card-body class="m-0 p-1">
             <div class="d-flex flex-wrap m-0 p-0">
               <div v-if="!selectedCollection" class="mt-1 pr-1">
-                <b-form-input type="text" size="sm" v-model.trim="searchCollection" debounce="600" v-b-popover.hover.top="'Filter by collection'" placeholder="collection name/addy"></b-form-input>
+                <b-form-input type="text" size="sm" v-model.trim="searchCollection" debounce="600" v-b-popover.hover.top="'Filter by ERC-721 NFT collection'" placeholder="collection name/addy"></b-form-input>
               </div>
-              <div v-if="selectedCollection" class="mt-1 pr-1">
-                <b-form-input type="text" size="sm" v-model.trim="searchCollection" debounce="600" v-b-popover.hover.top="'Filter by collection'" placeholder="tokenId"></b-form-input>
+              <div class="mt-1 pr-1">
+                <b-form-select size="sm" v-model="selectedCollection" :options="collectionsOptions" v-b-popover.hover.top="'ERC-721 NFT Collection'"></b-form-select>
               </div>
-              <div class="mt-1">
-                <b-form-select size="sm" v-model="selectedCollection" :options="collectionsOptions" v-b-popover.hover.top="'Filter by layer'"></b-form-select>
+              <div v-if="selectedCollection" class="mt-1">
+                <b-form-input type="text" size="sm" v-model.trim="searchCollection" debounce="600" v-b-popover.hover.top="'Filter by tokenId'" placeholder="tokenId"></b-form-input>
               </div>
               <div class="mt-1 flex-grow-1">
               </div>
               <div v-if="!selectedCollection" class="mt-1 pr-1">
-                <b-button :disabled="sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Sync UmswapFactory via the web3 connection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Overview</b-button>
+                <b-button :disabled="sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Sync UmswapFactory via the web3 connection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Sync</b-button>
               </div>
               <div v-if="selectedCollection" class="mt-1">
-                <b-button :disabled="true" size="sm" @click="retrievePrices" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Retrieve collection info'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Collection</b-button>
+                <b-button :disabled="sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Sync collection info'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Pools</b-button>
               </div>
               <div class="mt-1 flex-grow-1">
               </div>
@@ -808,6 +808,7 @@
               }
               // console.log("collections: " + JSON.stringify(collections, null, 2));
               this.collections = collections;
+              localStorage.setItem('umsCollections', JSON.stringify(collections));
 
 
               // const erc721Helper = new ethers.Contract(ERC721HELPERADDRESS, ERC721HELPERABI, provider);
@@ -859,9 +860,9 @@
           },
         },
         mounted() {
-          // if (localStorage.getItem('umsOwners')) {
-          //   this.owners = JSON.parse(localStorage.getItem('umsOwners'));
-          // }
+          if (localStorage.getItem('umsCollections')) {
+            this.collections = JSON.parse(localStorage.getItem('umsCollections'));
+          }
           // if (localStorage.getItem('umsENSMap')) {
           //   this.ensMap = JSON.parse(localStorage.getItem('umsENSMap'));
           // }
