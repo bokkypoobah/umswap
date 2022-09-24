@@ -182,7 +182,7 @@
               </div>
 
               <b-card-body class="m-0 mt-1 p-0">
-                <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='poolsRowSelected' :fields="poolsFields" :items="selectedPool ? getSelectedPool : pagedFilteredPools" head-variant="light" class="m-0">
+                <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='poolsRowSelected' :fields="poolsFields" :items="selectedPool ? [getSelectedPoolRecord] : pagedFilteredPools" head-variant="light" class="m-0">
                   <template #cell(address)="data">
                     <b-link :href="'https://etherscan.io/token/' + data.item.address" v-b-popover.hover.bottom="'View Umswap pool contract in Etherscan.io'" target="_blank">
                       {{ data.item.address }}
@@ -198,7 +198,7 @@
                   </template>
                   <template #cell(validTokenIds)="data">
                     <div v-if="data.item.validTokenIds.length == 0">
-                      (All)
+                      (All in collection)
                     </div>
                     <div v-else>
                       {{ data.item.validTokenIds.length + 'x - ' + data.item.validTokenIds.join(", ") }}
@@ -219,11 +219,17 @@
                 <b-table small fixed striped selectable responsive hover select-mode="single" :items="pagedFilteredPools" head-variant="light" class="m-0">
                 </b-table>
                 -->
-              </b-card-body>
-            </b-card>
-            <b-card v-if="selectedPool != null" no-header no-body class="m-0 mt-1 p-1 border-1">
-              <b-card-body class="m-0 mt-1 p-0">
-                Blah
+                <!-- <b-card v-if="selectedPool != null" no-header no-body class="m-0 mt-1 p-1 border-1"> -->
+                  <!-- <b-card-body class="m-0 mt-1 p-0"> -->
+                    <b-card v-if="getSelectedPoolRecord && getSelectedPoolRecord.validTokenIds && getSelectedPoolRecord.validTokenIds.length > 0" title="Valid Tokens" class="m-1" body-class="m-1 p-1">
+                      {{ getSelectedPoolRecord.validTokenIds.join(", ") }}
+                    </b-card>
+                    <b-card v-if="getSelectedPoolRecord" title="Tokens In Pool" class="m-1" body-class="m-1 p-1">
+                      {{ getSelectedPoolRecord.tokenIds.join(", ") }}
+                    </b-card>
+                    <!-- Blah -->
+                  <!-- </b-card-body> -->
+                <!-- </b-card> -->
               </b-card-body>
             </b-card>
           </b-card-body>
@@ -462,16 +468,16 @@
           pagedFilteredPools() {
             return this.filteredSortedPools.slice((this.poolsCurrentPage - 1) * this.poolsPageSize, this.poolsCurrentPage * this.poolsPageSize);
           },
-          getSelectedPool() {
+          getSelectedPoolRecord() {
             const results = this.selectedCollection ? [] : [];
             if (this.collections[this.selectedCollection]) {
               for (const umswap of this.collections[this.selectedCollection].umswaps) {
                 if (this.selectedPool == umswap.address) {
-                  results.push(umswap);
+                  return umswap;
                 }
               }
             }
-            return results;
+            return null;
           },
           // filteredCollectionTokens() {
           //   let stage1Data = this.selectedTraits ? [] : [];
