@@ -224,7 +224,7 @@
 
             <b-card v-if="!selectedCollection" no-header no-body class="m-0 mt-1 p-0 border-0">
               <b-card-body class="m-0 ml-0 p-0">
-                <b-table small fixed striped selectable select-mode="single" @row-selected='selectedCollection=$event[0].address;' :fields="collectionsFields" :items="pagedFilteredCollections" head-variant="light">
+                <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='selectedCollection=$event[0].address;' :fields="collectionsFields" :items="pagedFilteredCollections" head-variant="light" v-b-popover.hover.top="'Select an NFT collection'">
                   <template #cell(address)="data">
                     <b-link :href="'https://etherscan.io/token/' + data.item.address" v-b-popover.hover.bottom="'View ERC-721 NFT collection contract in Etherscan.io'" target="_blank">
                       {{ data.item.address }}
@@ -374,14 +374,14 @@
           collectionsCurrentPage: 1,
           currentPage: 0,
           ownerCurrentPage: 1,
-          collectionsSortOption: 'nameasc', // TODO
+          collectionsSortOption: 'nameasc',
           sortOption: 'priceasc',
           ownerSortOption: 'countdsc',
           collectionsPageSize: 100,
           pageSize: 100,
           ownerPageSize: 100,
           currentPage: 1,
-          collectionsSortOptions: [  // TODO
+          collectionsSortOptions: [
             { value: 'symbolasc', text: '▲ Symbol' },
             { value: 'symboldsc', text: '▼ Symbol' },
             { value: 'nameasc', text: '▲ Name' },
@@ -503,24 +503,21 @@
                 (v.name && v.name.toLowerCase().includes(searchLower)) ||
                 (v.address && v.address.toLowerCase().includes(searchLower))
               ) {
-                // TODO Remove
-                // for (let dup = 0; dup < 1000; dup++) {
-                  results.push(v);
-                // }
+                results.push(v);
               }
             }
             return results;
           },
           filteredSortedCollections() {
             let results = this.filteredCollections;
-            if (this.sortOption == 'symbolasc') {
-              results.sort((a, b) => ('' + b.symbol).localeCompare(a.symbol))
-            } else if (this.sortOption == 'symboldsc') {
+            if (this.collectionsSortOption == 'symbolasc') {
               results.sort((a, b) => ('' + a.symbol).localeCompare(b.symbol))
-            } else if (this.sortOption == 'nameasc') {
-              results.sort((a, b) => ('' + b.name).localeCompare(a.name))
-            } else if (this.sortOption == 'namedsc') {
+            } else if (this.collectionsSortOption == 'symboldsc') {
+              results.sort((a, b) => ('' + b.symbol).localeCompare(a.symbol))
+            } else if (this.collectionsSortOption == 'nameasc') {
               results.sort((a, b) => ('' + a.name).localeCompare(b.name))
+            } else if (this.collectionsSortOption == 'namedsc') {
+              results.sort((a, b) => ('' + b.name).localeCompare(a.name))
             } else {
               results.sort(() => {
                 return Math.random() - 0.5;
