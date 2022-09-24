@@ -196,6 +196,14 @@
                   <template #cell(name)="data">
                     {{ data.item.name }}
                   </template>
+                  <template #cell(validTokenIds)="data">
+                    <div v-if="data.item.validTokenIds.length == 0">
+                      (All)
+                    </div>
+                    <div v-else>
+                      {{ data.item.validTokenIds.length + 'x - ' + data.item.validTokenIds.join(", ") }}
+                    </div>
+                  </template>
                   <template #cell(swappedIn)="data">
                     {{ data.item.swappedIn }}
                   </template>
@@ -207,8 +215,10 @@
                   </template>
                 </b-table>
                 <br />
+                <!--
                 <b-table small fixed striped selectable responsive hover select-mode="single" :items="pagedFilteredPools" head-variant="light" class="m-0">
                 </b-table>
+                -->
               </b-card-body>
             </b-card>
           </b-card-body>
@@ -282,10 +292,11 @@
           poolsFields: [
             { key: 'address', label: 'Pool', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
             { key: 'symbol', label: 'Symbol', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            { key: 'name', label: 'Name', thStyle: 'width: 35%;', tdClass: 'text-truncate' },
-            { key: 'swappedIn', label: '# In', thStyle: 'width: 15%;', thClass: 'text-right', tdClass: 'text-right' },
-            { key: 'swappedOut', label: '# Out', thStyle: 'width: 15%;', thClass: 'text-right', tdClass: 'text-right' },
-            { key: 'totalSupply', label: 'Total Supply', thStyle: 'width: 15%;', thClass: 'text-right', tdClass: 'text-right' },
+            { key: 'name', label: 'Name', thStyle: 'width: 25%;', tdClass: 'text-truncate' },
+            { key: 'validTokenIds', label: 'Valid Token Ids', thStyle: 'width: 25%;', tdClass: 'text-truncate' },
+            { key: 'swappedIn', label: '# In', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
+            { key: 'swappedOut', label: '# Out', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
+            { key: 'totalSupply', label: 'Total Supply', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
           ],
           ownersFields: [
             { key: 'index', label: '#' },
@@ -702,8 +713,8 @@
                 const symbol = umswaps[1][i];
                 const name = umswaps[2][i];
                 const collection = umswaps[3][i];
-                const validTokenIds = umswaps[4][i];
-                const tokenIds = umswaps[5][i];
+                const validTokenIds = umswaps[4][i].map(e => e.toNumber());
+                const tokenIds = umswaps[5][i].map(e => e.toNumber());
                 const creator = umswaps[6][i];
                 const stats = umswaps[7][i];
                 const swappedIn = stats[0].toString();
