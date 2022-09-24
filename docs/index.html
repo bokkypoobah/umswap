@@ -61,8 +61,10 @@
               <div class="mt-0 pr-1">
                 <b-form-select size="sm" v-model="selectedCollection" :options="collectionsOptions" @change="selectedCollectionChanged" v-b-popover.hover.top="'ERC-721 NFT Collection'"></b-form-select>
               </div>
+              <div class="mt-0 flex-grow-1">
+              </div>
               <div class="mt-1" style="width: 200px;">
-                <b-progress v-if="sync.section != null" height="1.5rem" :max="sync.total" show-progress :animated="sync.section != null" :variant="sync.section != null ? 'success' : 'secondary'" v-b-popover.hover.top="'Click on the Sync(ing) button to (un)pause'">
+                <b-progress v-if="selectedCollection == null && sync.section != null" height="1.5rem" :max="sync.total" show-progress :animated="sync.section != null" :variant="sync.section != null ? 'success' : 'secondary'" v-b-popover.hover.top="'Click on the Sync(ing) button to (un)pause'">
                   <b-progress-bar :value="sync.completed">
                     {{ sync.total == null ? (sync.completed + ' ' + sync.section) : (sync.completed + '/' + sync.total + ' ' + ((sync.completed / sync.total) * 100).toFixed(0) + '% ' + sync.section) }}
                   </b-progress-bar>
@@ -156,8 +158,10 @@
                 <div class="mt-0 pr-1">
                   <b-form-select size="sm" v-model="selectedPool" :options="poolsOptions" v-b-popover.hover.top="'Umswap Pool'"></b-form-select>
                 </div>
+                <div class="mt-0 flex-grow-1">
+                </div>
                 <div class="mt-1" style="width: 200px;">
-                  <b-progress v-if="sync.section != null" height="1.5rem" :max="sync.total" show-progress :animated="sync.section != null" :variant="sync.section != null ? 'success' : 'secondary'" v-b-popover.hover.top="'Click on the Sync(ing) button to (un)pause'">
+                  <b-progress v-if="selectedCollection != null && sync.section != null" height="1.5rem" :max="sync.total" show-progress :animated="sync.section != null" :variant="sync.section != null ? 'success' : 'secondary'" v-b-popover.hover.top="'Click on the Sync(ing) button to (un)pause'">
                     <b-progress-bar :value="sync.completed">
                       {{ sync.total == null ? (sync.completed + ' ' + sync.section) : (sync.completed + '/' + sync.total + ' ' + ((sync.completed / sync.total) * 100).toFixed(0) + '% ' + sync.section) }}
                     </b-progress-bar>
