@@ -179,13 +179,20 @@
               <b-card no-header no-body class="m-2 p-1">
                 <b-card-body class="m-0 p-0">
                   <b-card-text class="m-1 p-1">
+                    <b-form-group label-cols="2" label-size="sm" label-align="right" label="" class="mx-0 mt-3 p-0">
+                      Umswaps are subsets of ERC-721 NFT collections pooled into ERC-20 tokens.
+                      <br />
+                      Umswaps are created by UmswapFactory.
+                      <br />
+                      "Like WETH, but for ERC-721s"
+                    </b-form-group>
                     <!--
                     <b-form-group label-cols="2" label-size="sm" label-align="right" label="Collection:" class="mx-0 my-1 p-0">
                       <b-form-input type="text" readonly size="sm" :value="info.name" class="w-50"></b-form-input>
                     </b-form-group>
                     -->
-                    <b-form-group label-cols="2" label-size="sm" label-align="right" label="Collection Address:" class="mx-0 my-1 p-0">
-                      <b-link :href="'https://etherscan.io/token/' + umswapFactoryAddress + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ umswapFactoryAddress }}</b-link>
+                    <b-form-group label-cols="2" label-size="sm" label-align="right" label="UmswapFactory:" class="mx-0 my-1 p-0">
+                      <b-link :href="'https://etherscan.io/address/' + umswapFactoryAddress + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ umswapFactoryAddress }}</b-link>
                     </b-form-group>
                     <!--
                     <b-form-group label-cols="2" label-size="sm" label-align="right" label="Collection Owner:" class="mx-0 my-1 p-0">
