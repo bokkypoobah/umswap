@@ -70,9 +70,6 @@
               </div>
               <div class="mt-0 flex-grow-1">
               </div>
-              <div v-if="false" class="mt-0 pr-1">
-                <b-button size="sm" :pressed.sync="ownerView" variant="link" v-b-popover.hover.top="'By owners or tokens'"><span v-if="ownerView"><b-icon-people-fill shift-v="+1" font-scale="1.0"></b-icon-people-fill></span><span v-else><b-icon-people shift-v="+1" font-scale="1.0"></b-icon-people></span></b-button>
-              </div>
               <div class="mt-0">
                 <b-button size="sm" :pressed.sync="showInfo" variant="link" v-b-popover.hover.top="'Show info'"><span v-if="showInfo"><b-icon-info-circle-fill shift-v="+1" font-scale="1.0"></b-icon-info-circle-fill></span><span v-else><b-icon-info-circle shift-v="+1" font-scale="1.0"></b-icon-info-circle></span></b-button>
               </div>
@@ -165,195 +162,30 @@
                 </div>
                 <div class="mt-0 flex-grow-1">
                 </div>
-                <div v-if="false" class="mt-0">
-                  <div v-if="!ownerView">
-                    <font size="-2" v-b-popover.hover.top="'# owners'">{{ filteredSortedTokensByOwners.length }}</font>
-                  </div>
-                </div>
-                <div v-if="false" class="mt-0 pr-1">
-                  <b-button size="sm" :pressed.sync="ownerView" variant="link" v-b-popover.hover.top="'By owners or tokens'"><span v-if="ownerView"><b-icon-people-fill shift-v="+1" font-scale="1.0"></b-icon-people-fill></span><span v-else><b-icon-people shift-v="+1" font-scale="1.0"></b-icon-people></span></b-button>
-                </div>
-                <div class="mt-0 flex-grow-1">
-                </div>
-
                 <div class="mt-0 pr-1">
                   <b-form-select v-if="!selectedCollection" size="sm" v-model="collectionsSortOption" :options="collectionsSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
                   <b-form-select v-if="selectedCollection" size="sm" v-model="poolsSortOption" :options="poolsSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
-                </div>
-                <div v-if="false" class="mt-0 pr-1">
-                  <div v-if="ownerView">
-                    <b-form-select size="sm" v-model="ownerSortOption" :options="ownerSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
-                  </div>
-                  <div v-else>
-                    <b-form-select size="sm" v-model="sortOption" :options="sortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
-                  </div>
                 </div>
                 <div class="mt-0 pr-1">
                   <font v-if="!selectedCollection" size="-2" v-b-popover.hover.top="'# collections'">{{ filteredCollections.length }}</font>
                   <font v-if="selectedCollection" size="-2" v-b-popover.hover.top="'# pools'">{{ filteredPools.length }}</font>
                 </div>
-                <div v-if="false" class="mt-0 pr-1">
-                  <div v-if="ownerView">
-                    <font size="-2" v-b-popover.hover.top="'# owners'">{{ filteredSortedTokensByOwners.length }}</font>
-                  </div>
-                  <div v-else>
-                    <font size="-2" v-b-popover.hover.top="'# tokens'">{{ filteredSortedCollectionTokens.length }}</font>
-                  </div>
-                </div>
                 <div class="mt-0 pr-1">
                   <b-pagination v-if="!selectedCollection" size="sm" v-model="collectionsCurrentPage" :total-rows="filteredSortedCollections.length" :per-page="collectionsPageSize" style="height: 0;"></b-pagination>
                   <b-pagination v-if="selectedCollection" size="sm" v-model="collectionsCurrentPage" :total-rows="filteredSortedCollections.length" :per-page="collectionsPageSize" style="height: 0;"></b-pagination>
                 </div>
-                <!--
-                <div v-if="false" class="mt-0 pr-1">
-                  <div v-if="ownerView">
-                    <b-pagination size="sm" v-model="ownerCurrentPage" :total-rows="filteredSortedTokensByOwners.length" :per-page="ownerPageSize" style="height: 0;"></b-pagination>
-                  </div>
-                  <div v-else>
-                    <b-pagination size="sm" v-model="currentPage" :total-rows="filteredSortedCollectionTokens.length" :per-page="pageSize" style="height: 0;"></b-pagination>
-                  </div>
-                </div>
-                -->
                 <div class="mt-0 pl-1">
                   <b-form-select v-if="!selectedCollection" size="sm" v-model="collectionsPageSize" :options="pageSizes" v-b-popover.hover.top="'Collections Page size'"></b-form-select>
                   <b-form-select v-if="selectedCollection" size="sm" v-model="poolsPageSize" :options="pageSizes" v-b-popover.hover.top="'Collections Page size'"></b-form-select>
                 </div>
-                <!--
-                <div v-if="false" class="mt-0 pl-1">
-                  <div v-if="ownerView">
-                    <b-form-select size="sm" v-model="ownerPageSize" :options="pageSizes" v-b-popover.hover.top="'Owner Page size'"></b-form-select>
-                  </div>
-                  <div v-else>
-                    <b-form-select size="sm" v-model="pageSize" :options="pageSizes" v-b-popover.hover.top="'Page size'"></b-form-select>
-                  </div>
-                </div>
-                -->
               </div>
 
 
               <b-card-body class="m-0 mt-1 p-0">
                 <b-table small fixed striped selectable responsive hover select-mode="single" :items="pagedFilteredPools" head-variant="light" v-b-popover.hover.top="'Select a pool'" class="m-0">
                 </b-table>
-
-                <br />
-                <br />
-
-                <!--
-                <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='selectedCollection=$event[0].address;' :items="pagedFilteredPools" head-variant="light" v-b-popover.hover.top="'Select an NFT collection'">
-                </b-table>
-
-                <br />
-                <br />
-
-                {{ collections[selectedCollection] }}
-                -->
               </b-card-body>
             </b-card>
-
-
-            <!--
-            <div v-if="!ownerView">
-              <b-card-group deck class="m-1 ml-0 p-0">
-                <div v-for="token in pagedFilteredCollectionTokens">
-                  <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 15rem;">
-                    <b-avatar button rounded size="15rem" :src="token.svg"></b-avatar>
-                    <b-card-text class="text-right">
-                      <div class="d-flex justify-content-between m-0 p-0">
-                        <div>
-                          <font size="-2">
-                            <b-button size="sm" :id="'popover-target-' + token.tokenId" variant="link" class="m-0 p-0">
-                              {{ token.tokenId }}
-                            </b-button>
-                            <b-popover :target="'popover-target-' + token.tokenId" placement="right">
-                              <template #title>{{ token.tokenId }}</template>
-                              <b-link :href="'https://opensea.io/assets/ethereum/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'View in opensea.io'" target="_blank">
-                                OpenSea
-                              </b-link>
-                              <br />
-                              <b-link :href="'https://looksrare.org/collections/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'View in looksrare.org'" target="_blank">
-                                LooksRare
-                              </b-link>
-                              <br />
-                              <b-link :href="'https://x2y2.io/eth/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'View in x2y2.io'" target="_blank">
-                                X2Y2
-                              </b-link>
-                              <br />
-                              <b-link :href="'https://app.indeliblelabs.io/api/png/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'Server generated PNG'" target="_blank">
-                                PNG Image
-                              </b-link>
-                            </b-popover>
-                          </font>
-                        </div>
-                        <div class="flex-grow-1">
-                        </div>
-                        <div>
-                          <font size="-1">
-                            <b-badge variant="transparent" v-b-popover.hover.bottom="'On '">{{ owner(token.tokenId) }}</b-badge>
-                          </font>
-                        </div>
-                        <div class="flex-grow-1">
-                        </div>
-                        <div v-if="token.price && token.price.price">
-                          <font size="-1">
-                            <b-badge variant="success" v-b-popover.hover.bottom="'On ' + token.price.source">{{ token.price.price }}</b-badge>
-                          </font>
-                        </div>
-                      </div>
-                    </b-card-text>
-                  </b-card>
-                </div>
-              </b-card-group>
-            </div>
-            <div v-else>
-              <b-table small :fields="ownersFields" :items="pagedFilteredSortedTokensByOwners" responsive="sm" class="m-1">
-                <template #cell(index)="data">
-                  {{ ((ownerCurrentPage - 1) * ownerPageSize) + parseInt(data.index) + 1 }}
-                </template>
-                <template #cell(owner)="data">
-                  {{ owner(data.item.tokenIds[0]) }}
-                  {{ data.item.tokenIds.length + '(' + (data.item.tokenIds.length*100/totalSupply).toFixed(2) + '%)' }}
-                </template>
-                <template #cell(tokens1)="data">
-                  <b-card-group deck class="m-1 ml-0 p-0">
-                    <div v-for="tokenId in data.item.tokenIds">
-                      <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 7rem;">
-                        <b-avatar button rounded size="7rem" :src="tokens[tokenId].svg"></b-avatar>
-                        <b-card-text class="text-right">
-                          <div class="d-flex justify-content-between m-0 p-0">
-                            <font size="-2">
-                              <b-button size="sm" :id="'popover-target-' + tokenId" variant="link" class="m-0 p-0">
-                                {{ tokenId }}
-                              </b-button>
-                              <b-popover :target="'popover-target-' + tokenId" placement="right">
-                                <template #title>{{ tokenId }}</template>
-                                <b-link :href="'https://opensea.io/assets/ethereum/' + contractAddress + '/' + tokenId" v-b-popover.hover.bottom="'View in opensea.io'" target="_blank">
-                                  OpenSea
-                                </b-link>
-                                <br />
-                                <b-link :href="'https://looksrare.org/collections/' + contractAddress + '/' + tokenId" v-b-popover.hover.bottom="'View in looksrare.org'" target="_blank">
-                                  LooksRare
-                                </b-link>
-                                <br />
-                                <b-link :href="'https://x2y2.io/eth/' + contractAddress + '/' + tokenId" v-b-popover.hover.bottom="'View in x2y2.io'" target="_blank">
-                                  X2Y2
-                                </b-link>
-                                <br />
-                                <b-link :href="'https://app.indeliblelabs.io/api/png/' + contractAddress + '/' + tokenId" v-b-popover.hover.bottom="'Server generated PNG'" target="_blank">
-                                  PNG Image
-                                </b-link>
-                              </b-popover>
-                            </font>
-                          </div>
-                          <div class="flex-grow-1">
-                          </div>
-                        </b-card-text>
-                      </b-card>
-                    </div>
-                  </b-card-group>
-                </template>
-              </b-table>
-            </div>
-            -->
           </b-card-body>
         </b-card>
       </b-container>
@@ -365,7 +197,6 @@
         data: {
           showInfo: false,
           selectedCollection: null,
-          ownerView: false,
           collectionsCurrentPage: 1,
           poolsCurrentPage: 1,
           currentPage: 0,
@@ -771,9 +602,8 @@
             console.log("doIt");
             let connected = true;
             if (!window.ethereum) {
-              alert("Please use the https://metamask.io addon with Firefox, Chromium, Opera or Chrome, or any other other web3 browser, for web3 data retrieval. And refresh!");
               connected = false;
-            } else if (!window.ethereum.isConnected()) {
+            } else {
               try {
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                 connected = window.ethereum.isConnected();
@@ -782,7 +612,9 @@
                 connected = false;
               }
             }
-            if (connected) {
+            if (!connected) {
+              alert("Please use the https://metamask.io addon with Firefox, Chromium, Opera or Chrome, or any other other web3 browser, for web3 data retrieval. And refresh!");
+            } else {
               const provider = new ethers.providers.Web3Provider(window.ethereum);
               const signer = provider.getSigner();
               const coinbase = await signer.getAddress();
@@ -792,15 +624,9 @@
               const block = await provider.getBlock("latest");
               const blockNumber = block.number;
 
-              // console.log("BlockNumber: " + blockNumber);
-
               const umswapsLength = await umswapFactory.getUmswapsLength();
-              // console.log("umswapsLength: " + umswapsLength);
-              // state.umswapFactory.umswapsLength = umswapsLength;
               var umswapsIndices = generateRange(0, parseInt(umswapsLength) - 1, 1);
-              // console.log("umswapsIndices: " + JSON.stringify(umswapsIndices));
               const umswaps = await umswapFactory.getUmswaps(coinbase, umswapsIndices);
-              // console.log("umswaps: " + JSON.stringify(umswaps, null, 2));
 
               const collections = {};
               for (let i = 0; i < umswaps[0].length; i++) {
@@ -819,21 +645,12 @@
                 const totalSupply = stats[3].toString();
                 const raters = stats[4].toString();
                 const isApprovedForAll = stats[5].toString();
-                // console.log(index + " " + address + " " + symbol + " " + name + " " + collection + " " +
-                //   JSON.stringify(validTokenIds) + " " + JSON.stringify(tokenIds.map(e => e.toString())) + " " + creator +
-                //   " swappedIn: " + swappedIn + " swappedOut: " + swappedOut + " totalScores: " + totalScores + " totalSupply: " + totalSupply + " raters: " + raters);
                 if (!(collection in collections)) {
                   collections[collection] = { address: collection, type: null, symbol: null, name: null, totalSupply: null, reservoirInfo: null, allTokens: [], sampleTokens: [], umswaps: [] };
                 }
                 const umswap = { index, address, symbol, name, collection, validTokenIds, tokenIds, creator, swappedIn, swappedOut, totalScores, totalSupply, raters, isApprovedForAll };
                 collections[collection].umswaps.push(umswap);
-
-                // if (index == state.filter.umswapIndex) {
-                //   logInfo("umswapModule", "mutations.doIt() - state.filter.umswapIndex: " + state.filter.umswapIndex);
-                //   state.umswap = umswap;
-                // }
               }
-              // console.log("collections: " + JSON.stringify(collections, null, 2));
 
               for (const [address, collection] of Object.entries(collections)) {
                 const info = await erc721Helper.tokenInfo([address]);
@@ -843,7 +660,6 @@
                 collection.totalSupply = info[3][0].toString();
 
                 let infoUrl = "https://api.reservoir.tools/collection/v2?id=" + address;
-                // logInfo("umswapModule", "mutations.doIt() - infoUrl: " + infoUrl);
                 const reservoirInfo = await fetch(infoUrl)
                   .then(handleErrors)
                   .then(response => response.json())
@@ -864,12 +680,9 @@
                      return [];
                   });
                 collection.sampleTokens = reservoirTokens && reservoirTokens.tokens || null;
-                // console.log("collection: " + JSON.stringify(collection, null, 2));
               }
-              // console.log("collections: " + JSON.stringify(collections, null, 2));
               this.collections = collections;
               localStorage.setItem('umsCollections', JSON.stringify(collections));
-
 
               // const erc721Helper = new ethers.Contract(ERC721HELPERADDRESS, ERC721HELPERABI, provider);
               // const owners = {};
