@@ -620,6 +620,7 @@
           collectionsRowSelected(item) {
             if (item && item.length > 0) {
               this.selectedCollection = this.selectedCollection != null ? null : item[0].address;
+              this.selectedPool = null;
             }
           },
           poolsRowSelected(item) {
