@@ -151,6 +151,9 @@
                 <div class="mt-0 pr-1">
                   <b-form-input type="text" size="sm" v-model.trim="searchCollection" debounce="600" v-b-popover.hover.top="'Filter by partial Umswap pool address, symbol or name'" placeholder="🔍 pool"></b-form-input>
                 </div>
+                <div class="mt-0 pr-1">
+                  <b-form-select size="sm" v-model="selectedPool" :options="poolsOptions" v-b-popover.hover.top="'Umswap Pool'"></b-form-select>
+                </div>
                 <div class="mt-1" style="width: 200px;">
                   <b-progress v-if="sync.section != null" height="1.5rem" :max="sync.total" show-progress :animated="sync.section != null" :variant="sync.section != null ? 'success' : 'secondary'" v-b-popover.hover.top="'Click on the Sync(ing) button to (un)pause'">
                     <b-progress-bar :value="sync.completed">
@@ -195,6 +198,7 @@
         data: {
           showInfo: false,
           selectedCollection: null,
+          selectedPool: null,
           collectionsCurrentPage: 1,
           poolsCurrentPage: 1,
           currentPage: 0,
@@ -284,6 +288,14 @@
           collectionsOptions() {
             const results = [];
             results.push({ value: null, text: '(select collection)' });
+            for (const collection of this.filteredSortedCollections) {
+              results.push({ value: collection.address, text: collection.symbol + ': ' + collection.name });
+            }
+            return results;
+          },
+          poolsOptions() {
+            const results = [];
+            results.push({ value: null, text: '(select pool)' });
             for (const collection of this.filteredSortedCollections) {
               results.push({ value: collection.address, text: collection.symbol + ': ' + collection.name });
             }
