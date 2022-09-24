@@ -93,7 +93,7 @@
               </div>
 
               <div v-if="!collection" class="mt-1 pr-1">
-                <b-form-select size="sm" v-model="collectionSortOption" :options="collectionSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
+                <b-form-select size="sm" v-model="collectionsSortOption" :options="collectionsSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
               </div>
               <div v-if="false" class="mt-1 pr-1">
                 <div v-if="ownerView">
@@ -103,6 +103,9 @@
                   <b-form-select size="sm" v-model="sortOption" :options="sortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
                 </div>
               </div>
+              <div v-if="!collection" class="mt-1 pr-1">
+                <font size="-2" v-b-popover.hover.top="'# collections'">{{ filteredCollections.length }}</font>
+              </div>
               <div v-if="false" class="mt-1 pr-1">
                 <div v-if="ownerView">
                   <font size="-2" v-b-popover.hover.top="'# owners'">{{ filteredSortedTokensByOwners.length }}</font>
@@ -111,6 +114,10 @@
                   <font size="-2" v-b-popover.hover.top="'# tokens'">{{ filteredSortedCollectionTokens.length }}</font>
                 </div>
               </div>
+              <div v-if="!collection" class="mt-1 pr-1">
+                <b-pagination size="sm" v-model="collectionsCurrentPage" :total-rows="filteredSortedCollections.length" :per-page="collectionsPageSize" style="height: 0;"></b-pagination>
+              </div>
+              <!--
               <div v-if="false" class="mt-1 pr-1">
                 <div v-if="ownerView">
                   <b-pagination size="sm" v-model="ownerCurrentPage" :total-rows="filteredSortedTokensByOwners.length" :per-page="ownerPageSize" style="height: 0;"></b-pagination>
@@ -119,6 +126,11 @@
                   <b-pagination size="sm" v-model="currentPage" :total-rows="filteredSortedCollectionTokens.length" :per-page="pageSize" style="height: 0;"></b-pagination>
                 </div>
               </div>
+              -->
+              <div v-if="!collection" class="mt-1 pl-1">
+                <b-form-select size="sm" v-model="collectionsPageSize" :options="pageSizes" v-b-popover.hover.top="'Collections Page size'"></b-form-select>
+              </div>
+              <!--
               <div v-if="false" class="mt-1 pl-1">
                 <div v-if="ownerView">
                   <b-form-select size="sm" v-model="ownerPageSize" :options="pageSizes" v-b-popover.hover.top="'Owner Page size'"></b-form-select>
@@ -127,13 +139,37 @@
                   <b-form-select size="sm" v-model="pageSize" :options="pageSizes" v-b-popover.hover.top="'Page size'"></b-form-select>
                 </div>
               </div>
+              -->
             </div>
-            <b-card class="m-0 mt-1 p-1 border-1">
-              <b-card-text>
-                <b-table small fixed striped :items="filteredSortedCollections" head-variant="light">
+
+
+            <b-card no-header no-body class="m-0 mt-1 p-0 border-0">
+              <b-card-body class="m-0 ml-0 p-0">
+
+                <b-table small fixed striped :fields="collectionsFields" :items="pagedFilteredCollections" head-variant="light">
+                  <template #cell(address)="data">
+                    {{ data.item.address }}
+                    <!--
+                    <b-link :href="'https://opensea.io/collection/' + data.item.address" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">
+                      {{ data.item.address }}
+                    </b-link>
+                    -->
+                  </template>
                 </b-table>
-              </b-card-text>
+
+                <!--
+                { key: 'address', label: 'Address', thStyle: 'width: 20%;' },
+                { key: 'symbol', label: 'Symbol', thStyle: 'width: 10%;' },
+                { key: 'name', label: 'Name', thStyle: 'width: 25%;' },
+                { key: 'pools', label: '#Pools', thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
+                { key: 'nftsInPool', label: '#NFTs in Pools', thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
+                <b-table small fixed striped :items="pagedFilteredCollections" head-variant="light">
+                </b-table>
+                -->
+              </b-card-body>
             </b-card>
+
+
             <b-card v-if="layer != null" no-header no-body class="m-0 mt-1 p-1 border-1">
               <b-card-group deck class="m-1 ml-0 p-0">
                 <div v-for="trait in traitOptions">
@@ -309,15 +345,17 @@
           showInfo: false,
           collection: null, // TODO
           ownerView: false,
+          collectionsCurrentPage: 1,
           currentPage: 0,
           ownerCurrentPage: 1,
-          collectionSortOption: 'nameasc', // TODO
+          collectionsSortOption: 'nameasc', // TODO
           sortOption: 'priceasc',
           ownerSortOption: 'countdsc',
+          collectionsPageSize: 100,
           pageSize: 100,
           ownerPageSize: 100,
           currentPage: 1,
-          collectionSortOptions: [  // TODO
+          collectionsSortOptions: [  // TODO
             { value: 'symbolasc', text: '▲ Symbol' },
             { value: 'symboldsc', text: '▼ Symbol' },
             { value: 'nameasc', text: '▲ Name' },
@@ -337,6 +375,7 @@
             { value: 'random', text: 'Random' },
           ],
           pageSizes: [
+            { value: 1, text: '1' }, // TODO: Delete
             { value: 10, text: '10' },
             { value: 50, text: '50' },
             { value: 100, text: '100' },
@@ -344,6 +383,13 @@
             { value: 1000, text: '1k' },
             { value: 2500, text: '2.5k' },
             { value: 10000, text: '10k' },
+          ],
+          collectionsFields: [
+            { key: 'address', label: 'Address', thStyle: 'width: 20%;', tdClass: 'text-truncate' },
+            { key: 'symbol', label: 'Symbol', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
+            { key: 'name', label: 'Name', thStyle: 'width: 25%;', tdClass: 'text-truncate' },
+            { key: 'pools', label: '#Pools', thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
+            { key: 'nftsInPool', label: '#NFTs in Pools', thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
           ],
           ownersFields: [
             { key: 'index', label: '#' },
@@ -413,7 +459,7 @@
             return collator;
           },
           filteredCollections() {
-            const results = this.collectionSortOption ? [] : [];
+            const results = this.collectionsSortOption ? [] : [];
             const searchLower = this.searchCollection && this.searchCollection.toLowerCase() || null;
             for (const [k, v] of Object.entries(this.collections)) {
               if (searchLower == null ||
@@ -421,7 +467,10 @@
                 (v.name && v.name.toLowerCase().includes(searchLower)) ||
                 (v.address && v.address.toLowerCase().includes(searchLower))
               ) {
-                results.push(v);
+                // TODO Remove
+                // for (let dup = 0; dup < 1000; dup++) {
+                  results.push(v);
+                // }
               }
             }
             return results;
@@ -442,6 +491,14 @@
               });
             }
             return results;
+          },
+          pagedFilteredCollections() {
+            console.log("this.collectionsCurrentPage: " + this.collectionsCurrentPage);
+            console.log("this.collectionsPageSize: " + this.collectionsPageSize);
+            console.log("pagedFilteredCollections: " + JSON.stringify(this.filteredSortedCollections));
+            const result = this.filteredSortedCollections.slice((this.collectionsCurrentPage - 1) * this.collectionsPageSize, this.collectionsCurrentPage * this.collectionsPageSize);
+            console.log("pagedFilteredCollections - result: " + JSON.stringify(result));
+            return result;
           },
           filteredCollectionTokens() {
             let stage1Data = this.selectedTraits ? [] : [];
