@@ -64,11 +64,9 @@
               </div>
               <div class="mt-1 flex-grow-1">
               </div>
-              <div v-if="!selectedCollection" class="mt-1 pr-1">
-                <b-button :disabled="sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Sync UmswapFactory via the web3 connection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Sync</b-button>
-              </div>
-              <div v-if="selectedCollection" class="mt-1">
-                <b-button :disabled="sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Sync collection info'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Pools</b-button>
+              <div class="mt-1 pr-1">
+                <b-button v-if="!selectedCollection" :disabled="sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Sync UmswapFactory via the web3 connection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Sync</b-button>
+                <b-button v-if="selectedCollection" :disabled="sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Sync collection info'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Pools</b-button>
               </div>
               <div class="mt-1 flex-grow-1">
               </div>
@@ -95,8 +93,9 @@
               <div class="mt-1 flex-grow-1">
               </div>
 
-              <div v-if="!selectedCollection" class="mt-1 pr-1">
-                <b-form-select size="sm" v-model="collectionsSortOption" :options="collectionsSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
+              <div class="mt-1 pr-1">
+                <b-form-select v-if="!selectedCollection" size="sm" v-model="collectionsSortOption" :options="collectionsSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
+                <b-form-select v-if="selectedCollection" size="sm" v-model="poolsSortOption" :options="poolsSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
               </div>
               <div v-if="false" class="mt-1 pr-1">
                 <div v-if="ownerView">
@@ -106,8 +105,9 @@
                   <b-form-select size="sm" v-model="sortOption" :options="sortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
                 </div>
               </div>
-              <div v-if="!selectedCollection" class="mt-1 pr-1">
-                <font size="-2" v-b-popover.hover.top="'# collections'">{{ filteredCollections.length }}</font>
+              <div class="mt-1 pr-1">
+                <font v-if="!selectedCollection" size="-2" v-b-popover.hover.top="'# collections'">{{ filteredCollections.length }}</font>
+                <font v-if="selectedCollection" size="-2" v-b-popover.hover.top="'# pools'">{{ filteredPools.length }}</font>
               </div>
               <div v-if="false" class="mt-1 pr-1">
                 <div v-if="ownerView">
@@ -117,8 +117,9 @@
                   <font size="-2" v-b-popover.hover.top="'# tokens'">{{ filteredSortedCollectionTokens.length }}</font>
                 </div>
               </div>
-              <div v-if="!selectedCollection" class="mt-1 pr-1">
-                <b-pagination size="sm" v-model="collectionsCurrentPage" :total-rows="filteredSortedCollections.length" :per-page="collectionsPageSize" style="height: 0;"></b-pagination>
+              <div class="mt-1 pr-1">
+                <b-pagination v-if="!selectedCollection" size="sm" v-model="collectionsCurrentPage" :total-rows="filteredSortedCollections.length" :per-page="collectionsPageSize" style="height: 0;"></b-pagination>
+                <b-pagination v-if="selectedCollection" size="sm" v-model="collectionsCurrentPage" :total-rows="filteredSortedCollections.length" :per-page="collectionsPageSize" style="height: 0;"></b-pagination>
               </div>
               <!--
               <div v-if="false" class="mt-1 pr-1">
@@ -130,8 +131,9 @@
                 </div>
               </div>
               -->
-              <div v-if="!selectedCollection" class="mt-1 pl-1">
-                <b-form-select size="sm" v-model="collectionsPageSize" :options="pageSizes" v-b-popover.hover.top="'Collections Page size'"></b-form-select>
+              <div class="mt-1 pl-1">
+                <b-form-select v-if="!selectedCollection" size="sm" v-model="collectionsPageSize" :options="pageSizes" v-b-popover.hover.top="'Collections Page size'"></b-form-select>
+                <b-form-select v-if="selectedCollection" size="sm" v-model="poolsPageSize" :options="pageSizes" v-b-popover.hover.top="'Collections Page size'"></b-form-select>
               </div>
               <!--
               <div v-if="false" class="mt-1 pl-1">
@@ -250,8 +252,18 @@
 
             <b-card v-if="selectedCollection" no-header no-body class="m-0 mt-1 p-0 border-0">
               <b-card-body class="m-0 ml-0 p-0">
-                <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='selectedCollection=$event[0].address;' :items="collections[selectedCollection].umswaps" head-variant="light" v-b-popover.hover.top="'Select an NFT collection'">
+                <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='selectedCollection=$event[0].address;' :items="pagedFilteredPools" head-variant="light" v-b-popover.hover.top="'Select an NFT collection'">
                 </b-table>
+
+                <br />
+                <br />
+
+                <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='selectedCollection=$event[0].address;' :items="pagedFilteredPools" head-variant="light" v-b-popover.hover.top="'Select an NFT collection'">
+                </b-table>
+
+                <br />
+                <br />
+
                 {{ collections[selectedCollection] }}
               </b-card-body>
             </b-card>
@@ -374,16 +386,26 @@
           selectedCollection: null,
           ownerView: false,
           collectionsCurrentPage: 1,
+          poolsCurrentPage: 1,
           currentPage: 0,
           ownerCurrentPage: 1,
           collectionsSortOption: 'nameasc',
+          poolsSortOption: 'nameasc',
           sortOption: 'priceasc',
           ownerSortOption: 'countdsc',
           collectionsPageSize: 100,
+          poolsPageSize: 100,
           pageSize: 100,
           ownerPageSize: 100,
           currentPage: 1,
           collectionsSortOptions: [
+            { value: 'symbolasc', text: '▲ Symbol' },
+            { value: 'symboldsc', text: '▼ Symbol' },
+            { value: 'nameasc', text: '▲ Name' },
+            { value: 'namedsc', text: '▼ Name' },
+            { value: 'random', text: 'Random' },
+          ],
+          poolsSortOptions: [
             { value: 'symbolasc', text: '▲ Symbol' },
             { value: 'symboldsc', text: '▼ Symbol' },
             { value: 'nameasc', text: '▲ Name' },
@@ -528,6 +550,45 @@
           },
           pagedFilteredCollections() {
             return this.filteredSortedCollections.slice((this.collectionsCurrentPage - 1) * this.collectionsPageSize, this.collectionsCurrentPage * this.collectionsPageSize);
+          },
+          filteredPools() {
+            const results = this.selectedCollection ? [] : [];
+            if (this.collections[this.selectedCollection]) {
+              for (const umswap of this.collections[this.selectedCollection].umswaps) {
+                results.push(umswap);
+              }
+            }
+            // const searchLower = this.searchCollections && this.searchCollections.toLowerCase() || null;
+            // for (const [k, v] of Object.entries(this.collections)) {
+            //   if (searchLower == null ||
+            //     (v.symbol && v.symbol.toLowerCase().includes(searchLower)) ||
+            //     (v.name && v.name.toLowerCase().includes(searchLower)) ||
+            //     (v.address && v.address.toLowerCase().includes(searchLower))
+            //   ) {
+            //     results.push(v);
+            //   }
+            // }
+            return results;
+          },
+          filteredSortedPools() {
+            let results = this.filteredPools;
+            if (this.poolsSortOption == 'symbolasc') {
+              results.sort((a, b) => ('' + a.symbol).localeCompare(b.symbol))
+            } else if (this.poolsSortOption == 'symboldsc') {
+              results.sort((a, b) => ('' + b.symbol).localeCompare(a.symbol))
+            } else if (this.poolsSortOption == 'nameasc') {
+              results.sort((a, b) => ('' + a.name).localeCompare(b.name))
+            } else if (this.poolsSortOption == 'namedsc') {
+              results.sort((a, b) => ('' + b.name).localeCompare(a.name))
+            } else {
+              results.sort(() => {
+                return Math.random() - 0.5;
+              });
+            }
+            return results;
+          },
+          pagedFilteredPools() {
+            return this.filteredSortedPools.slice((this.poolsCurrentPage - 1) * this.poolsPageSize, this.poolsCurrentPage * this.poolsPageSize);
           },
           filteredCollectionTokens() {
             let stage1Data = this.selectedTraits ? [] : [];
