@@ -54,7 +54,7 @@
           <b-card-body class="m-0 p-1">
             <div class="d-flex flex-wrap m-0 p-0">
               <div v-if="!selectedCollection" class="mt-1 pr-1">
-                <b-form-input type="text" size="sm" v-model.trim="searchCollection" debounce="600" v-b-popover.hover.top="'Filter by ERC-721 NFT collection'" placeholder="collection name/addy"></b-form-input>
+                <b-form-input type="text" size="sm" v-model.trim="searchCollections" debounce="600" v-b-popover.hover.top="'Filter by ERC-721 NFT collection'" placeholder="collection name/addy"></b-form-input>
               </div>
               <div class="mt-1 pr-1">
                 <b-form-select size="sm" v-model="selectedCollection" :options="collectionsOptions" v-b-popover.hover.top="'ERC-721 NFT Collection'"></b-form-select>
@@ -414,6 +414,7 @@
             { key: 'owner', label: 'Owner' },
             { key: 'tokens1', label: 'Tokens' },
           ],
+          searchCollections: null,
           searchCollection: null,
           layer: null,
           collections: {},
@@ -487,7 +488,7 @@
           },
           filteredCollections() {
             const results = this.collectionsSortOption ? [] : [];
-            const searchLower = this.searchCollection && this.searchCollection.toLowerCase() || null;
+            const searchLower = this.searchCollections && this.searchCollections.toLowerCase() || null;
             for (const [k, v] of Object.entries(this.collections)) {
               if (searchLower == null ||
                 (v.symbol && v.symbol.toLowerCase().includes(searchLower)) ||
@@ -520,12 +521,7 @@
             return results;
           },
           pagedFilteredCollections() {
-            console.log("this.collectionsCurrentPage: " + this.collectionsCurrentPage);
-            console.log("this.collectionsPageSize: " + this.collectionsPageSize);
-            console.log("pagedFilteredCollections: " + JSON.stringify(this.filteredSortedCollections));
-            const result = this.filteredSortedCollections.slice((this.collectionsCurrentPage - 1) * this.collectionsPageSize, this.collectionsCurrentPage * this.collectionsPageSize);
-            console.log("pagedFilteredCollections - result: " + JSON.stringify(result));
-            return result;
+            return this.filteredSortedCollections.slice((this.collectionsCurrentPage - 1) * this.collectionsPageSize, this.collectionsCurrentPage * this.collectionsPageSize);
           },
           filteredCollectionTokens() {
             let stage1Data = this.selectedTraits ? [] : [];
@@ -558,8 +554,8 @@
               }
             }
             let results = stage1Data;
-            if (this.searchCollection != null && this.searchCollection.length > 0) {
-              const searchCollections = this.searchCollection.split(/[, \t\n]+/).map(s => s.toLowerCase());
+            if (this.searchCollections != null && this.searchCollections.length > 0) {
+              const searchCollections = this.searchCollections.split(/[, \t\n]+/).map(s => s.toLowerCase());
               results = [];
               for (let i in stage1Data) {
                 const d = stage1Data[i];
