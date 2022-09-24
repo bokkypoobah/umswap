@@ -181,9 +181,8 @@
                 </div>
               </div>
 
-
               <b-card-body class="m-0 mt-1 p-0">
-                <b-table small fixed striped selectable responsive hover select-mode="single" :fields="poolsFields" :items="pagedFilteredPools" head-variant="light" class="m-0">
+                <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='poolsRowSelected' :fields="poolsFields" :items="selectedPool ? getSelectedPool : pagedFilteredPools" head-variant="light" class="m-0">
                   <template #cell(address)="data">
                     <b-link :href="'https://etherscan.io/token/' + data.item.address" v-b-popover.hover.bottom="'View Umswap pool contract in Etherscan.io'" target="_blank">
                       {{ data.item.address }}
@@ -447,6 +446,17 @@
           pagedFilteredPools() {
             return this.filteredSortedPools.slice((this.poolsCurrentPage - 1) * this.poolsPageSize, this.poolsCurrentPage * this.poolsPageSize);
           },
+          getSelectedPool() {
+            const results = this.selectedCollection ? [] : [];
+            if (this.collections[this.selectedCollection]) {
+              for (const umswap of this.collections[this.selectedCollection].umswaps) {
+                if (this.selectedPool == umswap.address) {
+                  results.push(umswap);
+                }
+              }
+            }
+            return results;
+          },
           // filteredCollectionTokens() {
           //   let stage1Data = this.selectedTraits ? [] : [];
           //   console.log("filteredCollectionTokens: " + JSON.stringify(this.selectedTraits));
@@ -587,6 +597,11 @@
           collectionsRowSelected(item) {
             if (item && item.length > 0) {
               this.selectedCollection = item[0].address;
+            }
+          },
+          poolsRowSelected(item) {
+            if (item && item.length > 0) {
+              this.selectedPool = item[0].address;
             }
           },
           toggleTrait(layer, trait) {
