@@ -183,6 +183,22 @@
 
 
               <b-card-body class="m-0 mt-1 p-0">
+                <b-table small fixed striped selectable responsive hover select-mode="single" :fields="poolsFields" :items="pagedFilteredPools" head-variant="light" class="m-0">
+                  <template #cell(address)="data">
+                    <b-link :href="'https://etherscan.io/token/' + data.item.address" v-b-popover.hover.bottom="'View Umswap pool contract in Etherscan.io'" target="_blank">
+                      {{ data.item.address }}
+                    </b-link>
+                  </template>
+                  <template #cell(symbol)="data">
+                    <b-link :href="'https://opensea.io/' + data.item.address" v-b-popover.hover.bottom="'View pool wallet in Opensea.io'" target="_blank">
+                      {{ data.item.symbol }}
+                    </b-link>
+                  </template>
+                  <template #cell(name)="data">
+                    {{ data.item.name }}
+                  </template>
+                </b-table>
+                <br />
                 <b-table small fixed striped selectable responsive hover select-mode="single" :items="pagedFilteredPools" head-variant="light" class="m-0">
                 </b-table>
               </b-card-body>
@@ -250,6 +266,13 @@
           ],
           collectionsFields: [
             { key: 'address', label: 'Collection', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
+            { key: 'symbol', label: 'Symbol', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
+            { key: 'name', label: 'Name', thStyle: 'width: 35%;', tdClass: 'text-truncate' },
+            { key: 'pools', label: '# Pools', thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
+            { key: 'nftsInPool', label: '∑ NFTs', thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
+          ],
+          poolsFields: [
+            { key: 'address', label: 'Pool', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
             { key: 'symbol', label: 'Symbol', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
             { key: 'name', label: 'Name', thStyle: 'width: 35%;', tdClass: 'text-truncate' },
             { key: 'pools', label: '# Pools', thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
