@@ -226,9 +226,17 @@
               <b-card-body class="m-0 ml-0 p-0">
                 <b-table small fixed striped selectable select-mode="single" @row-selected='selectedCollection=$event[0].address;' :fields="collectionsFields" :items="pagedFilteredCollections" head-variant="light">
                   <template #cell(address)="data">
-                    <b-link :href="'https://opensea.io/collection/' + data.item.reservoirInfo.slug" v-b-popover.hover.bottom="'View collection in Opensea.io'" target="_blank">
+                    <b-link :href="'https://etherscan.io/token/' + data.item.address" v-b-popover.hover.bottom="'View ERC-721 NFT collection contract in Etherscan.io'" target="_blank">
                       {{ data.item.address }}
                     </b-link>
+                  </template>
+                  <template #cell(symbol)="data">
+                    <b-link :href="'https://opensea.io/collection/' + data.item.reservoirInfo.slug" v-b-popover.hover.bottom="'View collection in Opensea.io'" target="_blank">
+                      {{ data.item.symbol }}
+                    </b-link>
+                  </template>
+                  <template #cell(name)="data">
+                    {{ data.item.name }}
                   </template>
                   <template #cell(pools)="data">
                     {{ data.item.umswaps.length }}
