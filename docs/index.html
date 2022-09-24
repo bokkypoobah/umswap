@@ -197,6 +197,15 @@
                   <template #cell(name)="data">
                     {{ data.item.name }}
                   </template>
+                  <template #cell(swappedIn)="data">
+                    {{ data.item.swappedIn }}
+                  </template>
+                  <template #cell(swappedOut)="data">
+                    {{ data.item.swappedOut }}
+                  </template>
+                  <template #cell(totalSupply)="data">
+                    {{ formatETH(data.item.totalSupply) }}
+                  </template>
                 </b-table>
                 <br />
                 <b-table small fixed striped selectable responsive hover select-mode="single" :items="pagedFilteredPools" head-variant="light" class="m-0">
@@ -275,8 +284,9 @@
             { key: 'address', label: 'Pool', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
             { key: 'symbol', label: 'Symbol', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
             { key: 'name', label: 'Name', thStyle: 'width: 35%;', tdClass: 'text-truncate' },
-            { key: 'pools', label: '# Pools', thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
-            { key: 'nftsInPool', label: '∑ NFTs', thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
+            { key: 'swappedIn', label: '# In', thStyle: 'width: 15%;', thClass: 'text-right', tdClass: 'text-right' },
+            { key: 'swappedOut', label: '# Out', thStyle: 'width: 15%;', thClass: 'text-right', tdClass: 'text-right' },
+            { key: 'totalSupply', label: 'Total Supply', thStyle: 'width: 15%;', thClass: 'text-right', tdClass: 'text-right' },
           ],
           ownersFields: [
             { key: 'index', label: '#' },
@@ -567,6 +577,13 @@
           // },
         },
         methods: {
+          formatETH(e) {
+            try {
+              return e ? ethers.utils.commify(ethers.utils.formatEther(e)) : null;
+            } catch (err) {
+            }
+            return e.toFixed(9);
+          },
           collectionsRowSelected(item) {
             if (item && item.length > 0) {
               this.selectedCollection = item[0].address;
