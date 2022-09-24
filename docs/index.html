@@ -53,14 +53,13 @@
           <b-card-body class="m-0 p-1">
             <div class="d-flex flex-wrap m-0 p-0">
               <div class="mt-0 pr-1">
+                <b-button :disabled="selectedCollection != null || sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 40px;" v-b-popover.hover.top="'Sync overview'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download></b-button>
+              </div>
+              <div class="mt-0 pr-1">
                 <b-form-input type="text" size="sm" v-model.trim="searchCollections" debounce="600" v-b-popover.hover.top="'Filter by ERC-721 NFT collection'" placeholder="collection name/addy"></b-form-input>
               </div>
               <div class="mt-0 pr-1">
                 <b-form-select size="sm" v-model="selectedCollection" :options="collectionsOptions" v-b-popover.hover.top="'ERC-721 NFT Collection'"></b-form-select>
-              </div>
-              <div class="mt-0 pr-1">
-                <b-button :disabled="selectedCollection != null || sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Sync UmswapFactory via the web3 connection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Sync Overview</b-button>
-                <!-- <b-button v-if="selectedCollection" :disabled="sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Sync collection info'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Pools</b-button> -->
               </div>
               <div class="mt-1" style="width: 200px;">
                 <b-progress v-if="sync.section != null" height="1.5rem" :max="sync.total" show-progress :animated="sync.section != null" :variant="sync.section != null ? 'success' : 'secondary'" v-b-popover.hover.top="'Click on the Sync(ing) button to (un)pause'">
@@ -71,11 +70,6 @@
               </div>
               <div class="mt-0 flex-grow-1">
               </div>
-              <div v-if="false" class="mt-0">
-                <div v-if="!ownerView">
-                  <font size="-2" v-b-popover.hover.top="'# owners'">{{ filteredSortedTokensByOwners.length }}</font>
-                </div>
-              </div>
               <div v-if="false" class="mt-0 pr-1">
                 <b-button size="sm" :pressed.sync="ownerView" variant="link" v-b-popover.hover.top="'By owners or tokens'"><span v-if="ownerView"><b-icon-people-fill shift-v="+1" font-scale="1.0"></b-icon-people-fill></span><span v-else><b-icon-people shift-v="+1" font-scale="1.0"></b-icon-people></span></b-button>
               </div>
@@ -84,89 +78,22 @@
               </div>
               <div class="mt-0 flex-grow-1">
               </div>
-
               <div class="mt-0 pr-1">
                 <b-form-select :disabled="selectedCollection != null" size="sm" v-model="collectionsSortOption" :options="collectionsSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
-              </div>
-              <div v-if="false" class="mt-0 pr-1">
-                <div v-if="ownerView">
-                  <b-form-select size="sm" v-model="ownerSortOption" :options="ownerSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
-                </div>
-                <div v-else>
-                  <b-form-select size="sm" v-model="sortOption" :options="sortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
-                </div>
               </div>
               <div class="mt-0 pr-1">
                 <font size="-2" v-b-popover.hover.top="'# collections'">{{ selectedCollection ? 1 : filteredCollections.length }}</font>
               </div>
-              <div v-if="false" class="mt-0 pr-1">
-                <div v-if="ownerView">
-                  <font size="-2" v-b-popover.hover.top="'# owners'">{{ filteredSortedTokensByOwners.length }}</font>
-                </div>
-                <div v-else>
-                  <font size="-2" v-b-popover.hover.top="'# tokens'">{{ filteredSortedCollectionTokens.length }}</font>
-                </div>
-              </div>
               <div class="mt-0 pr-1">
                 <b-pagination :disabled="selectedCollection != null" size="sm" v-model="collectionsCurrentPage" :total-rows="filteredSortedCollections.length" :per-page="collectionsPageSize" style="height: 0;"></b-pagination>
               </div>
-              <!--
-              <div v-if="false" class="mt-0 pr-1">
-                <div v-if="ownerView">
-                  <b-pagination size="sm" v-model="ownerCurrentPage" :total-rows="filteredSortedTokensByOwners.length" :per-page="ownerPageSize" style="height: 0;"></b-pagination>
-                </div>
-                <div v-else>
-                  <b-pagination size="sm" v-model="currentPage" :total-rows="filteredSortedCollectionTokens.length" :per-page="pageSize" style="height: 0;"></b-pagination>
-                </div>
-              </div>
-              -->
               <div class="mt-0 pl-1">
                 <b-form-select :disabled="selectedCollection != null" size="sm" v-model="collectionsPageSize" :options="pageSizes" v-b-popover.hover.top="'Collections Page size'"></b-form-select>
               </div>
-              <!--
-              <div v-if="false" class="mt-1 pl-1">
-                <div v-if="ownerView">
-                  <b-form-select size="sm" v-model="ownerPageSize" :options="pageSizes" v-b-popover.hover.top="'Owner Page size'"></b-form-select>
-                </div>
-                <div v-else>
-                  <b-form-select size="sm" v-model="pageSize" :options="pageSizes" v-b-popover.hover.top="'Page size'"></b-form-select>
-                </div>
-              </div>
-              -->
             </div>
 
-
-            <!--
-            <b-card v-if="layer != null" no-header no-body class="m-0 mt-1 p-1 border-1">
-              <b-card-group deck class="m-1 ml-0 p-0">
-                <div v-for="trait in traitOptions">
-                  <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 7rem;">
-                    <b-avatar button @click="toggleTrait(layer, trait.value)" rounded size="7rem" :src="getSVG(layer, trait.value)">
-                      <template v-if="selectedTraits[layer] && selectedTraits[layer][trait.value]" #badge><b-icon icon="check"></b-icon></template>
-                    </b-avatar>
-                    <b-card-text class="text-right">
-                      <div class="d-flex justify-content-between m-0 p-0">
-                        <div>
-                          <font size="-2">
-                            <b-badge variant="light" v-b-popover.hover.bottom="'blah'">{{ trait.text }}</b-badge>
-                          </font>
-                        </div>
-                        <div class="flex-grow-1">
-                        </div>
-                        <div>
-                          <font size="-2">
-                            <b-badge variant="light" v-b-popover.hover.bottom="'#tokens'">{{ collectionTokensAttributesWithCounts[layer][trait.value] && collectionTokensAttributesWithCounts[layer][trait.value].length || 0 }}</b-badge>
-                          </font>
-                        </div>
-                      </div>
-                    </b-card-text>
-                  </b-card>
-                </div>
-              </b-card-group>
-            </b-card>
-            -->
             <div v-if="showInfo">
-              <b-card no-header no-body class="mx-0 my-2 p-0">
+              <b-card no-header no-body class="mx-0 my-1 p-0">
                 <b-card-body class="m-0 p-0">
                   <b-card-text class="m-1 p-1">
                     <b-form-group label-cols="2" label-size="sm" label-align="right" label="" class="mx-0 mt-3 p-0">
@@ -179,26 +106,9 @@
                       <br />
                       WARNING: Experimental un-audited software!
                     </b-form-group>
-                    <!--
-                    <b-form-group label-cols="2" label-size="sm" label-align="right" label="Collection:" class="mx-0 my-1 p-0">
-                      <b-form-input type="text" readonly size="sm" :value="info.name" class="w-50"></b-form-input>
-                    </b-form-group>
-                    -->
                     <b-form-group label-cols="2" label-size="sm" label-align="right" label="UmswapFactory:" class="mx-0 my-1 p-0">
                       <b-link :href="'https://etherscan.io/address/' + umswapFactoryAddress + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ umswapFactoryAddress }}</b-link>
                     </b-form-group>
-                    <!--
-                    <b-form-group label-cols="2" label-size="sm" label-align="right" label="Collection Owner:" class="mx-0 my-1 p-0">
-                      <b-link :href="'https://twitter.com/proofofpepe'" v-b-popover.hover.bottom="'View in Twitter.com'" target="_blank">@proofofpepe</b-link>
-                    </b-form-group>
-                    <b-form-group label-cols="2" label-size="sm" label-align="right" label="Markets:" class="mx-0 my-1 p-0">
-                      <b-link :href="'https://opensea.io/collection/proofofpepe'" target="_blank">OpenSea.io</b-link>,
-                      <b-link :href="'https://looksrare.org/collections/' + contractAddress" target="_blank">LooksRare.org</b-link>,
-                      <b-link :href="'https://x2y2.io/collection/proofofpepe/items'" target="_blank">X2Y2.io</b-link>,
-                      <b-link :href="'https://sudoswap.xyz/#/browse/pools/' + contractAddress" target="_blank">sudoswap.xyz</b-link>,
-                      <b-link :href="'https://www.gem.xyz/collection/proofofpepe/'" target="_blank">gem.xyz</b-link>
-                    </b-form-group>
-                    -->
                     <b-form-group label-cols="2" label-size="sm" label-align="right" label="This Dapp GitHub:" class="mx-0 my-1 p-0">
                       <b-link :href="'https://github.com/bokkypoobah/umswap'" v-b-popover.hover.bottom="'View in GitHub.com. Feel free to clone and improve'" target="_blank">https://github.com/bokkypoobah/umswap</b-link>
                     </b-form-group>
@@ -212,13 +122,8 @@
               </b-card>
             </div>
 
-            <!-- <b-card v-if="!selectedCollection" no-header no-body class="m-0 mt-1 p-0 border-0"> -->
             <b-card no-header no-body class="m-0 mt-1 p-0 border-0">
               <b-card-body class="m-0 p-0">
-                <!--
-                collectionsRowSelected
-                <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='selectedCollection=$event && $event.length > 0 && $event[0].address || null;' :fields="collectionsFields" :items="selectedCollection ? [collections[selectedCollection]] : pagedFilteredCollections" head-variant="light" v-b-popover.hover.top="'Select an NFT collection'" class="m-0">
-                -->
                 <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='collectionsRowSelected' :fields="collectionsFields" :items="selectedCollection ? [collections[selectedCollection]] : pagedFilteredCollections" head-variant="light" class="m-0">
                   <template #cell(address)="data">
                     <b-link :href="'https://etherscan.io/token/' + data.item.address" v-b-popover.hover.bottom="'View ERC-721 NFT collection contract in Etherscan.io'" target="_blank">
@@ -243,14 +148,13 @@
               </b-card-body>
             </b-card>
 
-            <b-card v-if="selectedCollection" no-header no-body class="m-0 mt-1 p-1 border-1">
-
+            <b-card v-if="selectedCollection != null" no-header no-body class="m-0 mt-1 p-1 border-1">
               <div class="d-flex flex-wrap m-0 p-0">
                 <div class="mt-0 pr-1">
-                  <b-form-input type="text" size="sm" v-model.trim="searchCollection" debounce="600" v-b-popover.hover.top="'Filter by tokenId'" placeholder="tokenId"></b-form-input>
+                  <b-button :disabled="sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 40px;" v-b-popover.hover.top="'Sync collection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download></b-button>
                 </div>
                 <div class="mt-0 pr-1">
-                  <b-button :disabled="sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Sync collection info'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Collection</b-button>
+                  <b-form-input type="text" size="sm" v-model.trim="searchCollection" debounce="600" v-b-popover.hover.top="'Filter by tokenId'" placeholder="tokenId"></b-form-input>
                 </div>
                 <div class="mt-1" style="width: 200px;">
                   <b-progress v-if="sync.section != null" height="1.5rem" :max="sync.total" show-progress :animated="sync.section != null" :variant="sync.section != null ? 'success' : 'secondary'" v-b-popover.hover.top="'Click on the Sync(ing) button to (un)pause'">
