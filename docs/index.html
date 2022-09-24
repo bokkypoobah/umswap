@@ -53,7 +53,7 @@
           <b-card-body class="m-0 p-1">
             <div class="d-flex flex-wrap m-0 p-0">
               <div class="mt-0 pr-1">
-                <b-button :disabled="selectedCollection != null || sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 40px;" v-b-popover.hover.top="'Sync overview'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download></b-button>
+                <b-button :disabled="selectedCollection != null || sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 40px;" v-b-popover.hover.top="'Sync UmswapFactory'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download></b-button>
               </div>
               <div class="mt-0 pr-1">
                 <b-form-input type="text" size="sm" v-model.trim="searchCollections" debounce="600" v-b-popover.hover.top="'Filter by partial ERC-721 NFT collection address, symbol or name'" placeholder="🔍 collection"></b-form-input>
@@ -146,7 +146,7 @@
             <b-card v-if="selectedCollection != null" no-header no-body class="m-0 mt-1 p-1 border-1">
               <div class="d-flex flex-wrap m-0 p-0">
                 <div class="mt-0 pr-1">
-                  <b-button :disabled="sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 40px;" v-b-popover.hover.top="'Sync collection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download></b-button>
+                  <b-button :disabled="sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 40px;" v-b-popover.hover.top="'Sync UmswapFactory and collection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download></b-button>
                 </div>
                 <div class="mt-0 pr-1">
                   <b-form-input type="text" size="sm" v-model.trim="searchCollection" debounce="600" v-b-popover.hover.top="'Filter by partial Umswap pool address, symbol or name'" placeholder="🔍 pool"></b-form-input>
