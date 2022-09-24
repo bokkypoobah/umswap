@@ -213,33 +213,25 @@
 
                 <b-table small fixed striped :fields="collectionsFields" :items="pagedFilteredCollections" head-variant="light">
                   <template #cell(address)="data">
-                    {{ data.item.address }}
-                    <!--
-                    <b-link :href="'https://opensea.io/collection/' + data.item.address" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">
+                    <b-link :href="'https://opensea.io/collection/' + data.item.reservoirInfo.slug" v-b-popover.hover.bottom="'View collection in Opensea.io'" target="_blank">
                       {{ data.item.address }}
                     </b-link>
-                    -->
                   </template>
                   <template #cell(pools)="data">
-                    {{ data.item.address }}
+                    {{ data.item.umswaps.length }}
                   </template>
                   <template #cell(nftsInPool)="data">
-                    {{ data.item.address }}
+                    {{ JSON.stringify(data.item.umswaps.map(e => e.tokenIds.length).reduce((r, n) => r + n)) }}
                   </template>
                 </b-table>
 
                 <!--
-                { key: 'address', label: 'Address', thStyle: 'width: 20%;' },
-                { key: 'symbol', label: 'Symbol', thStyle: 'width: 10%;' },
-                { key: 'name', label: 'Name', thStyle: 'width: 25%;' },
-                { key: 'pools', label: '#Pools', thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
-                { key: 'nftsInPool', label: '#NFTs in Pools', thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
                 <b-table small fixed striped :items="pagedFilteredCollections" head-variant="light">
                 </b-table>
                 -->
               </b-card-body>
             </b-card>
-            
+
             <!--
             <div v-if="!ownerView">
               <b-card-group deck class="m-1 ml-0 p-0">
@@ -396,9 +388,9 @@
             { value: 10000, text: '10k' },
           ],
           collectionsFields: [
-            { key: 'address', label: 'Address', thStyle: 'width: 20%;', tdClass: 'text-truncate' },
+            { key: 'address', label: 'Address', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
             { key: 'symbol', label: 'Symbol', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            { key: 'name', label: 'Name', thStyle: 'width: 25%;', tdClass: 'text-truncate' },
+            { key: 'name', label: 'Name', thStyle: 'width: 35%;', tdClass: 'text-truncate' },
             { key: 'pools', label: '#Pools', thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
             { key: 'nftsInPool', label: '#NFTs in Pools', thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
           ],
