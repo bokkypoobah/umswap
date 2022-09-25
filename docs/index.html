@@ -122,8 +122,23 @@
             <b-card no-header no-body class="m-0 mt-1 p-0 border-0">
               <b-card-body class="m-0 p-0">
                 <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='collectionsRowSelected' :fields="collectionsFields" :items="selectedCollection ? [collections[selectedCollection]] : pagedFilteredCollections" head-variant="light" class="m-0">
+                  <template #head(address)="data">
+                    <span v-b-popover.hover="'ERC-721 NFT collection contract address'">{{ data.label }}</span>
+                  </template>
+                  <template #head(symbol)="data">
+                    <span v-b-popover.hover="'ERC-721 NFT collection symbol'">{{ data.label }}</span>
+                  </template>
+                  <template #head(name)="data">
+                    <span v-b-popover.hover="'ERC-721 NFT collection name'">{{ data.label }}</span>
+                  </template>
+                  <template #head(pools)="data">
+                    <span v-b-popover.hover="'Number of Umswap pools for this collection'">{{ data.label }}</span>
+                  </template>
+                  <template #head(nftsInPool)="data">
+                    <span v-b-popover.hover="'Number of NFTs across all Umswap pools for this collection'">{{ data.label }}</span>
+                  </template>
                   <template #cell(address)="data">
-                    <b-link :href="'https://etherscan.io/token/' + data.item.address" v-b-popover.hover.bottom="'View ERC-721 NFT collection contract in Etherscan.io'" target="_blank">
+                    <b-link :href="'https://etherscan.io/token/' + data.item.address" v-b-popover.hover.bottom="'View contract in Etherscan.io'" target="_blank">
                       {{ data.item.address }}
                     </b-link>
                   </template>
@@ -776,6 +791,7 @@
                      // Want to work around API data unavailablity - state.sync.error = true;
                      return [];
                   });
+                console.log(JSON.stringify(reservoirInfo, null, 2));
                 collection.reservoirInfo = reservoirInfo && reservoirInfo.collection || null;
 
                 let tokensUrl = "https://api.reservoir.tools/tokens/details/v4?contract=" + address + "&limit=22";
