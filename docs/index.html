@@ -228,7 +228,7 @@
                     <span v-b-popover.hover="'Number of ERC-721 tokens currently in this pool = Umswap totalSupply'">{{ data.label }}</span>
                   </template>
                   <template #cell(address)="data">
-                    <b-link :href="'https://etherscan.io/token/' + data.item.address" v-b-popover.hover.bottom="'View Umswap pool contract in Etherscan.io'" target="_blank">
+                    <b-link :href="'https://etherscan.io/token/' + data.item.address + '#balances'" v-b-popover.hover.bottom="'View Umswap pool contract in Etherscan.io'" target="_blank">
                       {{ data.item.address }}
                     </b-link>
                   </template>
@@ -265,7 +265,7 @@
                 -->
                 <!-- <b-card v-if="selectedPool != null" no-header no-body class="m-0 mt-1 p-1 border-1"> -->
                   <!-- <b-card-body class="m-0 mt-1 p-0"> -->
-                    <b-card v-if="getSelectedPoolRecord && getSelectedPoolRecord.validTokenIds && getSelectedPoolRecord.validTokenIds.length > 0" sub-title="Tokens Valid In This Pool" class="mx-0 my-1" body-class="m-1 p-1">
+                    <!-- <b-card v-if="getSelectedPoolRecord && getSelectedPoolRecord.validTokenIds && getSelectedPoolRecord.validTokenIds.length > 0" sub-title="Tokens Valid In This Pool" class="mx-0 my-1" body-class="m-1 p-1">
                       {{ getSelectedPoolRecord.validTokenIds.join(", ") }}
                     </b-card>
                     <b-card v-if="getSelectedPoolRecord" sub-title="Tokens Currently In This Pool" class="mx-0 my-1" body-class="m-1 p-1">
@@ -273,10 +273,12 @@
                     </b-card>
                     <b-card v-if="getSelectedPoolRecord" sub-title="Your Tokens Valid In This Pool" class="mx-0 my-1" body-class="m-1 p-1">
                       {{ getSelectedPoolRecord.tokenIds.join(", ") }}
-                    </b-card>
+                    </b-card> -->
 
-                    <b-card sub-title="Pool Tokens" class="mx-0 my-1" body-class="m-1 p-1">
-                      {{ JSON.stringify(getPoolTokens(selectedCollection, selectedPool) || 'Loading ...') }}
+                    <b-card sub-title="Tokens" class="mx-0 my-1" body-class="m-1 p-1">
+                      <div v-for="(set, setIndex) in getPoolTokens(selectedCollection, selectedPool)" :key="setIndex">
+                        {{ JSON.stringify(set) }}
+                      </div>
                     </b-card>
                     <!-- Blah -->
                   <!-- </b-card-body> -->
@@ -763,7 +765,10 @@
                     tokenIdsNotOwned.push(token);
                   }
                 }
-                return [tokenIdsOwned, tokenIdsNotOwned];
+                return [
+                  { name: 'tokenIdsOwned', tokens: tokenIdsOwned },
+                  { name: 'tokenIdsNotOwned', tokens: tokenIdsNotOwned },
+                ];
               }
             }
             // const results = this.selectedCollection ? [] : [];
@@ -774,7 +779,7 @@
             //     }
             //   }
             // }
-            return null;
+            return [];
           },
           toggleTrait(layer, trait) {
             if (!this.selectedTraits[layer]) {
