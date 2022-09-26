@@ -17,6 +17,7 @@
     <script src="js/bootstrap-vue.min.js"></script>
     <script src="js/bootstrap-vue-icons.min.js"></script>
     <script src="js/ethers-5.6.umd.min.js" type="application/javascript"></script>
+    <script src="js/moment.min.js"></script>
     <script src="js/dexie.js"></script>
     <script src="globals.js"></script>
     <script src="deploymentData.js"></script>
@@ -184,10 +185,10 @@
                   </b-progress>
                 </div>
                 <div v-if="collectionLoaded" class="mt-0 pr-1">
-                  <font size="-2" v-b-popover.hover.top="'# pools'">{{ 'Collection loaded'  }}</font>
+                  <font size="-2" v-b-popover.hover.top="'# pools'">{{ 'Last updated ' + formatTimestamp(collectionLoaded) }}</font>
                 </div>
                 <div v-if="!collectionLoaded" class="mt-0 pr-1">
-                  <font size="-2" v-b-popover.hover.top="'# pools'">{{ 'Collection not loaded'  }}</font>
+                  <font size="-2" v-b-popover.hover.top="'# pools'">{{ 'Click Sync button to load collection'  }}</font>
                 </div>
                 <div class="mt-0 flex-grow-1">
                 </div>
@@ -274,6 +275,10 @@
                     </b-card>
                     <b-card v-if="getSelectedPoolRecord" sub-title="Your Tokens Valid In This Pool" class="mx-0 my-1" body-class="m-1 p-1">
                       {{ getSelectedPoolRecord.tokenIds.join(", ") }}
+                    </b-card>
+
+                    <b-card sub-title="Pool Tokens" class="mx-0 my-1" body-class="m-1 p-1">
+                      {{ JSON.stringify(getPoolTokens(selectedCollection, selectedPool)) }}
                     </b-card>
                     <!-- Blah -->
                   <!-- </b-card-body> -->
@@ -548,7 +553,7 @@
             return null;
           },
           collectionLoaded() {
-            return this.selectedCollection && this.collection && this.collection.address && this.collection.address.toLowerCase() == this.selectedCollection.toLowerCase();
+            return this.selectedCollection && this.collection && this.collection.address && this.collection.address.toLowerCase() == this.selectedCollection.toLowerCase() && this.collection.timestamp || null;
           },
           // filteredCollectionTokens() {
           //   let stage1Data = this.selectedTraits ? [] : [];
@@ -680,6 +685,12 @@
           // },
         },
         methods: {
+          formatTimestamp(ts) {
+            if (ts != null) {
+              return moment.unix(ts).format("YYYY-MM-DD HH:mm:ss");
+            }
+            return null;
+          },
           formatETH(e) {
             try {
               return e ? ethers.utils.commify(ethers.utils.formatEther(e)) : null;
@@ -728,6 +739,21 @@
               }
               db0.close();
             })();
+          },
+          getPoolTokens(collection, pool) {
+            console.log("getPoolTokens: " + collection + " " + pool);
+            if (collection == this.collection.address) {
+              return collection + " " + pool;
+            }
+            // const results = this.selectedCollection ? [] : [];
+            // if (this.collections[this.selectedCollection]) {
+            //   for (const umswap of this.collections[this.selectedCollection].umswaps) {
+            //     if (this.selectedPool == umswap.address) {
+            //       return umswap;
+            //     }
+            //   }
+            // }
+            return null;
           },
           toggleTrait(layer, trait) {
             if (!this.selectedTraits[layer]) {
