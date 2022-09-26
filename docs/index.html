@@ -292,6 +292,7 @@
       window.app = new Vue({
         el: '#app',
         data: {
+          coinbase: null,
           showInfo: false,
           selectedCollection: null,
           selectedPool: null,
@@ -804,7 +805,7 @@
             } else {
               const provider = new ethers.providers.Web3Provider(window.ethereum);
               const signer = provider.getSigner();
-              const coinbase = await signer.getAddress();
+              this.coinbase = await signer.getAddress();
               const network = await provider.getNetwork();
               const umswapFactory = new ethers.Contract(UMSWAPFACTORYADDRESS, UMSWAPFACTORYABI, provider);
               const erc721Helper = new ethers.Contract(ERC721HELPERADDRESS, ERC721HELPERABI, provider);
@@ -821,7 +822,7 @@
               this.sync.completed = 0;
               this.sync.total = parseInt(umswapsLength);
               this.sync.section = "Umswaps";
-              const umswaps = await umswapFactory.getUmswaps(coinbase, umswapsIndices);
+              const umswaps = await umswapFactory.getUmswaps(this.coinbase, umswapsIndices);
 
               const collections = {};
               for (let i = 0; i < umswaps[0].length; i++) {
