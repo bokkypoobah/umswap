@@ -177,18 +177,16 @@
                 </div>
                 <div class="mt-0 flex-grow-1">
                 </div>
-                <div class="mt-1 pr-1" style="width: 200px;">
-                  <b-progress v-if="selectedCollection != null && sync.section != null" height="1.5rem" :max="sync.total" show-progress :animated="sync.section != null" :variant="sync.section != null ? 'success' : 'secondary'" v-b-popover.hover.top="'Click on the Sync(ing) button to (un)pause'">
+                <div v-if="sync.section != null" class="mt-1 pr-1" style="width: 200px;">
+                  <b-progress height="1.5rem" :max="sync.total" show-progress :animated="sync.section != null" :variant="sync.section != null ? 'success' : 'secondary'" v-b-popover.hover.top="'Click on the Sync(ing) button to (un)pause'">
                     <b-progress-bar :value="sync.completed">
                       {{ sync.total == null ? (sync.completed + ' ' + sync.section) : (sync.completed + '/' + sync.total + ' ' + ((sync.completed / sync.total) * 100).toFixed(0) + '% ' + sync.section) }}
                     </b-progress-bar>
                   </b-progress>
                 </div>
-                <div v-if="collectionLoaded" class="mt-0 pr-1">
-                  <font size="-2" v-b-popover.hover.top="'# pools'">{{ 'Last updated ' + formatTimestamp(collectionLoaded) }}</font>
-                </div>
-                <div v-if="!collectionLoaded" class="mt-0 pr-1">
-                  <font size="-2" v-b-popover.hover.top="'# pools'">{{ 'Click Sync button to load collection'  }}</font>
+                <div v-if="sync.section == null" class="mt-0 pr-1">
+                  <font v-if="collectionLoaded" size="-2" v-b-popover.hover.top="'# pools'">{{ 'Last updated ' + formatTimestamp(collectionLoaded) }}</font>
+                  <font v-if="!collectionLoaded" size="-2" v-b-popover.hover.top="'# pools'">{{ 'Click Sync button to load collection'  }}</font>
                 </div>
                 <div class="mt-0 flex-grow-1">
                 </div>
@@ -882,17 +880,7 @@
                      // Want to work around API data unavailablity - state.sync.error = true;
                      return [];
                   });
-                if (reservoirInfo && reservoirInfo.collection) {
-                  // console.log(JSON.stringify(reservoirInfo.collection, null, 2));
-                  this.collection.address = this.selectedCollection;
-                  this.collection.symbol = reservoirInfo.collection.symbol || null;
-                  this.collection.name = reservoirInfo.collection.name || null;
-                  this.collection.slug = reservoirInfo.collection.slug || null;
-                  this.collection.imageUrl = reservoirInfo.collection.metadata.imageUrl || null;
-                  this.collection.blockNumber = blockNumber;
-                  this.collection.timestamp = timestamp;
-                  this.sync.completed = 1;
-                }
+                this.sync.completed = 1;
 
                 this.sync.section = null;
                 this.sync.completed = 0;
@@ -982,6 +970,17 @@
                 // this.ensMap = ensMap;
                 // localStorage.setItem('umsENSMap', JSON.stringify(ensMap));
                 this.collection.ensMap = ensMap;
+
+                if (reservoirInfo && reservoirInfo.collection) {
+                  // console.log(JSON.stringify(reservoirInfo.collection, null, 2));
+                  this.collection.address = this.selectedCollection;
+                  this.collection.symbol = reservoirInfo.collection.symbol || null;
+                  this.collection.name = reservoirInfo.collection.name || null;
+                  this.collection.slug = reservoirInfo.collection.slug || null;
+                  this.collection.imageUrl = reservoirInfo.collection.metadata.imageUrl || null;
+                  this.collection.blockNumber = blockNumber;
+                  this.collection.timestamp = timestamp;
+                }
 
                 await db0.collection.put(this.collection).then (function() {
                 }).catch(function(error) {
