@@ -794,7 +794,7 @@
                 const raters = stats[4].toString();
                 const isApprovedForAll = stats[5].toString();
                 if (!(collection in collections)) {
-                  collections[collection] = { address: collection, type: null, symbol: null, name: null, totalSupply: null, reservoirInfo: null, allTokens: [], sampleTokens: [], umswaps: [] };
+                  collections[collection] = { address: collection, type: null, symbol: null, name: null, totalSupply: null, reservoirInfo: null, allTokens: [], umswaps: [] };
                 }
                 const umswap = { index, address, symbol, name, collection, validTokenIds, tokenIds, creator, swappedIn, swappedOut, totalScores, totalSupply, raters, isApprovedForAll };
                 collections[collection].umswaps.push(umswap);
@@ -821,27 +821,13 @@
                      // Want to work around API data unavailablity - state.sync.error = true;
                      return [];
                   });
-                // console.log(JSON.stringify(reservoirInfo, null, 2));
                 collection.reservoirInfo = reservoirInfo && reservoirInfo.collection || null;
-
-                // let tokensUrl = "https://api.reservoir.tools/tokens/details/v4?contract=" + address + "&limit=22";
-                // const reservoirTokens = await fetch(tokensUrl)
-                //   .then(handleErrors)
-                //   .then(response => response.json())
-                //   .catch(function(error) {
-                //      console.log("ERROR - doIt: " + error);
-                //      // Want to work around API data unavailablity - state.sync.error = true;
-                //      return [];
-                //   });
-                // collection.sampleTokens = reservoirTokens && reservoirTokens.tokens || null;
                 this.sync.completed++;
               }
               this.collections = collections;
               localStorage.setItem('umsCollections', JSON.stringify(collections));
 
               if (this.selectedCollection != null) {
-                console.log("Sync collections");
-
                 this.sync.section = null;
                 this.sync.completed = 0;
                 this.sync.total = 1;
@@ -855,7 +841,6 @@
                      // Want to work around API data unavailablity - state.sync.error = true;
                      return [];
                   });
-                // console.log(JSON.stringify(reservoirInfo, null, 2));
                 if (reservoirInfo && reservoirInfo.collection) {
                   this.collection.address = this.selectedCollection;
                   this.collection.symbol = reservoirInfo.collection.symbol;
@@ -865,8 +850,6 @@
                   this.collection.updated = new Date();
                   this.sync.completed = 1;
                 }
-                // console.log("this.collection: " + JSON.stringify(this.collection, null, 2));
-                // collection.reservoirInfo = reservoirInfo && reservoirInfo.collection || null;
 
                 this.sync.section = null;
                 this.sync.completed = 0;
@@ -911,6 +894,7 @@
                   }
                 } while (continuation != null /*&& !state.halt && !state.sync.error */);
 
+                this.sync.section = null;
                 this.sync.completed = 0;
                 const tokenIds = Object.keys(tokens);
                 this.sync.total = tokenIds.length;
@@ -927,6 +911,7 @@
                 this.collection.tokens = tokens;
                 localStorage.setItem('umsCollection', JSON.stringify(this.collection));
 
+                this.sync.section = null;
                 const ensMap = {};
                 for (const [tokenId, token] of Object.entries(tokens)) {
                   if (!ensMap[token.owner]) {
