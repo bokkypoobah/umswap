@@ -307,7 +307,9 @@
             symbol: null,
             name: null,
             slug: null,
+            imageUrl: null,
             tokens: [],
+            updated: null,
           },
           prices: {},
           owners: {},
@@ -821,16 +823,16 @@
                 console.log(JSON.stringify(reservoirInfo, null, 2));
                 collection.reservoirInfo = reservoirInfo && reservoirInfo.collection || null;
 
-                let tokensUrl = "https://api.reservoir.tools/tokens/details/v4?contract=" + address + "&limit=22";
-                const reservoirTokens = await fetch(tokensUrl)
-                  .then(handleErrors)
-                  .then(response => response.json())
-                  .catch(function(error) {
-                     console.log("ERROR - doIt: " + error);
-                     // Want to work around API data unavailablity - state.sync.error = true;
-                     return [];
-                  });
-                collection.sampleTokens = reservoirTokens && reservoirTokens.tokens || null;
+                // let tokensUrl = "https://api.reservoir.tools/tokens/details/v4?contract=" + address + "&limit=22";
+                // const reservoirTokens = await fetch(tokensUrl)
+                //   .then(handleErrors)
+                //   .then(response => response.json())
+                //   .catch(function(error) {
+                //      console.log("ERROR - doIt: " + error);
+                //      // Want to work around API data unavailablity - state.sync.error = true;
+                //      return [];
+                //   });
+                // collection.sampleTokens = reservoirTokens && reservoirTokens.tokens || null;
                 this.sync.completed++;
               }
               this.collections = collections;
@@ -838,6 +840,97 @@
 
               if (this.selectedCollection != null) {
                 console.log("Sync collections");
+
+                // collection: {
+                //   address: null,
+                //   symbol: null,
+                //   name: null,
+                //   slug: null,
+                //   imageUrl: null,
+                //   tokens: [],
+                //   updated: null,
+                // },
+
+                this.sync.section = null;
+                this.sync.completed = 0;
+                this.sync.total = 1;
+                this.sync.section = "Collection";
+                let infoUrl = "https://api.reservoir.tools/collection/v2?id=" + this.selectedCollection;
+                const reservoirInfo = await fetch(infoUrl)
+                  .then(handleErrors)
+                  .then(response => response.json())
+                  .catch(function(error) {
+                     console.log("ERROR - doIt: " + error);
+                     // Want to work around API data unavailablity - state.sync.error = true;
+                     return [];
+                  });
+                // console.log(JSON.stringify(reservoirInfo, null, 2));
+                if (reservoirInfo && reservoirInfo.collection) {
+                  this.collection.address = this.selectedCollection;
+                  this.collection.symbol = reservoirInfo.collection.symbol;
+                  this.collection.name = reservoirInfo.collection.name;
+                  this.collection.slug = reservoirInfo.collection.slug;
+                  this.collection.imageUrl = reservoirInfo.collection.metadata.imageUrl;
+                  this.collection.updated = new Date();
+                  this.sync.completed = 1;
+                }
+                // console.log("this.collection: " + JSON.stringify(this.collection, null, 2));
+                // collection.reservoirInfo = reservoirInfo && reservoirInfo.collection || null;
+
+                this.sync.section = null;
+                this.sync.completed = 0;
+                this.sync.total = null;
+                this.sync.section = "Tokens";
+                let continuation = null;
+                let tokens = {};
+                do {
+                  let tokensUrl = "https://api.reservoir.tools/tokens/v5?contract=" + this.selectedCollection + "&limit=100" +
+                    (continuation != null ? "&continuation=" + continuation : '');
+                  console.log(tokensUrl);
+                  const reservoirTokens = await fetch(tokensUrl)
+                    .then(handleErrors)
+                    .then(response => response.json())
+                    .catch(function(error) {
+                       console.log("ERROR - doIt: " + error);
+                       // Want to work around API data unavailablity - state.sync.error = true;
+                       return [];
+                    });
+                  continuation = reservoirTokens.continuation;
+                  // console.log(JSON.stringify(reservoirTokens, null, 2));
+
+                  if (reservoirTokens && reservoirTokens.tokens) {
+                    for (const token of reservoirTokens.tokens) {
+                      let price = null;
+                      let validUntil = null;
+                      let source = null;
+                      if (token.market.floorAsk.price) {
+                        price = token.market.floorAsk.price.amount.native;
+                        validUntil = token.market.floorAsk.validUntil;
+                        source = token.market.floorAsk.source.name;
+                      }
+                      // prices[token.token.tokenId] = { price, validUntil, source, lastSell: token.token.lastSell, rarityRank: token.rarityRank };
+                      // console.log(JSON.stringify(token, null, 2));
+                      // console.log(token.token.tokenId + " " + token.token.name + " " + token.token.image);
+                      tokens[token.token.tokenId] = {
+                        owner: token.token.owner || null,
+                        name: token.token.name || null,
+                        image: token.token.image || null,
+                        price,
+                        validUntil,
+                        source,
+                        lastSell: token.token.lastSell,
+                      };
+                      // console.log(JSON.stringify(tokens[token.tokenId], null, 2));
+                    }
+                    this.sync.completed = Object.keys(tokens).length;
+                  }
+
+                  // collection.sampleTokens = reservoirTokens && reservoirTokens.tokens || null;
+                } while (continuation != null /*&& !state.halt && !state.sync.error */);
+                // console.log(JSON.stringify(tokens, null, 2));
+                this.collection.tokens = tokens;
+                localStorage.setItem('umsCollection', JSON.stringify(this.collection));
+                // console.log("this.collection: " + JSON.stringify(this.collection, null, 2));
               }
               // const erc721Helper = new ethers.Contract(ERC721HELPERADDRESS, ERC721HELPERABI, provider);
               // const owners = {};
@@ -890,6 +983,9 @@
         mounted() {
           if (localStorage.getItem('umsCollections')) {
             this.collections = JSON.parse(localStorage.getItem('umsCollections'));
+          }
+          if (localStorage.getItem('umsCollection')) {
+            this.collection = JSON.parse(localStorage.getItem('umsCollection'));
           }
           // console.log("mounted: " + window.location.href);
           if (window.location.href.indexOf("0x") >= 0) {
