@@ -765,6 +765,7 @@
               const network = await provider.getNetwork();
               const umswapFactory = new ethers.Contract(UMSWAPFACTORYADDRESS, UMSWAPFACTORYABI, provider);
               const erc721Helper = new ethers.Contract(ERC721HELPERADDRESS, ERC721HELPERABI, provider);
+              const ensReverseRecordsContract = new ethers.Contract(ENSREVERSERECORDSADDRESS, ENSREVERSERECORDSABI, provider);
               const block = await provider.getBlock("latest");
               const blockNumber = block.number;
 
@@ -841,16 +842,6 @@
               if (this.selectedCollection != null) {
                 console.log("Sync collections");
 
-                // collection: {
-                //   address: null,
-                //   symbol: null,
-                //   name: null,
-                //   slug: null,
-                //   imageUrl: null,
-                //   tokens: [],
-                //   updated: null,
-                // },
-
                 this.sync.section = null;
                 this.sync.completed = 0;
                 this.sync.total = 1;
@@ -880,7 +871,7 @@
                 this.sync.section = null;
                 this.sync.completed = 0;
                 this.sync.total = null;
-                this.sync.section = "Tokens";
+                this.sync.section = "Collection Tokens";
                 let continuation = null;
                 let tokens = {};
                 do {
@@ -896,8 +887,6 @@
                        return [];
                     });
                   continuation = reservoirTokens.continuation;
-                  // console.log(JSON.stringify(reservoirTokens, null, 2));
-
                   if (reservoirTokens && reservoirTokens.tokens) {
                     for (const token of reservoirTokens.tokens) {
                       let price = null;
@@ -908,9 +897,6 @@
                         validUntil = token.market.floorAsk.validUntil;
                         source = token.market.floorAsk.source.name;
                       }
-                      // prices[token.token.tokenId] = { price, validUntil, source, lastSell: token.token.lastSell, rarityRank: token.rarityRank };
-                      // console.log(JSON.stringify(token, null, 2));
-                      // console.log(token.token.tokenId + " " + token.token.name + " " + token.token.image);
                       tokens[token.token.tokenId] = {
                         owner: token.token.owner || null,
                         name: token.token.name || null,
@@ -920,78 +906,52 @@
                         source,
                         lastSell: token.token.lastSell,
                       };
-                      // console.log(JSON.stringify(tokens[token.tokenId], null, 2));
                     }
                     this.sync.completed = Object.keys(tokens).length;
                   }
-
-                  // collection.sampleTokens = reservoirTokens && reservoirTokens.tokens || null;
                 } while (continuation != null /*&& !state.halt && !state.sync.error */);
-                // console.log(JSON.stringify(tokens, null, 2));
 
                 this.sync.completed = 0;
                 const tokenIds = Object.keys(tokens);
                 this.sync.total = tokenIds.length;
-                this.sync.section = "Owners";
+                this.sync.section = "Token Owners";
                 const NFTOWNERBATCHSIZE = 200; // 500 OK
                 for (let i = 0; i < tokenIds.length; i += NFTOWNERBATCHSIZE) {
                   const batch = tokenIds.slice(i, parseInt(i) + NFTOWNERBATCHSIZE);
                   const ownersResult = await erc721Helper.ownersByTokenIds(this.selectedCollection, batch);
                   for (let j = 0; j < ownersResult[0].length; j++) {
-                    // console.log(tokenIds[j] + tokens[tokenIds[j]].owner + " => " + ownersResult[1][j]);
-                    // owners[tokenIds[j]] = ownersResult[1][j];
                     tokens[tokenIds[j]].owner = ownersResult[1][j];
                   }
                   this.sync.completed = parseInt(this.sync.completed) + batch.length;
                 }
                 this.collection.tokens = tokens;
                 localStorage.setItem('umsCollection', JSON.stringify(this.collection));
-                // console.log("this.collection: " + JSON.stringify(this.collection, null, 2));
+
+                const ensMap = {};
+                for (const [tokenId, token] of Object.entries(tokens)) {
+                  if (!ensMap[token.owner]) {
+                    ensMap[token.owner] = token.owner;
+                  }
+                }
+                this.sync.completed = 0;
+                let addresses = Object.keys(ensMap);
+                this.sync.total = addresses.length;
+                this.sync.section = "Reverse ENS";
+                const ENSOWNERBATCHSIZE = 200; // 500 fails occassionally
+                for (let i = 0; i < addresses.length; i += ENSOWNERBATCHSIZE) {
+                  const batch = addresses.slice(i, parseInt(i) + ENSOWNERBATCHSIZE);
+                  const allnames = await ensReverseRecordsContract.getNames(batch);
+                  for (let j = 0; j < batch.length; j++) {
+                    const address = batch[j];
+                    const name = allnames[j];
+                    ensMap[address] = name != null && name.length > 0 ? name : address;
+                    // const normalized = normalize(address);
+                  }
+                  this.sync.completed = parseInt(this.sync.completed) + batch.length;
+                }
+                this.ensMap = ensMap;
+                localStorage.setItem('umsENSMap', JSON.stringify(ensMap));
               }
-              // const erc721Helper = new ethers.Contract(ERC721HELPERADDRESS, ERC721HELPERABI, provider);
-              // const owners = {};
-              // const NFTOWNERBATCHSIZE = 200; // 500 OK
-              // this.sync.completed = 0;
-              // this.sync.total = this.totalSupply;
-              // this.sync.section = "Owners";
-              // const generateRange = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
-              // for (let i = 0; i < this.totalSupply; i += NFTOWNERBATCHSIZE) {
-              //   const to = (i + NFTOWNERBATCHSIZE > this.totalSupply) ? this.totalSupply : i + NFTOWNERBATCHSIZE;
-              //   const tokenIds = generateRange(i, to, 1);
-              //   const ownersResult = await erc721Helper.ownersByTokenIds(this.contractAddress, tokenIds);
-              //   for (let j = 0; j < ownersResult[0].length; j++) {
-              //     owners[tokenIds[j]] = ownersResult[1][j];
-              //   }
-              //   this.sync.completed = Object.keys(owners).length;
-              // }
-              // this.owners = owners;
-              // localStorage.setItem('umsOwners', JSON.stringify(owners));
-              // this.sync.section = "ENS";
-              // const ensMap = {};
-              // for (let i in owners) {
-              //   const owner = owners[i];
-              //   if (!ensMap[owner]) {
-              //     ensMap[owner] = owner;
-              //   }
-              // }
-              // let addresses = Object.keys(ensMap);
-              // this.sync.total = addresses.length;
-              // this.sync.completed = 0;
-              // const ensReverseRecordsContract = new ethers.Contract(ENSREVERSERECORDSADDRESS, ENSREVERSERECORDSABI, provider);
-              // const ENSOWNERBATCHSIZE = 200; // 500 fails occassionally
-              // for (let i = 0; i < addresses.length; i += ENSOWNERBATCHSIZE) {
-              //   const batch = addresses.slice(i, parseInt(i) + ENSOWNERBATCHSIZE);
-              //   const allnames = await ensReverseRecordsContract.getNames(batch);
-              //   for (let j = 0; j < batch.length; j++) {
-              //     const address = batch[j];
-              //     const name = allnames[j];
-              //     ensMap[address] = name != null && name.length > 0 ? name : address;
-              // //     // const normalized = normalize(address);
-              //   }
-              //   this.sync.completed = parseInt(this.sync.completed) + batch.length;
-              // }
-              // this.ensMap = ensMap;
-              // localStorage.setItem('umsENSMap', JSON.stringify(ensMap));
               this.sync.section = null;
             }
           },
@@ -1003,30 +963,13 @@
           if (localStorage.getItem('umsCollection')) {
             this.collection = JSON.parse(localStorage.getItem('umsCollection'));
           }
-          // console.log("mounted: " + window.location.href);
           if (window.location.href.indexOf("0x") >= 0) {
             this.selectedCollection = window.location.href.replace(/^.*0x/, "0x");
-            // console.log("selectedCollection: " + selectedCollection);
           }
-          // let uri = window.location.href.split('?');
-          // if (uri.length == 2) {
-          //   let vars = uri[1].split('&');
-          //   let getVars = {};
-          //   let tmp = '';
-          //   vars.forEach(function(v) {
-          //     tmp = v.split('=');
-          //     if(tmp.length == 2)
-          //       getVars[tmp[0]] = tmp[1];
-          //   });
-          //   console.log(getVars);
-          //   // do
-          // }
-          // if (localStorage.getItem('umsENSMap')) {
-          //   this.ensMap = JSON.parse(localStorage.getItem('umsENSMap'));
-          // }
-          // if (localStorage.getItem('umsPrices')) {
-          //   this.prices = JSON.parse(localStorage.getItem('umsPrices'));
-          // }
+          if (localStorage.getItem('umsENSMap')) {
+            this.ensMap = JSON.parse(localStorage.getItem('umsENSMap'));
+            // console.log("mounted - ensMap: " + JSON.stringify(this.ensMap, null, 2));
+          }
         },
       })
     </script>
