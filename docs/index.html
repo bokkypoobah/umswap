@@ -276,7 +276,7 @@
                     </b-card>
 
                     <b-card sub-title="Pool Tokens" class="mx-0 my-1" body-class="m-1 p-1">
-                      {{ JSON.stringify(getPoolTokens(selectedCollection, selectedPool)) }}
+                      {{ JSON.stringify(getPoolTokens(selectedCollection, selectedPool) || 'Loading ...') }}
                     </b-card>
                     <!-- Blah -->
                   <!-- </b-card-body> -->
@@ -753,7 +753,17 @@
               if (umswap) {
                 return collectionAddress + " " + poolAddress;
               } else {
-                return collectionAddress;
+                const tokenIdsOwned = [];
+                const tokenIdsNotOwned = [];
+                for (const [tokenId, token] of Object.entries(this.collection.tokens)) {
+                  // console.log(JSON.stringify(token));
+                  if (token.owner == this.coinbase) {
+                    tokenIdsOwned.push(token);
+                  } else {
+                    tokenIdsNotOwned.push(token);
+                  }
+                }
+                return [tokenIdsOwned, tokenIdsNotOwned];
               }
             }
             // const results = this.selectedCollection ? [] : [];
@@ -806,6 +816,7 @@
               const provider = new ethers.providers.Web3Provider(window.ethereum);
               const signer = provider.getSigner();
               this.coinbase = await signer.getAddress();
+              localStorage.coinbase = this.coinbase;
               const network = await provider.getNetwork();
               const umswapFactory = new ethers.Contract(UMSWAPFACTORYADDRESS, UMSWAPFACTORYABI, provider);
               const erc721Helper = new ethers.Contract(ERC721HELPERADDRESS, ERC721HELPERABI, provider);
@@ -925,6 +936,7 @@
                         source = token.market.floorAsk.source.name;
                       }
                       tokens[token.token.tokenId] = {
+                        tokenId: token.token.tokenId,
                         owner: token.token.owner || null,
                         name: token.token.name || null,
                         image: token.token.image || null,
@@ -1006,6 +1018,10 @@
           },
         },
         mounted() {
+          if ('coinbase' in localStorage) {
+            this.coinbase = localStorage.coinbase;
+            console.log("Loaded coinbase: " + this.coinbase);
+          }
           (async() => {
             const db0 = new Dexie(this.db.name);
             db0.version(this.db.version).stores(this.db.schemaDefinition);
