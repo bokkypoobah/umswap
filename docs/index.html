@@ -738,10 +738,22 @@
               db0.close();
             })();
           },
-          getPoolTokens(collection, pool) {
-            console.log("getPoolTokens: " + collection + " " + pool);
-            if (collection == this.collection.address) {
-              return collection + " " + pool;
+          getPoolTokens(collectionAddress, poolAddress) {
+            console.log("getPoolTokens: " + collectionAddress + " " + poolAddress);
+            if (collectionAddress == this.collection.address) {
+              let umswap = null;
+              if (poolAddress != null) {
+                for (const umswapItem of this.collections[collectionAddress].umswaps) {
+                  if (poolAddress == umswapItem.address) {
+                    umswap = umswapItem;
+                  }
+                }
+              }
+              if (umswap) {
+                return collectionAddress + " " + poolAddress;
+              } else {
+                return collectionAddress;
+              }
             }
             // const results = this.selectedCollection ? [] : [];
             // if (this.collections[this.selectedCollection]) {
