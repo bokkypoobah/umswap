@@ -124,7 +124,7 @@
               <b-card-body class="m-0 p-0">
                 <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='collectionsRowSelected' :fields="collectionsFields" :items="selectedCollection ? [collections[selectedCollection]] : pagedFilteredCollections" head-variant="light" class="m-0">
                   <template #head(address)="data">
-                    <span v-b-popover.hover="'ERC-721 NFT collection contract address'">{{ data.label }}</span>
+                    <span v-b-popover.hover="'ERC-721 NFT collection contract address. Always check this against a separate source'">{{ data.label }}</span>
                   </template>
                   <template #head(symbol)="data">
                     <span v-b-popover.hover="'ERC-721 NFT collection symbol'">{{ data.label }}</span>
@@ -176,7 +176,7 @@
                 </div>
                 <div class="mt-0 flex-grow-1">
                 </div>
-                <div class="mt-1" style="width: 200px;">
+                <div class="mt-1 pr-1" style="width: 200px;">
                   <b-progress v-if="selectedCollection != null && sync.section != null" height="1.5rem" :max="sync.total" show-progress :animated="sync.section != null" :variant="sync.section != null ? 'success' : 'secondary'" v-b-popover.hover.top="'Click on the Sync(ing) button to (un)pause'">
                     <b-progress-bar :value="sync.completed">
                       {{ sync.total == null ? (sync.completed + ' ' + sync.section) : (sync.completed + '/' + sync.total + ' ' + ((sync.completed / sync.total) * 100).toFixed(0) + '% ' + sync.section) }}
