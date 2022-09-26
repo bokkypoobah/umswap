@@ -183,6 +183,12 @@
                     </b-progress-bar>
                   </b-progress>
                 </div>
+                <div v-if="collectionLoaded" class="mt-0 pr-1">
+                  <font size="-2" v-b-popover.hover.top="'# pools'">{{ 'Collection loaded'  }}</font>
+                </div>
+                <div v-if="!collectionLoaded" class="mt-0 pr-1">
+                  <font size="-2" v-b-popover.hover.top="'# pools'">{{ 'Collection not loaded'  }}</font>
+                </div>
                 <div class="mt-0 flex-grow-1">
                 </div>
                 <div class="mt-0 pr-1">
@@ -541,6 +547,9 @@
             }
             return null;
           },
+          collectionLoaded() {
+            return this.selectedCollection && this.collection && this.collection.address && this.collection.address.toLowerCase() == this.selectedCollection.toLowerCase();
+          },
           // filteredCollectionTokens() {
           //   let stage1Data = this.selectedTraits ? [] : [];
           //   console.log("filteredCollectionTokens: " + JSON.stringify(this.selectedTraits));
@@ -682,7 +691,7 @@
             if (item && item.length > 0) {
               this.selectedCollection = this.selectedCollection != null ? null : item[0].address;
               this.selectedPool = null;
-              console.log("collectionsRowSelected - this.selectedCollection: " + JSON.stringify(this.selectedCollection));
+              // console.log("collectionsRowSelected - this.selectedCollection: " + JSON.stringify(this.selectedCollection));
 
               (async() => {
                 const db0 = new Dexie(this.db.name);
@@ -691,7 +700,8 @@
                 // console.log("collectionsRowSelected - records: " + JSON.stringify(records, null, 2));
                 if (records.length == 1) {
                   this.collection = records[0];
-                  console.log("collectionsRowSelected - this.collection: " + JSON.stringify(this.collection, null, 2));
+                  // console.log("collectionsRowSelected - this.collection: " + JSON.stringify(this.collection, null, 2));
+                  console.log("collectionsRowSelected - Loaded collection " + this.selectedCollection);
                 }
                 db0.close();
               })();
@@ -703,7 +713,7 @@
             }
           },
           selectedCollectionChanged(event) {
-            console.log("selectedCollectionChanged: " + JSON.stringify(event));
+            // console.log("selectedCollectionChanged: " + JSON.stringify(event));
             this.selectedPool = null;
 
             (async() => {
@@ -713,7 +723,8 @@
               // console.log("collectionsRowSelected - records: " + JSON.stringify(records, null, 2));
               if (records.length == 1) {
                 this.collection = records[0];
-                console.log("selectedCollectionChanged - this.collection: " + JSON.stringify(this.collection, null, 2));
+                // console.log("selectedCollectionChanged - this.collection: " + JSON.stringify(this.collection, null, 2));
+                console.log("selectedCollectionChanged - Loaded collection " + this.selectedCollection);
               }
               db0.close();
             })();
