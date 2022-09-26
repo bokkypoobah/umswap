@@ -200,6 +200,27 @@
 
               <b-card-body class="m-0 mt-1 p-0">
                 <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='poolsRowSelected' :fields="poolsFields" :items="selectedPool != null ? [getSelectedPoolRecord] : pagedFilteredPools" head-variant="light" class="m-0">
+                  <template #head(address)="data">
+                    <span v-b-popover.hover="'ERC-20 Umswap pool contract address'">{{ data.label }}</span>
+                  </template>
+                  <template #head(symbol)="data">
+                    <span v-b-popover.hover="'ERC-20 Umswap pool symbol'">{{ data.label }}</span>
+                  </template>
+                  <template #head(name)="data">
+                    <span v-b-popover.hover="'ERC-20 Umswap pool name'">{{ data.label }}</span>
+                  </template>
+                  <template #head(validTokenIds)="data">
+                    <span v-b-popover.hover="'ERC-721 token ids accepted by this Umswap pool'">{{ data.label }}</span>
+                  </template>
+                  <template #head(swappedIn)="data">
+                    <span v-b-popover.hover="'Number of ERC-721 tokens swapped into this Umswap pool'">{{ data.label }}</span>
+                  </template>
+                  <template #head(swappedOut)="data">
+                    <span v-b-popover.hover="'Number of ERC-721 tokens swapped out of this Umswap pool'">{{ data.label }}</span>
+                  </template>
+                  <template #head(totalSupply)="data">
+                    <span v-b-popover.hover="'Number of ERC-721 tokens currently in this pool = Umswap totalSupply'">{{ data.label }}</span>
+                  </template>
                   <template #cell(address)="data">
                     <b-link :href="'https://etherscan.io/token/' + data.item.address" v-b-popover.hover.bottom="'View Umswap pool contract in Etherscan.io'" target="_blank">
                       {{ data.item.address }}
