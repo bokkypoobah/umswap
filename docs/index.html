@@ -143,7 +143,7 @@
                     </b-link>
                   </template>
                   <template #cell(symbol)="data">
-                    <b-link :href="'https://opensea.io/collection/' + data.item.reservoirInfo.slug" v-b-popover.hover.bottom="'View collection in Opensea.io'" target="_blank">
+                    <b-link :href="'https://opensea.io/collection/' + data.item.slug" v-b-popover.hover.bottom="'View collection in Opensea.io'" target="_blank">
                       {{ data.item.symbol }}
                     </b-link>
                   </template>
@@ -694,47 +694,6 @@
               Vue.set(this.selectedTraits[layer], trait, true);
             }
           },
-          async retrievePrices() {
-            let continuation = null;
-            let prices = {};
-            this.sync.completed = 0;
-            this.sync.total = this.totalSupply;
-            this.sync.section = "Prices";
-            do {
-              let url = "https://api.reservoir.tools/tokens/v5?contract=" + this.contractAddress + "&limit=100" +
-                (continuation != null ? "&continuation=" + continuation : '');
-              console.log("url: " + url);
-              const data = await fetch(url)
-                // .then(handleErrors)
-                .then(response => response.json())
-                .catch(function(error) {
-                   console.log("ERROR - updateCollection: " + error);
-                   // state.sync.error = true;
-                   return [];
-                });
-              continuation = data.continuation;
-              if (data && data.tokens) {
-                for (const token of data.tokens) {
-                  let price = null;
-                  let validUntil = null;
-                  let source = null;
-                  if (token.market.floorAsk.price) {
-                    price = token.market.floorAsk.price.amount.native;
-                    validUntil = token.market.floorAsk.validUntil;
-                    source = token.market.floorAsk.source.name;
-                  }
-                  prices[token.token.tokenId] = { price, validUntil, source, lastSell: token.token.lastSell, rarityRank: token.rarityRank };
-                }
-              }
-              this.sync.completed = Object.keys(prices).length;
-            } while (continuation != null /*&& !state.halt && !state.sync.error */);
-            this.prices = prices;
-            localStorage.setItem('umsPrices', JSON.stringify(prices));
-            this.sync.section = null;
-          },
-          // getSVG(layerIndex, traitIndex) {
-          //   return INFO[0].layers[layerIndex].traits[parseInt(traitIndex)].svg;
-          // },
           owner(tokenId, length = 24) {
             const address = this.owners[tokenId] || null;
             if (address in this.ensMap) {
@@ -858,9 +817,8 @@
                 let continuation = null;
                 let tokens = {};
                 do {
-                  let tokensUrl = "https://api.reservoir.tools/tokens/v5?contract=" + this.selectedCollection + "&limit=100" +
+                  let tokensUrl = "https://api.reservoir.tools/tokens/v5?contract=" + this.selectedCollection + "&limit=100&includeAttributes=true" +
                     (continuation != null ? "&continuation=" + continuation : '');
-                  // console.log(tokensUrl);
                   const reservoirTokens = await fetch(tokensUrl)
                     .then(handleErrors)
                     .then(response => response.json())
@@ -872,6 +830,7 @@
                   continuation = reservoirTokens.continuation;
                   if (reservoirTokens && reservoirTokens.tokens) {
                     for (const token of reservoirTokens.tokens) {
+                      // console.log(JSON.stringify(token, null, 2));
                       let price = null;
                       let validUntil = null;
                       let source = null;
@@ -884,6 +843,7 @@
                         owner: token.token.owner || null,
                         name: token.token.name || null,
                         image: token.token.image || null,
+                        attributes: token.token.attributes.map(e => ({ key: e.key, value: e.value })) || [],
                         price,
                         validUntil,
                         source,
@@ -893,6 +853,7 @@
                     this.sync.completed = Object.keys(tokens).length;
                   }
                 } while (continuation != null /*&& !state.halt && !state.sync.error */);
+                // console.log(JSON.stringify(tokens, null, 2));
 
                 this.sync.section = null;
                 this.sync.completed = 0;
