@@ -820,7 +820,7 @@
                      // Want to work around API data unavailablity - state.sync.error = true;
                      return [];
                   });
-                console.log(JSON.stringify(reservoirInfo, null, 2));
+                // console.log(JSON.stringify(reservoirInfo, null, 2));
                 collection.reservoirInfo = reservoirInfo && reservoirInfo.collection || null;
 
                 // let tokensUrl = "https://api.reservoir.tools/tokens/details/v4?contract=" + address + "&limit=22";
@@ -886,7 +886,7 @@
                 do {
                   let tokensUrl = "https://api.reservoir.tools/tokens/v5?contract=" + this.selectedCollection + "&limit=100" +
                     (continuation != null ? "&continuation=" + continuation : '');
-                  console.log(tokensUrl);
+                  // console.log(tokensUrl);
                   const reservoirTokens = await fetch(tokensUrl)
                     .then(handleErrors)
                     .then(response => response.json())
@@ -928,6 +928,22 @@
                   // collection.sampleTokens = reservoirTokens && reservoirTokens.tokens || null;
                 } while (continuation != null /*&& !state.halt && !state.sync.error */);
                 // console.log(JSON.stringify(tokens, null, 2));
+
+                this.sync.completed = 0;
+                const tokenIds = Object.keys(tokens);
+                this.sync.total = tokenIds.length;
+                this.sync.section = "Owners";
+                const NFTOWNERBATCHSIZE = 200; // 500 OK
+                for (let i = 0; i < tokenIds.length; i += NFTOWNERBATCHSIZE) {
+                  const batch = tokenIds.slice(i, parseInt(i) + NFTOWNERBATCHSIZE);
+                  const ownersResult = await erc721Helper.ownersByTokenIds(this.selectedCollection, batch);
+                  for (let j = 0; j < ownersResult[0].length; j++) {
+                    // console.log(tokenIds[j] + tokens[tokenIds[j]].owner + " => " + ownersResult[1][j]);
+                    // owners[tokenIds[j]] = ownersResult[1][j];
+                    tokens[tokenIds[j]].owner = ownersResult[1][j];
+                  }
+                  this.sync.completed = parseInt(this.sync.completed) + batch.length;
+                }
                 this.collection.tokens = tokens;
                 localStorage.setItem('umsCollection', JSON.stringify(this.collection));
                 // console.log("this.collection: " + JSON.stringify(this.collection, null, 2));
