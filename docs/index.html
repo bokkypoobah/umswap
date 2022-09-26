@@ -17,6 +17,7 @@
     <script src="js/bootstrap-vue.min.js"></script>
     <script src="js/bootstrap-vue-icons.min.js"></script>
     <script src="js/ethers-5.6.umd.min.js" type="application/javascript"></script>
+    <script src="js/dexie.js"></script>
     <script src="globals.js"></script>
     <script src="deploymentData.js"></script>
 
@@ -309,17 +310,28 @@
             slug: null,
             imageUrl: null,
             tokens: [],
-            updated: null,
+            ensMap: {},
+            blockNumber: null,
+            timestamp: null,
           },
           prices: {},
           owners: {},
-          ensMap: {},
+          // ensMap: {},
           selectedTraits: {},
           sync: {
             section: null,
             // ? error: false,
             total: null,
             completed: null,
+          },
+          db: {
+            name: "umswapdb",
+            version: 1,
+            schemaDefinition: {
+              cache: '&objectName',
+              collection: '&address',
+            },
+            updated: null,
           },
           collectionsSortOptions: [
             { value: 'symbolasc', text: '▲ Symbol' },
@@ -670,6 +682,19 @@
             if (item && item.length > 0) {
               this.selectedCollection = this.selectedCollection != null ? null : item[0].address;
               this.selectedPool = null;
+              console.log("collectionsRowSelected - this.selectedCollection: " + JSON.stringify(this.selectedCollection));
+
+              (async() => {
+                const db0 = new Dexie(this.db.name);
+                db0.version(this.db.version).stores(this.db.schemaDefinition);
+                const records = await db0.collection.where("address").equalsIgnoreCase(this.selectedCollection || '').toArray();
+                // console.log("collectionsRowSelected - records: " + JSON.stringify(records, null, 2));
+                if (records.length == 1) {
+                  this.collection = records[0];
+                  console.log("collectionsRowSelected - this.collection: " + JSON.stringify(this.collection, null, 2));
+                }
+                db0.close();
+              })();
             }
           },
           poolsRowSelected(item) {
@@ -680,6 +705,18 @@
           selectedCollectionChanged(event) {
             console.log("selectedCollectionChanged: " + JSON.stringify(event));
             this.selectedPool = null;
+
+            (async() => {
+              const db0 = new Dexie(this.db.name);
+              db0.version(this.db.version).stores(this.db.schemaDefinition);
+              const records = await db0.collection.where("address").equalsIgnoreCase(this.selectedCollection || '').toArray();
+              // console.log("collectionsRowSelected - records: " + JSON.stringify(records, null, 2));
+              if (records.length == 1) {
+                this.collection = records[0];
+                console.log("selectedCollectionChanged - this.collection: " + JSON.stringify(this.collection, null, 2));
+              }
+              db0.close();
+            })();
           },
           toggleTrait(layer, trait) {
             if (!this.selectedTraits[layer]) {
@@ -727,6 +764,10 @@
               const ensReverseRecordsContract = new ethers.Contract(ENSREVERSERECORDSADDRESS, ENSREVERSERECORDSABI, provider);
               const block = await provider.getBlock("latest");
               const blockNumber = block.number;
+              const timestamp = block.timestamp;
+
+              const db0 = new Dexie(this.db.name);
+              db0.version(this.db.version).stores(this.db.schemaDefinition);
 
               const umswapsLength = await umswapFactory.getUmswapsLength();
               var umswapsIndices = generateRange(0, parseInt(umswapsLength) - 1, 1);
@@ -784,7 +825,11 @@
                 this.sync.completed++;
               }
               this.collections = collections;
-              localStorage.setItem('umsCollections', JSON.stringify(collections));
+              // localStorage.setItem('umsCollections', JSON.stringify(collections));
+              await db0.cache.put({ objectName: 'collections', object: this.collections }).then (function() {
+              }).catch(function(error) {
+                console.log("error: " + error);
+              });
 
               if (this.selectedCollection != null) {
                 this.sync.section = null;
@@ -801,12 +846,14 @@
                      return [];
                   });
                 if (reservoirInfo && reservoirInfo.collection) {
+                  // console.log(JSON.stringify(reservoirInfo.collection, null, 2));
                   this.collection.address = this.selectedCollection;
-                  this.collection.symbol = reservoirInfo.collection.symbol;
-                  this.collection.name = reservoirInfo.collection.name;
-                  this.collection.slug = reservoirInfo.collection.slug;
-                  this.collection.imageUrl = reservoirInfo.collection.metadata.imageUrl;
-                  this.collection.updated = new Date();
+                  this.collection.symbol = reservoirInfo.collection.symbol || null;
+                  this.collection.name = reservoirInfo.collection.name || null;
+                  this.collection.slug = reservoirInfo.collection.slug || null;
+                  this.collection.imageUrl = reservoirInfo.collection.metadata.imageUrl || null;
+                  this.collection.blockNumber = blockNumber;
+                  this.collection.timestamp = timestamp;
                   this.sync.completed = 1;
                 }
 
@@ -870,7 +917,7 @@
                   this.sync.completed = parseInt(this.sync.completed) + batch.length;
                 }
                 this.collection.tokens = tokens;
-                localStorage.setItem('umsCollection', JSON.stringify(this.collection));
+                // localStorage.setItem('umsCollection', JSON.stringify(this.collection));
 
                 this.sync.section = null;
                 const ensMap = {};
@@ -895,27 +942,39 @@
                   }
                   this.sync.completed = parseInt(this.sync.completed) + batch.length;
                 }
-                this.ensMap = ensMap;
-                localStorage.setItem('umsENSMap', JSON.stringify(ensMap));
+                // this.ensMap = ensMap;
+                // localStorage.setItem('umsENSMap', JSON.stringify(ensMap));
+                this.collection.ensMap = ensMap;
+
+                await db0.collection.put(this.collection).then (function() {
+                }).catch(function(error) {
+                  console.log("error: " + error);
+                });
               }
+              db0.close();
               this.sync.section = null;
             }
           },
         },
         mounted() {
-          if (localStorage.getItem('umsCollections')) {
-            this.collections = JSON.parse(localStorage.getItem('umsCollections'));
-          }
-          if (localStorage.getItem('umsCollection')) {
-            this.collection = JSON.parse(localStorage.getItem('umsCollection'));
-          }
-          if (window.location.href.indexOf("0x") >= 0) {
-            this.selectedCollection = window.location.href.replace(/^.*0x/, "0x");
-          }
-          if (localStorage.getItem('umsENSMap')) {
-            this.ensMap = JSON.parse(localStorage.getItem('umsENSMap'));
-            // console.log("mounted - ensMap: " + JSON.stringify(this.ensMap, null, 2));
-          }
+          (async() => {
+            const db0 = new Dexie(this.db.name);
+            db0.version(this.db.version).stores(this.db.schemaDefinition);
+            const records = await db0.cache.where("objectName").equals('collections').toArray();
+            if (records.length == 1) {
+              this.collections = records[0].object;
+              // console.log("mounted - this.collections: " + JSON.stringify(this.collections, null, 2));
+            }
+            if (window.location.href.indexOf("0x") >= 0) {
+              this.selectedCollection = window.location.href.replace(/^.*0x/, "0x");
+              const records = await db0.collection.where("address").equalsIgnoreCase(this.selectedCollection).toArray();
+              if (records.length == 1) {
+                this.collection = records[0];
+                // console.log("mounted - records: " + JSON.stringify(this.collection, null, 2));
+              }
+            }
+            db0.close();
+          })();
         },
       })
     </script>
