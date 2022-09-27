@@ -275,11 +275,37 @@
                       {{ getSelectedPoolRecord.tokenIds.join(", ") }}
                     </b-card> -->
 
-                    <b-card sub-title="Tokens" class="mx-0 my-1" body-class="m-1 p-1">
-                      <div v-for="(set, setIndex) in getPoolTokens(selectedCollection, selectedPool)" :key="setIndex">
-                        {{ JSON.stringify(set.name) + ' ' + JSON.stringify(set.tokens.map(e => e.tokenId )) }}
-                      </div>
-                    </b-card>
+                    <div v-for="(set, setIndex) in getPoolTokens(selectedCollection, selectedPool)" :key="setIndex">
+                      <b-card class="mx-0 my-1" body-class="m-1 p-1">
+                        <template #header>
+                          <h6 class="mb-0">{{ set.description }}</h6>
+                        </template>
+                        <b-card-text v-if="set.tokens.length == 0">
+                          Empty
+                        </b-card-text>
+                        <b-card-group v-if="set.tokens.length > 0" deck class="m-0 p-0">
+                          <div v-for="(token, tokenIndex) in set.tokens.slice(0, 100)" :key="tokenIndex">
+                            <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 7rem;">
+                              <b-avatar rounded size="7rem" :src="token.image" style="background-color: #fafafa"></b-avatar>
+                              <b-card-text>
+                                <div class="d-flex justify-content-between m-0 p-0">
+                                  <div>
+                                    <font size="-1">
+                                      <b-link :href="'https://opensea.io/assets/ethereum/' + selectedCollection + '/' + token.tokenId" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">
+                                        <b-badge variant="light">{{ token.tokenId }}</b-badge>
+                                      </b-link>
+                                    </font>
+                                  </div>
+                                  <div class="flex-grow-1">
+                                  </div>
+                                </div>
+                              </b-card-text>
+                            </b-card>
+                          </div>
+                        </b-card-group>
+                        <!-- {{ JSON.stringify(set.name) + ' ' + JSON.stringify(set.tokens.map(e => e.tokenId )) }} -->
+                      </b-card>
+                    </div>
                     <!-- Blah -->
                   <!-- </b-card-body> -->
                 <!-- </b-card> -->
@@ -785,11 +811,11 @@
                   }
                 }
                 return [
-                  { name: 'validTokenIdsInPool', tokens: validTokenIdsInPool },
-                  { name: 'validTokenIdsOwned', tokens: validTokenIdsOwned },
-                  { name: 'validTokenIdsNotInPoolOrOwned', tokens: validTokenIdsNotInPoolOrOwned },
-                  { name: 'invalidTokenIdsOwned', tokens: invalidTokenIdsOwned },
-                  { name: 'invalidTokenIdsNotInPoolOrOwned', tokens: invalidTokenIdsNotInPoolOrOwned },
+                  { name: 'validTokenIdsInPool', description: 'Tokens In This Pool', tokens: validTokenIdsInPool },
+                  { name: 'validTokenIdsOwned', description: 'My Tokens Eligible For This Pool', tokens: validTokenIdsOwned },
+                  { name: 'validTokenIdsNotInPoolOrOwned', description: 'Other Tokens Eligible For This Pool', tokens: validTokenIdsNotInPoolOrOwned },
+                  { name: 'invalidTokenIdsOwned', description: 'My Tokens Not Eligible For This Pool', tokens: invalidTokenIdsOwned },
+                  { name: 'invalidTokenIdsNotInPoolOrOwned', description: 'Other Tokens Not Eligible For This Pool', tokens: invalidTokenIdsNotInPoolOrOwned },
                 ];
               } else {
                 const tokenIdsOwned = [];
@@ -803,8 +829,8 @@
                   }
                 }
                 return [
-                  { name: 'tokenIdsOwned', tokens: tokenIdsOwned },
-                  { name: 'tokenIdsNotOwned', tokens: tokenIdsNotOwned },
+                  { name: 'tokenIdsOwned', description: 'My Tokens', tokens: tokenIdsOwned },
+                  { name: 'tokenIdsNotOwned', description: 'Not My Tokens', tokens: tokenIdsNotOwned },
                 ];
               }
             }
