@@ -156,7 +156,7 @@
                     {{ data.item.umswaps.length }}
                   </template>
                   <template #cell(balance)="data">
-                    {{ data.item.umswaps.map(e => e.balance).reduce((r, n) => parseFloat(r) + parseFloat(n)) }}
+                    {{ parseFloat(data.item.umswaps.map(e => e.balance).reduce((r, n) => parseFloat(r) + parseFloat(n))).toFixed(9) }}
                   </template>
                   <template #cell(nftsInPool)="data">
                     {{ data.item.umswaps.map(e => e.tokenIds.length).reduce((r, n) => parseFloat(r) + parseFloat(n)) }}
@@ -264,7 +264,7 @@
                     {{ data.item.swappedOut }}
                   </template>
                   <template #cell(balance)="data">
-                    {{ data.item.balance }}
+                    {{ parseFloat(data.item.balance).toFixed(9) }}
                   </template>
                   <template #cell(totalSupply)="data">
                     {{ formatETH(data.item.totalSupply) }}
@@ -778,7 +778,7 @@
           },
           formatETH(e) {
             try {
-              return e ? ethers.utils.commify(ethers.utils.formatEther(e)) : null;
+              return e ? parseFloat(ethers.utils.formatEther(e)).toFixed(9) : null;
             } catch (err) {
             }
             return e.toFixed(9);
