@@ -306,7 +306,7 @@
                     <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapOut.join(',')" rows="1" max-rows="5" class="w-50"></b-form-textarea>
                   </b-form-group>
                   <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Change:" class="mx-0 my-1 p-0">
-                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapsChange" class="w-25"></b-form-input>
+                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapChange" class="w-25"></b-form-input>
                   </b-form-group>
                   <b-form-group label-cols="3" label-size="sm" label-align="right" label="My Umswap Balance:" class="mx-0 my-1 p-0">
                     <b-form-input type="text" size="sm" readonly v-model.trim="formatETH(umswapBalance)" class="w-25"></b-form-input>
@@ -321,7 +321,7 @@
                     </b-input-group>
                   </b-form-group>
                   <b-form-group label-cols="3" label-size="sm" label="" class="mx-0 my-1 p-0">
-                    <b-button size="sm" @click="swapIt" :disabled="!umswapApproved" variant="warning">Swap</b-button>
+                    <b-button size="sm" @click="swapIt" :disabled="!umswapApproved || (parseFloat(convertETH(umswapBalance)) + parseFloat(umswapChange) < 0) || (tokenIdsToSwapIn.length == 0 && tokenIdsToSwapOut.length == 0)" variant="warning">Swap</b-button>
                   </b-form-group>
                 </b-card-text>
               </b-card>
@@ -648,7 +648,7 @@
               return [];
             }
           },
-          umswapsChange() {
+          umswapChange() {
             return this.tokenIdsToSwapIn.length - this.tokenIdsToSwapOut.length;
           },
           umswapBalance() {
@@ -811,6 +811,13 @@
           formatETH(e) {
             try {
               return e ? ethers.utils.commify(ethers.utils.formatEther(e)) : null;
+            } catch (err) {
+            }
+            return e.toFixed(9);
+          },
+          convertETH(e) {
+            try {
+              return e ? ethers.utils.formatEther(e) : null;
             } catch (err) {
             }
             return e.toFixed(9);
