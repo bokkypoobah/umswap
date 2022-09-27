@@ -772,8 +772,8 @@
                 // console.log("collectionsRowSelected - records: " + JSON.stringify(records, null, 2));
                 if (records.length == 1) {
                   this.collection = records[0];
-                  console.log("collectionsRowSelected - Loaded collection: " + JSON.stringify(this.collection, null, 2));
-                  // console.log("collectionsRowSelected - Loaded collection " + this.selectedCollection);
+                  // console.log("collectionsRowSelected - Loaded collection: " + JSON.stringify(this.collection, null, 2));
+                  console.log("collectionsRowSelected - Loaded collection " + this.selectedCollection);
                 }
                 db0.close();
               })();
@@ -814,7 +814,7 @@
                 }
               }
               if (umswap) {
-                console.log(JSON.stringify(umswap, null, 2));
+                // console.log(JSON.stringify(umswap, null, 2));
                 const validTokenIdsInPool = [];
                 const validTokenIdsOwned = [];
                 const validTokenIdsNotInPoolOrOwned = [];
@@ -824,9 +824,9 @@
 
                 for (const [tokenId, token] of Object.entries(this.collection.tokens)) {
                   const validInPool = umswap.validTokenIds.length == 0 || umswap.validTokenIds.includes(parseInt(tokenId));
-                  if ([6, 170, 1923].includes(parseInt(tokenId))) {
-                    console.log("Valid: " + validInPool + " " + token.tokenId + " " + token.owner);
-                  }
+                  // if ([6, 170, 1923].includes(parseInt(tokenId))) {
+                  //   console.log("Valid: " + validInPool + " " + token.tokenId + " " + token.owner);
+                  // }
                   const tokenOwner = token.owner.toLowerCase();
                   if (tokenOwner == umswapAddressLower) {
                     validTokenIdsInPool.push(token);
@@ -879,7 +879,7 @@
             return [];
           },
           toggleToken(setName, tokenId) {
-            console.log("toggleToken: " + setName + " " + tokenId);
+            // console.log("toggleToken: " + setName + " " + tokenId);
             if (!this.selectedTokens[setName]) {
               Vue.set(this.selectedTokens, setName, {});
             }
@@ -891,7 +891,7 @@
             } else {
               Vue.set(this.selectedTokens[setName], tokenId, true);
             }
-            console.log("toggleToken: " + JSON.stringify(this.selectedTokens));
+            // console.log("toggleToken: " + JSON.stringify(this.selectedTokens));
           },
           owner(tokenId, length = 24) {
             const address = this.owners[tokenId] || null;
@@ -992,7 +992,7 @@
               }
               this.collections = collections;
               // localStorage.setItem('umsCollections', JSON.stringify(collections));
-              console.log("this.collections", JSON.stringify(this.collections, null, 2));
+              // console.log("this.collections", JSON.stringify(this.collections, null, 2));
               await db0.cache.put({ objectName: 'collections', object: this.collections }).then (function() {
               }).catch(function(error) {
                 console.log("error: " + error);
