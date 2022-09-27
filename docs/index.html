@@ -277,7 +277,7 @@
             </b-card>
 
             <div v-if="selectedCollection != null && selectedPool != null">
-              <b-card class="mx-0 my-1" body-class="m-1 p-1">
+              <b-card class="mx-0 my-1" body-class="m-1 p-0">
                 <template #header>
                   <h6 class="mb-0">Swap</h6>
                 </template>
@@ -311,15 +311,31 @@
             </div>
 
             <div v-if="selectedCollection != null" v-for="(set, setIndex) in getPoolTokens(selectedCollection, selectedPool)" :key="setIndex">
-              <b-card class="mx-0 my-1" body-class="m-1 p-1">
+              <b-card class="mx-0 my-1" body-class="m-1 p-0">
                 <template #header>
                   <h6 class="mb-0">{{ set.description }}</h6>
                 </template>
                 <b-card-text v-if="set.tokens.length == 0">
                   Empty
                 </b-card-text>
+                <div v-if="set.tokens.length > 0" class="d-flex flex-wrap m-0 p-0">
+                  <div class="mt-0 flex-grow-1">
+                  </div>
+                  <div class="mt-0 pr-1">
+                    <b-form-select size="sm" v-model="tokens[set.name].sortOption" :options="tokensSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
+                  </div>
+                  <div class="mt-0 pr-1">
+                    <font size="-2" v-b-popover.hover.top="'# tokens'">{{ set.tokens.length }}</font>
+                  </div>
+                  <div class="mt-0 pr-1">
+                    <b-pagination size="sm" v-model="tokens[set.name].currentPage" :total-rows="set.tokens.length" :per-page="tokens[set.name].pageSize" style="height: 0;"></b-pagination>
+                  </div>
+                  <div class="mt-0 pl-1">
+                    <b-form-select size="sm" v-model="tokens[set.name].pageSize" :options="pageSizes" v-b-popover.hover.top="'Tokens Page size'"></b-form-select>
+                  </div>
+                </div>
                 <b-card-group v-if="set.tokens.length > 0" deck class="m-0 p-0">
-                  <div v-for="(token, tokenIndex) in set.tokens.slice(0, 100)" :key="tokenIndex">
+                  <div v-for="(token, tokenIndex) in pagedFilteredTokens(selectedCollection, selectedPool, set.name)" :key="tokenIndex">
                     <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 7rem;">
                       <b-avatar v-if="['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" button @click="toggleToken(set.name, token.tokenId)" rounded size="7rem" :src="token.image" style="background-color: #fafafa">
                         <template v-if="selectedTokens[set.name] && selectedTokens[set.name][token.tokenId]" #badge><b-icon icon="check"></b-icon></template>
@@ -361,19 +377,52 @@
           collectionsCurrentPage: 1,
           poolsCurrentPage: 1,
           currentPage: 0,
-          ownerCurrentPage: 1,
           collectionsSortOption: 'nameasc',
           poolsSortOption: 'nameasc',
           sortOption: 'priceasc',
-          ownerSortOption: 'countdsc',
           collectionsPageSize: 100,
           poolsPageSize: 100,
           pageSize: 100,
-          ownerPageSize: 100,
           currentPage: 1,
+          tokens: {
+            'validTokenIdsInPool': {
+              currentPage: 1,
+              pageSize: 100,
+              sortOption: 'idasc',
+            },
+            'validTokenIdsOwned': {
+              currentPage: 1,
+              pageSize: 100,
+              sortOption: 'idasc',
+            },
+            'validTokenIdsNotInPoolOrOwned': {
+              currentPage: 1,
+              pageSize: 100,
+              sortOption: 'idasc',
+            },
+            'invalidTokenIdsOwned': {
+              currentPage: 1,
+              pageSize: 100,
+              sortOption: 'idasc',
+            },
+            'invalidTokenIdsNotInPoolOrOwned': {
+              currentPage: 1,
+              pageSize: 100,
+              sortOption: 'idasc',
+            },
+            'tokenIdsOwned': {
+              currentPage: 1,
+              pageSize: 100,
+              sortOption: 'idasc',
+            },
+            'tokenIdsNotOwned': {
+              currentPage: 1,
+              pageSize: 100,
+              sortOption: 'idasc',
+            },
+          },
           searchCollections: null,
           searchCollection: null,
-          layer: null,
           collections: {},
           collection: {
             address: null,
@@ -386,8 +435,7 @@
             blockNumber: null,
             timestamp: null,
           },
-          prices: {},
-          owners: {},
+          // owners: {},
           selectedTokens: {},
           sync: {
             section: null,
@@ -418,20 +466,12 @@
             { value: 'namedsc', text: '▼ Name' },
             { value: 'random', text: 'Random' },
           ],
-          sortOptions: [
+          tokensSortOptions: [
             { value: 'idasc', text: '▲ Id' },
             { value: 'iddsc', text: '▼ Id' },
-            { value: 'priceasc', text: '▲ Price' },
-            { value: 'pricedsc', text: '▼ Price' },
-            { value: 'random', text: 'Random' },
-          ],
-          ownerSortOptions: [
-            { value: 'countasc', text: '▲ Count' },
-            { value: 'countdsc', text: '▼ Count' },
             { value: 'random', text: 'Random' },
           ],
           pageSizes: [
-            { value: 1, text: '1' }, // TODO: Delete
             { value: 10, text: '10' },
             { value: 50, text: '50' },
             { value: 100, text: '100' },
@@ -487,44 +527,6 @@
             }
             return results;
           },
-          // layerOptions() {
-          //   const results = [];
-          //   results.push({ value: null, text: '(select collection)' });
-          //   for (const item of INFO[0].layers) {
-          //     results.push({ value: item.layerIndex, text: item.name });
-          //   }
-          //   return results;
-          // },
-          // traitOptions() {
-          //   const results = [];
-          //   if (this.layer != null) {
-          //     let traitIndex = 0;
-          //     for (const trait of INFO[0].layers[this.layer].traits) {
-          //       results.push({ value: traitIndex.toString().padStart(3, '0'), text: trait.name, mimeType: trait.mimeType, base64: trait.base64 });
-          //       traitIndex++;
-          //     }
-          //   }
-          //   return results;
-          // },
-          // collectionTokensAttributesWithCounts() {
-          //   const collator = {};
-          //   for (const tokenId of Object.keys(INFO[0].tokenData)) {
-          //     const token = INFO[0].tokenData[tokenId];
-          //     const traits = token.hash.match(/.{1,3}/g);
-          //     for (let layerIndex in traits) {
-          //       const traitIndex = traits[layerIndex];
-          //       if (!collator[layerIndex]) {
-          //         collator[layerIndex] = {};
-          //       }
-          //       if (!collator[layerIndex][traitIndex]) {
-          //         collator[layerIndex][traitIndex] = [tokenId];
-          //       } else {
-          //         collator[layerIndex][traitIndex].push(tokenId);
-          //       }
-          //     }
-          //   }
-          //   return collator;
-          // },
           filteredCollections() {
             const results = this.collectionsSortOption ? [] : [];
             const searchLower = this.searchCollections && this.searchCollections.toLowerCase() || null;
@@ -640,134 +642,6 @@
             }
             return false;
           },
-          // filteredCollectionTokens() {
-          //   let stage1Data = this.selectedTraits ? [] : [];
-          //   console.log("filteredCollectionTokens: " + JSON.stringify(this.selectedTraits));
-          //   if (Object.keys(this.selectedTraits).length == 0) {
-          //     for (const tokenId of Object.keys(INFO[0].tokenData)) {
-          //       const token = INFO[0].tokenData[tokenId];
-          //       const price = this.prices[token.tokenId] || null;
-          //       stage1Data.push({ ...token, price });
-          //     }
-          //   } else {
-          //     let selectedTokenIds = [];
-          //     for (const [trait, value] of Object.entries(this.selectedTraits)) {
-          //       console.log(trait + ' ' + JSON.stringify(value));
-          //       let thisTraitTokenIds = [];
-          //       for (const selectedValue of Object.keys(value)) {
-          //         const tokenIds = this.collectionTokensAttributesWithCounts[trait][selectedValue] || [];
-          //         thisTraitTokenIds = [...thisTraitTokenIds, ...tokenIds];
-          //       }
-          //       if (selectedTokenIds.length == 0) {
-          //         selectedTokenIds = thisTraitTokenIds;
-          //       } else {
-          //         selectedTokenIds = selectedTokenIds.filter(tokenId => thisTraitTokenIds.includes(tokenId));
-          //       }
-          //     }
-          //     for (const tokenId of selectedTokenIds) {
-          //       const token = INFO[0].tokenData[tokenId];
-          //       const price = this.prices[token.tokenId] || null;
-          //       stage1Data.push({ ...token, price });
-          //     }
-          //   }
-          //   let results = stage1Data;
-          //   if (this.searchCollections != null && this.searchCollections.length > 0) {
-          //     const searchCollections = this.searchCollections.split(/[, \t\n]+/).map(s => s.toLowerCase());
-          //     results = [];
-          //     for (let i in stage1Data) {
-          //       const d = stage1Data[i];
-          //       const owner = this.owners[d.tokenId] || null;
-          //       const ensName = owner == null ? null : this.ensMap[owner];
-          //       for (searchCollection of searchCollections) {
-          //         if (owner != null && owner.toLowerCase().includes(searchCollection)) {
-          //           results.push(d);
-          //           break;
-          //         } else if (ensName != null && ensName.includes(searchCollection)) {
-          //           results.push(d);
-          //           break;
-          //         }
-          //       }
-          //     }
-          //   }
-          //   return results;
-          // },
-          // filteredSortedCollectionTokens() {
-          //   let results = this.filteredCollectionTokens;
-          //   if (this.sortOption == 'idasc') {
-          //     results.sort((a, b) => a.tokenId - b.tokenId);
-          //   } else if (this.sortOption == 'iddsc') {
-          //     results.sort((a, b) => b.tokenId - a.tokenId);
-          //   } else if (this.sortOption == 'priceasc') {
-          //     results.sort((a, b) => {
-          //       const pricea = a.price && a.price.price || null;
-          //       const priceb = b.price && b.price.price || null;
-          //       if (pricea == priceb) {
-          //         return a.tokenId - b.tokenId;
-          //       } else if (pricea != null && priceb == null) {
-          //         return -1;
-          //       } else if (pricea == null && priceb != null) {
-          //         return 1;
-          //       } else {
-          //         return pricea - priceb;
-          //       }
-          //     });
-          //   } else if (this.sortOption == 'pricedsc') {
-          //     results.sort((a, b) => {
-          //       const pricea = a.price && a.price.price || null;
-          //       const priceb = b.price && b.price.price || null;
-          //       if (pricea == priceb) {
-          //         return a.tokenId - b.tokenId;
-          //       } else if (pricea != null && priceb == null) {
-          //         return -1;
-          //       } else if (pricea == null && priceb != null) {
-          //         return 1;
-          //       } else {
-          //         return priceb - pricea;
-          //       }
-          //     });
-          //   } else {
-          //     results.sort(() => {
-          //       return Math.random() - 0.5;
-          //     });
-          //   }
-          //   return results;
-          // },
-          // pagedFilteredCollectionTokens() {
-          //   return this.filteredSortedCollectionTokens.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
-          // },
-          // filteredTokensByOwners() {
-          //   const collator = {};
-          //   for (result of Object.values(this.filteredCollectionTokens)) {
-          //     const owner = this.owners[result.tokenId];
-          //     if (!collator[owner]) {
-          //       collator[owner] = [result.tokenId];
-          //     } else {
-          //       collator[owner].push(result.tokenId);
-          //     }
-          //   }
-          //   const results = [];
-          //   for (const key of Object.keys(collator)) {
-          //     const tokenIds = collator[key];
-          //     results.push( { owner: key, count: tokenIds.length, tokenIds: tokenIds } );
-          //   }
-          //   return results;
-          // },
-          // filteredSortedTokensByOwners() {
-          //   let results = this.filteredTokensByOwners;
-          //   if (this.ownerSortOption == 'countasc') {
-          //     results.sort((a, b) => a.count - b.count);
-          //   } else if (this.ownerSortOption == 'countdsc') {
-          //     results.sort((a, b) => b.count - a.count);
-          //   } else {
-          //     results.sort(() => {
-          //       return Math.random() - 0.5;
-          //     });
-          //   }
-          //   return results;
-          // },
-          // pagedFilteredSortedTokensByOwners() {
-          //   return this.filteredSortedTokensByOwners.slice((this.ownerCurrentPage - 1) * this.ownerPageSize, this.ownerCurrentPage * this.ownerPageSize);
-          // },
         },
         methods: {
           formatTimestamp(ts) {
@@ -821,7 +695,6 @@
             }
           },
           selectedCollectionChanged(event) {
-            // console.log("selectedCollectionChanged: " + JSON.stringify(event));
             this.selectedPool = null;
             for (const setName of ['validTokenIdsInPool', 'validTokenIdsOwned']) {
               Vue.set(this.selectedTokens, setName, {});
@@ -830,18 +703,14 @@
               const db0 = new Dexie(this.db.name);
               db0.version(this.db.version).stores(this.db.schemaDefinition);
               const records = await db0.collection.where("address").equalsIgnoreCase(this.selectedCollection || '').toArray();
-              // console.log("collectionsRowSelected - records: " + JSON.stringify(records, null, 2));
               if (records.length == 1) {
                 this.collection = records[0];
-                // console.log("selectedCollectionChanged - Loaded collection: " + JSON.stringify(this.collection, null, 2));
-                // console.log("selectedCollectionChanged - Loaded collection " + this.selectedCollection);
               }
               db0.close();
             })();
           },
           getPoolTokens(collectionAddress, poolAddress) {
             const coinbaseLower = this.coinbase && this.coinbase.toLowerCase() || null;
-            // console.log("getPoolTokens: " + collectionAddress + " " + poolAddress);
             if (collectionAddress == this.collection.address) {
               let umswap = null;
               if (poolAddress != null) {
@@ -852,59 +721,109 @@
                 }
               }
               if (umswap) {
-                const validTokenIdsInPool = [];
-                const validTokenIdsOwned = [];
-                const validTokenIdsNotInPoolOrOwned = [];
-                const invalidTokenIdsOwned = [];
-                const invalidTokenIdsNotInPoolOrOwned = [];
                 const umswapAddressLower = umswap.address.toLowerCase();
+                const tokens = {};
+                for (const setName of ['validTokenIdsInPool', 'validTokenIdsOwned', 'validTokenIdsNotInPoolOrOwned', 'invalidTokenIdsOwned', 'invalidTokenIdsNotInPoolOrOwned']) {
+                  tokens[setName] = [];
+                }
                 for (const [tokenId, token] of Object.entries(this.collection.tokens)) {
                   const validInPool = umswap.validTokenIds.length == 0 || umswap.validTokenIds.includes(parseInt(tokenId));
                   const tokenOwner = token.owner.toLowerCase();
+                  let setName;
                   if (tokenOwner == umswapAddressLower) {
-                    validTokenIdsInPool.push(token);
+                    setName = 'validTokenIdsInPool';
                   } else if (tokenOwner == coinbaseLower) {
                     if (validInPool) {
-                      validTokenIdsOwned.push(token);
+                      setName = 'validTokenIdsOwned';
                     } else {
-                      invalidTokenIdsOwned.push(token);
+                      setName = 'invalidTokenIdsOwned';
                     }
                   } else {
                     if (validInPool) {
-                      validTokenIdsNotInPoolOrOwned.push(token);
+                      setName = 'validTokenIdsNotInPoolOrOwned';
                     } else {
-                      invalidTokenIdsNotInPoolOrOwned.push(token);
+                      setName = 'invalidTokenIdsNotInPoolOrOwned';
                     }
                   }
+                  tokens[setName].push(token);
                 }
-                return [
-                  { name: 'validTokenIdsInPool', description: 'Tokens In This Pool', tokens: validTokenIdsInPool },
-                  { name: 'validTokenIdsOwned', description: 'My Tokens Eligible For This Pool', tokens: validTokenIdsOwned },
-                  { name: 'validTokenIdsNotInPoolOrOwned', description: 'Other Tokens Eligible For This Pool', tokens: validTokenIdsNotInPoolOrOwned },
-                  { name: 'invalidTokenIdsOwned', description: 'My Tokens Not Eligible For This Pool', tokens: invalidTokenIdsOwned },
-                  { name: 'invalidTokenIdsNotInPoolOrOwned', description: 'Other Tokens Not Eligible For This Pool', tokens: invalidTokenIdsNotInPoolOrOwned },
-                ];
-              } else {
-                const tokenIdsOwned = [];
-                const tokenIdsNotOwned = [];
-                for (const [tokenId, token] of Object.entries(this.collection.tokens)) {
-                  const tokenOwner = token.owner.toLowerCase();
-                  if (tokenOwner == coinbaseLower) {
-                    tokenIdsOwned.push(token);
+                for (const setName of ['validTokenIdsInPool', 'validTokenIdsOwned', 'validTokenIdsNotInPoolOrOwned', 'invalidTokenIdsOwned', 'invalidTokenIdsNotInPoolOrOwned']) {
+                  if (this.tokens[setName].sortOption == 'idasc') {
+                    tokens[setName].sort((a, b) => a.tokenId - b.tokenId);
+                  } else if (this.tokens[setName].sortOption == 'iddsc') {
+                    tokens[setName].sort((a, b) => b.tokenId - a.tokenId);
                   } else {
-                    tokenIdsNotOwned.push(token);
+                    tokens[setName].sort(() => {
+                      return Math.random() - 0.5;
+                    });
                   }
                 }
                 return [
-                  { name: 'tokenIdsOwned', description: 'My Tokens', tokens: tokenIdsOwned },
-                  { name: 'tokenIdsNotOwned', description: 'Not My Tokens', tokens: tokenIdsNotOwned },
+                  { name: 'validTokenIdsInPool', description: 'Tokens In This Pool', tokens: tokens['validTokenIdsInPool'] },
+                  { name: 'validTokenIdsOwned', description: 'My Tokens Eligible For This Pool', tokens: tokens['validTokenIdsOwned'] },
+                  { name: 'validTokenIdsNotInPoolOrOwned', description: 'Other Tokens Eligible For This Pool', tokens: tokens['validTokenIdsNotInPoolOrOwned'] },
+                  { name: 'invalidTokenIdsOwned', description: 'My Tokens Not Eligible For This Pool', tokens: tokens['invalidTokenIdsOwned'] },
+                  { name: 'invalidTokenIdsNotInPoolOrOwned', description: 'Other Tokens Not Eligible For This Pool', tokens: tokens['invalidTokenIdsNotInPoolOrOwned'] },
+                ];
+              } else {
+                const tokens = {};
+                for (const setName of ['tokenIdsOwned', 'tokenIdsNotOwned']) {
+                  tokens[setName] = [];
+                }
+                for (const [tokenId, token] of Object.entries(this.collection.tokens)) {
+                  const tokenOwner = token.owner.toLowerCase();
+                  let setName;
+                  if (tokenOwner == coinbaseLower) {
+                    setName = 'tokenIdsOwned';
+                  } else {
+                    setName = 'tokenIdsNotOwned';
+                  }
+                  tokens[setName].push(token);
+                }
+                for (const setName of ['tokenIdsOwned', 'tokenIdsNotOwned']) {
+                  if (this.tokens[setName].sortOption == 'idasc') {
+                    tokens[setName].sort((a, b) => a.tokenId - b.tokenId);
+                  } else if (this.tokens[setName].sortOption == 'iddsc') {
+                    tokens[setName].sort((a, b) => b.tokenId - a.tokenId);
+                  } else {
+                    tokens[setName].sort(() => {
+                      return Math.random() - 0.5;
+                    });
+                  }
+                }
+                return [
+                  { name: 'tokenIdsOwned', description: 'My Tokens', tokens: tokens['tokenIdsOwned'] },
+                  { name: 'tokenIdsNotOwned', description: 'Not My Tokens', tokens: tokens['tokenIdsNotOwned'] },
                 ];
               }
             }
             return [];
           },
+          pagedFilteredTokens(collectionAddress, poolAddress, setName) {
+            const allTokens = this.getPoolTokens(collectionAddress, poolAddress);
+            if (allTokens) {
+              let tokens;
+              if (setName == 'tokenIdsOwned') {
+                tokens = allTokens[0].tokens;
+              } else if (setName == 'tokenIdsNotOwned') {
+                tokens = allTokens[1].tokens;
+              } else if (setName == 'validTokenIdsInPool') {
+                tokens = allTokens[0].tokens;
+              } else if (setName == 'validTokenIdsOwned') {
+                tokens = allTokens[1].tokens;
+              } else if (setName == 'validTokenIdsNotInPoolOrOwned') {
+                tokens = allTokens[2].tokens;
+              } else if (setName == 'invalidTokenIdsOwned') {
+                tokens = allTokens[3].tokens;
+              } else if (setName == 'invalidTokenIdsNotInPoolOrOwned') {
+                tokens = allTokens[4].tokens;
+              }
+              return tokens.slice((this.tokens[setName].currentPage - 1) * this.tokens[setName].pageSize, this.tokens[setName].currentPage * this.tokens[setName].pageSize);
+            } else {
+              return [];
+            }
+          },
           toggleToken(setName, tokenId) {
-            // console.log("toggleToken: " + setName + " " + tokenId);
             if (!this.selectedTokens[setName]) {
               Vue.set(this.selectedTokens, setName, {});
             }
@@ -916,7 +835,6 @@
             } else {
               Vue.set(this.selectedTokens[setName], tokenId, true);
             }
-            // console.log("toggleToken: " + JSON.stringify(this.selectedTokens));
           },
           owner(tokenId, length = 24) {
             const address = this.owners[tokenId] || null;
