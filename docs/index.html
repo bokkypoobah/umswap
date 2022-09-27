@@ -254,7 +254,7 @@
                       (All in collection)
                     </div>
                     <div v-else>
-                      {{ data.item.validTokenIds.length + 'x - ' + data.item.validTokenIds.join(", ") }}
+                      {{ data.item.validTokenIds.length + 'x: [' + data.item.validTokenIds.join(",") + ']' }}
                     </div>
                   </template>
                   <template #cell(swappedIn)="data">
@@ -794,6 +794,9 @@
             if (item && item.length > 0) {
               this.selectedCollection = this.selectedCollection != null ? null : item[0].address;
               this.selectedPool = null;
+              for (const setName of ['validTokenIdsInPool', 'validTokenIdsOwned']) {
+                Vue.set(this.selectedTokens, setName, {});
+              }
               // console.log("collectionsRowSelected - this.selectedCollection: " + JSON.stringify(this.selectedCollection));
               (async() => {
                 const db0 = new Dexie(this.db.name);
@@ -812,11 +815,17 @@
           poolsRowSelected(item) {
             if (item && item.length > 0) {
               this.selectedPool = this.selectedPool != null ? null : item[0].address;
+              for (const setName of ['validTokenIdsInPool', 'validTokenIdsOwned']) {
+                Vue.set(this.selectedTokens, setName, {});
+              }
             }
           },
           selectedCollectionChanged(event) {
             // console.log("selectedCollectionChanged: " + JSON.stringify(event));
             this.selectedPool = null;
+            for (const setName of ['validTokenIdsInPool', 'validTokenIdsOwned']) {
+              Vue.set(this.selectedTokens, setName, {});
+            }
             (async() => {
               const db0 = new Dexie(this.db.name);
               db0.version(this.db.version).stores(this.db.schemaDefinition);
