@@ -123,7 +123,7 @@
 
             <b-card no-header no-body class="m-0 mt-1 p-0 border-0">
               <b-card-body class="m-0 p-0">
-                <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='collectionsRowSelected' :fields="collectionsFields" :items="selectedCollection ? [collections[selectedCollection]] : pagedFilteredCollections" head-variant="light" class="m-0">
+                <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='collectionsRowSelected' :fields="collectionsFields" :items="selectedCollection ? (collections[selectedCollection] ? [collections[selectedCollection]] : []) : pagedFilteredCollections" head-variant="light" class="m-0">
                   <template #head(address)="data">
                     <span v-b-popover.hover="'ERC-721 NFT collection contract address. Always check this against a separate source'">{{ data.label }}</span>
                   </template>
@@ -224,8 +224,11 @@
                   <template #head(swappedOut)="data">
                     <span v-b-popover.hover="'Number of ERC-721 tokens swapped out of this Umswap pool'">{{ data.label }}</span>
                   </template>
+                  <template #head(balance)="data">
+                    <span v-b-popover.hover="'My number of Umswap tokens'">{{ data.label }}</span>
+                  </template>
                   <template #head(totalSupply)="data">
-                    <span v-b-popover.hover="'Number of ERC-721 tokens currently in this pool = Umswap totalSupply'">{{ data.label }}</span>
+                    <span v-b-popover.hover="'Total number of Umswap tokens = number of ERC-721 tokens currently in this pool'">{{ data.label }}</span>
                   </template>
                   <template #head(isApprovedForAll)="data">
                     <span v-b-popover.hover="'Umswap contract has been approved by NFT contract to transfer in tokens'">{{ data.label }}</span>
@@ -256,6 +259,9 @@
                   </template>
                   <template #cell(swappedOut)="data">
                     {{ data.item.swappedOut }}
+                  </template>
+                  <template #cell(balance)="data">
+                    {{ formatETH(data.item.balance) }}
                   </template>
                   <template #cell(totalSupply)="data">
                     {{ formatETH(data.item.totalSupply) }}
@@ -443,10 +449,11 @@
           poolsFields: [
             { key: 'address', label: 'Pool', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
             { key: 'symbol', label: 'Symbol', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            { key: 'name', label: 'Name', thStyle: 'width: 25%;', tdClass: 'text-truncate' },
-            { key: 'validTokenIds', label: 'Valid Token Ids', thStyle: 'width: 25%;', tdClass: 'text-truncate' },
+            { key: 'name', label: 'Name', thStyle: 'width: 20%;', tdClass: 'text-truncate' },
+            { key: 'validTokenIds', label: 'Valid Token Ids', thStyle: 'width: 20%;', tdClass: 'text-truncate' },
             { key: 'swappedIn', label: '# In', thStyle: 'width: 5%;', thClass: 'text-right', tdClass: 'text-right' },
             { key: 'swappedOut', label: '# Out', thStyle: 'width: 5%;', thClass: 'text-right', tdClass: 'text-right' },
+            { key: 'balance', label: 'Balance', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
             { key: 'totalSupply', label: 'Total Supply', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
             { key: 'isApprovedForAll', label: 'Approved', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
           ],
@@ -796,7 +803,7 @@
           },
           getPoolTokens(collectionAddress, poolAddress) {
             const coinbaseLower = this.coinbase && this.coinbase.toLowerCase() || null;
-            console.log("getPoolTokens: " + collectionAddress + " " + poolAddress);
+            // console.log("getPoolTokens: " + collectionAddress + " " + poolAddress);
             if (collectionAddress == this.collection.address) {
               let umswap = null;
               if (poolAddress != null) {
@@ -949,13 +956,16 @@
                 const totalSupply = stats[3].toString();
                 const raters = stats[4].toString();
                 const isApprovedForAll = stats[5].toString();
+                const umswapContract = new ethers.Contract(address, UMSWAPABI, provider);
+                const balance = (await umswapContract.balanceOf(this.coinbase)).toString();
                 if (!(collection in collections)) {
-                  collections[collection] = { address: collection, type: null, symbol: null, name: null, totalSupply: null, reservoirInfo: null, allTokens: [], umswaps: [] };
+                  collections[collection] = { address: collection, type: null, symbol: null, name: null, balance: null, totalSupply: null, reservoirInfo: null, allTokens: [], umswaps: [] };
                 }
-                const umswap = { index, address, symbol, name, collection, validTokenIds, tokenIds, creator, swappedIn, swappedOut, totalScores, totalSupply, raters, isApprovedForAll };
+                const umswap = { index, address, symbol, name, collection, validTokenIds, tokenIds, creator, swappedIn, swappedOut, totalScores, balance, totalSupply, raters, isApprovedForAll };
                 collections[collection].umswaps.push(umswap);
                 this.sync.completed = i + 1;
               }
+              // console.log("collections: " + JSON.stringify(collections, null, 2));
 
               this.sync.section = null;
               this.sync.completed = 0;
@@ -982,6 +992,7 @@
               }
               this.collections = collections;
               // localStorage.setItem('umsCollections', JSON.stringify(collections));
+              console.log("this.collections", JSON.stringify(this.collections, null, 2));
               await db0.cache.put({ objectName: 'collections', object: this.collections }).then (function() {
               }).catch(function(error) {
                 console.log("error: " + error);
@@ -1117,7 +1128,7 @@
         mounted() {
           if ('coinbase' in localStorage) {
             this.coinbase = localStorage.coinbase;
-            console.log("Loaded coinbase: " + this.coinbase);
+            // console.log("Loaded coinbase: " + this.coinbase);
           }
           (async() => {
             const db0 = new Dexie(this.db.name);
