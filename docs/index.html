@@ -1223,7 +1223,6 @@
                   h('b-col', 'setApprovalForAll('),
                 ]
               ),
-              // function setApprovalForAll(address operator, bool approved) public virtual override {
               h('b-row', {
                 }, [
                   h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
@@ -1280,13 +1279,8 @@
             // this.newUmswap.error = null;
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const umswapContract = new ethers.Contract(this.selectedPool, UMSWAPABI, provider);
-            // const umswapFactoryWithSigner = umswapFactory.connect(provider.getSigner());
-            // const from = await provider.getSigner().getAddress();
-            // const collection = this.newUmswap.collection == null || this.newUmswap.collection.trim().length == 0 ? null : this.newUmswap.collection.trim();
-            // const name = this.newUmswap.name == null || this.newUmswap.name.trim().length == 0 ? null : this.newUmswap.name.trim();
-            // const tokenIds = this.newUmswap.tokenIds == null || this.newUmswap.tokenIds.trim().length == 0 ? [] : this.newUmswap.tokenIds.split(/[, \t\n]+/).sort((a, b) => (BigInt(a) > BigInt(b))? 0 : -1);
-            // const integrator = ADDRESS0;
-            // const tip = this.newUmswap.tip == null || this.newUmswap.tip.trim().length == 0 ? 0 : ethers.utils.parseEther(this.newUmswap.tip);
+            const umswapContractWithSigner = umswapContract.connect(provider.getSigner());
+            const from = await provider.getSigner().getAddress();
             const h = this.$createElement;
             const messageVNode = h('div', { class: ['confirm-modal'] }, [
               h('b-row', {
@@ -1294,7 +1288,7 @@
                   h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'From:'),
                   h('b-col',
                     [
-                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + this.coinbase, 'target': '_blank' } }, this.coinbase),
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + from, 'target': '_blank' } }, from),
                     ]
                   ),
                 ]
@@ -1315,25 +1309,6 @@
                   h('b-col', 'swap('),
                 ]
               ),
-              // function swap(uint[] calldata inTokenIds, uint[] calldata outTokenIds) public reentrancyGuard {
-            //   h('b-row', {
-            //     }, [
-            //       h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
-            //       h('b-col', { class: ['text-right'], props: { cols: 2 } }, 'collection:'),
-            //       h('b-col',
-            //         [
-            //           h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + collection, 'target': '_blank' } }, collection),
-            //         ]
-            //       ),
-            //     ]
-            //   ),
-            //   h('b-row', {
-            //     }, [
-            //       h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
-            //       h('b-col', { class: ['text-right'], props: { cols: 2 } }, 'name:'),
-            //       h('b-col', name),
-            //     ]
-            //   ),
               h('b-row', {
                 }, [
                   h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
@@ -1348,29 +1323,12 @@
                   h('b-col', this.tokenIdsToSwapOut.join(",")),
                 ]
               ),
-            //   h('b-row', {
-            //     }, [
-            //       h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
-            //       h('b-col', { class: ['text-right'], props: { cols: 2 } }, 'integrator:'),
-            //       h('b-col',
-            //         [
-            //           h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + integrator, 'target': '_blank' } }, integrator),
-            //         ]
-            //       ),
-            //     ]
-            //   ),
               h('b-row', {
                 }, [
                   h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
                   h('b-col', ')'),
                 ]
               ),
-            //   h('b-row', {
-            //     }, [
-            //       h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'Tip:'),
-            //       h('b-col', ethers.utils.formatEther(tip)),
-            //     ]
-            //   ),
             ])
             this.$bvModal.msgBoxConfirm([messageVNode], {
               title: 'Send Transaction',
@@ -1383,18 +1341,18 @@
             }).then( async value1 => {
               if (value1) {
                 event.preventDefault();
-            //     try {
-            //       const tx = await umswapFactoryWithSigner.newUmswap(collection, name, tokenIds, integrator, { value: tip });
+                try {
+                  const tx = await umswapContractWithSigner.swap(this.tokenIdsToSwapIn, this.tokenIdsToSwapOut);
             //       this.newUmswap.txHash = tx.hash;
-            //       console.log("tx: " + JSON.stringify(tx));
-            //     } catch (e) {
+                  console.log("tx: " + JSON.stringify(tx));
+                } catch (e) {
             //       this.newUmswap.error = e.message.toString();
-            //       console.log("newUmswap.newUmswap error: " + JSON.stringify(e));
-            //     }
+                  console.log("swapIt error: " + JSON.stringify(e));
+                }
               }
             }).catch(err => {
               // this.newUmswap.error = err.message.toString();
-              console.log("newUmswap.newUmswap error: " + JSON.stringify(e));
+              console.log("swapIt error: " + JSON.stringify(e));
             });
           },
         },
