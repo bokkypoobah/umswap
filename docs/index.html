@@ -1172,14 +1172,13 @@
               ),
               h('b-row', {
                 }, [
-                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'Function:'),
-                  h('b-col', 'setApprovalForAll('),
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'setApprovalForAll('),
+                  h('b-col', ''),
                 ]
               ),
               h('b-row', {
                 }, [
-                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
-                  h('b-col', { class: ['text-right'], props: { cols: 2 } }, 'operator:'),
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'operator:'),
                   h('b-col',
                     [
                       h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + this.selectedPool + '#code', 'target': '_blank' } }, this.selectedPool),
@@ -1189,15 +1188,14 @@
               ),
               h('b-row', {
                 }, [
-                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
-                  h('b-col', { class: ['text-right'], props: { cols: 2 } }, 'approved:'),
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'approved:'),
                   h('b-col', approved),
                 ]
               ),
               h('b-row', {
                 }, [
-                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
-                  h('b-col', ')'),
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, ')'),
+                  h('b-col', ''),
                 ]
               ),
               h('b-row', {
@@ -1264,28 +1262,26 @@
               ),
               h('b-row', {
                 }, [
-                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'Function:'),
-                  h('b-col', 'swap('),
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'swap('),
+                  h('b-col', ''),
                 ]
               ),
               h('b-row', {
                 }, [
-                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
-                  h('b-col', { class: ['text-right'], props: { cols: 2 } }, 'inTokenIds:'),
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'inTokenIds:'),
                   h('b-col', '[' + this.tokenIdsToSwapIn.join(",") + ']'),
                 ]
               ),
               h('b-row', {
                 }, [
-                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
-                  h('b-col', { class: ['text-right'], props: { cols: 2 } }, 'outTokenIds:'),
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'outTokenIds:'),
                   h('b-col', '[' + this.tokenIdsToSwapOut.join(",") + ']'),
                 ]
               ),
               h('b-row', {
                 }, [
-                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
-                  h('b-col', ')'),
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, ')'),
+                  h('b-col', ''),
                 ]
               ),
               h('b-row', {
