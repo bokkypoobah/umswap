@@ -227,6 +227,9 @@
                   <template #head(totalSupply)="data">
                     <span v-b-popover.hover="'Number of ERC-721 tokens currently in this pool = Umswap totalSupply'">{{ data.label }}</span>
                   </template>
+                  <template #head(isApprovedForAll)="data">
+                    <span v-b-popover.hover="'Umswap contract has been approved by NFT contract to transfer in tokens'">{{ data.label }}</span>
+                  </template>
                   <template #cell(address)="data">
                     <b-link :href="'https://etherscan.io/token/' + data.item.address + '#balances'" v-b-popover.hover.bottom="'View Umswap pool contract in Etherscan.io'" target="_blank">
                       {{ data.item.address }}
@@ -257,6 +260,9 @@
                   <template #cell(totalSupply)="data">
                     {{ formatETH(data.item.totalSupply) }}
                   </template>
+                  <template #cell(isApprovedForAll)="data">
+                    {{ data.item.isApprovedForAll == 0 ? 'No' : 'Yes' }}
+                  </template>
                 </b-table>
                 <!--
                 <br />
@@ -281,6 +287,14 @@
               </b-card-body>
             </b-card>
 
+            <div v-if="selectedCollection != null">
+              <b-card class="mx-0 my-1" body-class="m-1 p-1">
+                <template #header>
+                  <h6 class="mb-0">Swap</h6>
+                </template>
+              </b-card>
+            </div>
+
             <div v-if="selectedCollection != null" v-for="(set, setIndex) in getPoolTokens(selectedCollection, selectedPool)" :key="setIndex">
               <b-card class="mx-0 my-1" body-class="m-1 p-1">
                 <template #header>
@@ -292,7 +306,11 @@
                 <b-card-group v-if="set.tokens.length > 0" deck class="m-0 p-0">
                   <div v-for="(token, tokenIndex) in set.tokens.slice(0, 100)" :key="tokenIndex">
                     <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 7rem;">
-                      <b-avatar :disabled="!['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" button @click="toggleToken(set.name, token.tokenId)" rounded size="7rem" :src="token.image" style="background-color: #fafafa"></b-avatar>
+                      <b-avatar v-if="['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" button @click="toggleToken(set.name, token.tokenId)" rounded size="7rem" :src="token.image" style="background-color: #fafafa">
+                        <template v-if="selectedTokens[set.name] && selectedTokens[set.name][token.tokenId]" #badge><b-icon icon="check"></b-icon></template>
+                      </b-avatar>
+                      <b-avatar v-if="!['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" rounded size="7rem" :src="token.image" style="background-color: #fafafa">
+                      </b-avatar>
                       <b-card-text>
                         <div class="d-flex justify-content-between m-0 p-0">
                           <div>
@@ -421,9 +439,10 @@
             { key: 'symbol', label: 'Symbol', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
             { key: 'name', label: 'Name', thStyle: 'width: 25%;', tdClass: 'text-truncate' },
             { key: 'validTokenIds', label: 'Valid Token Ids', thStyle: 'width: 25%;', tdClass: 'text-truncate' },
-            { key: 'swappedIn', label: '# In', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
-            { key: 'swappedOut', label: '# Out', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
+            { key: 'swappedIn', label: '# In', thStyle: 'width: 5%;', thClass: 'text-right', tdClass: 'text-right' },
+            { key: 'swappedOut', label: '# Out', thStyle: 'width: 5%;', thClass: 'text-right', tdClass: 'text-right' },
             { key: 'totalSupply', label: 'Total Supply', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
+            { key: 'isApprovedForAll', label: 'Approved', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
           ],
           ownersFields: [
             { key: 'index', label: '#' },
@@ -740,8 +759,8 @@
                 // console.log("collectionsRowSelected - records: " + JSON.stringify(records, null, 2));
                 if (records.length == 1) {
                   this.collection = records[0];
-                  // console.log("collectionsRowSelected - Loaded collection: " + JSON.stringify(this.collection, null, 2));
-                  console.log("collectionsRowSelected - Loaded collection " + this.selectedCollection);
+                  console.log("collectionsRowSelected - Loaded collection: " + JSON.stringify(this.collection, null, 2));
+                  // console.log("collectionsRowSelected - Loaded collection " + this.selectedCollection);
                 }
                 db0.close();
               })();
