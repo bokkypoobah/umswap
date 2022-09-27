@@ -742,6 +742,7 @@
             })();
           },
           getPoolTokens(collectionAddress, poolAddress) {
+            const coinbaseLower = this.coinbase.toLowerCase();
             console.log("getPoolTokens: " + collectionAddress + " " + poolAddress);
             if (collectionAddress == this.collection.address) {
               let umswap = null;
@@ -755,34 +756,47 @@
               if (umswap) {
                 console.log(JSON.stringify(umswap, null, 2));
                 const validTokenIdsInPool = [];
-                const validTokenIdsNotInPool = [];
                 const validTokenIdsOwned = [];
+                const validTokenIdsNotInPoolOrOwned = [];
                 const invalidTokenIdsOwned = [];
-                const invalidTokenIdsNotOwned = [];
+                const invalidTokenIdsNotInPoolOrOwned = [];
+                const umswapAddressLower = umswap.address.toLowerCase();
+
                 for (const [tokenId, token] of Object.entries(this.collection.tokens)) {
-                  // console.log(JSON.stringify(token));
-                  if (token.owner == this.coinbase) {
-                    if (umswap.validTokenIds.length == 0 || umswap.validTokenIds.includes(tokenId)) {
+                  const validInPool = umswap.validTokenIds.length == 0 || umswap.validTokenIds.includes(parseInt(tokenId));
+                  if ([6, 170, 1923].includes(parseInt(tokenId))) {
+                    console.log("Valid: " + validInPool + " " + token.tokenId + " " + token.owner);
+                  }
+                  const tokenOwner = token.owner.toLowerCase();
+                  if (tokenOwner == umswapAddressLower) {
+                    validTokenIdsInPool.push(token);
+                  } else if (tokenOwner == coinbaseLower) {
+                    if (validInPool) {
                       validTokenIdsOwned.push(token);
                     } else {
                       invalidTokenIdsOwned.push(token);
                     }
                   } else {
-                    invalidTokenIdsNotOwned.push(token);
+                    if (validInPool) {
+                      validTokenIdsNotInPoolOrOwned.push(token);
+                    } else {
+                      invalidTokenIdsNotInPoolOrOwned.push(token);
+                    }
                   }
                 }
                 return [
                   { name: 'validTokenIdsInPool', tokens: validTokenIdsInPool },
-                  { name: 'validTokenIdsNotInPool', tokens: validTokenIdsNotInPool },
                   { name: 'validTokenIdsOwned', tokens: validTokenIdsOwned },
+                  { name: 'validTokenIdsNotInPoolOrOwned', tokens: validTokenIdsNotInPoolOrOwned },
                   { name: 'invalidTokenIdsOwned', tokens: invalidTokenIdsOwned },
-                  { name: 'invalidTokenIdsNotOwned', tokens: invalidTokenIdsNotOwned },
+                  { name: 'invalidTokenIdsNotInPoolOrOwned', tokens: invalidTokenIdsNotInPoolOrOwned },
                 ];
               } else {
                 const tokenIdsOwned = [];
                 const tokenIdsNotOwned = [];
                 for (const [tokenId, token] of Object.entries(this.collection.tokens)) {
-                  if (token.owner == this.coinbase) {
+                  const tokenOwner = token.owner.toLowerCase();
+                  if (tokenOwner == coinbaseLower) {
                     tokenIdsOwned.push(token);
                   } else {
                     tokenIdsNotOwned.push(token);
@@ -990,7 +1004,7 @@
                   const batch = tokenIds.slice(i, parseInt(i) + NFTOWNERBATCHSIZE);
                   const ownersResult = await erc721Helper.ownersByTokenIds(this.selectedCollection, batch);
                   for (let j = 0; j < ownersResult[0].length; j++) {
-                    tokens[tokenIds[j]].owner = ownersResult[1][j];
+                    // tokens[tokenIds[j]].owner = ownersResult[1][j];
                   }
                   this.sync.completed = parseInt(this.sync.completed) + batch.length;
                 }
