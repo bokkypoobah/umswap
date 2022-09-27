@@ -292,7 +292,7 @@
                 <b-card-group v-if="set.tokens.length > 0" deck class="m-0 p-0">
                   <div v-for="(token, tokenIndex) in set.tokens.slice(0, 100)" :key="tokenIndex">
                     <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 7rem;">
-                      <b-avatar rounded size="7rem" :src="token.image" style="background-color: #fafafa"></b-avatar>
+                      <b-avatar :disabled="!['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" button @click="toggleToken(set.name, token.tokenId)" rounded size="7rem" :src="token.image" style="background-color: #fafafa"></b-avatar>
                       <b-card-text>
                         <div class="d-flex justify-content-between m-0 p-0">
                           <div>
@@ -356,6 +356,7 @@
           prices: {},
           owners: {},
           // ensMap: {},
+          selectedTokens: {},
           selectedTraits: {},
           sync: {
             section: null,
@@ -769,7 +770,7 @@
             })();
           },
           getPoolTokens(collectionAddress, poolAddress) {
-            const coinbaseLower = this.coinbase.toLowerCase();
+            const coinbaseLower = this.coinbase && this.coinbase.toLowerCase() || null;
             console.log("getPoolTokens: " + collectionAddress + " " + poolAddress);
             if (collectionAddress == this.collection.address) {
               let umswap = null;
@@ -844,6 +845,21 @@
             //   }
             // }
             return [];
+          },
+          toggleToken(setName, tokenId) {
+            console.log("toggleToken: " + setName + " " + tokenId);
+            if (!this.selectedTokens[setName]) {
+              Vue.set(this.selectedTokens, setName, {});
+            }
+            if (this.selectedTokens[setName][tokenId]) {
+              Vue.delete(this.selectedTokens[setName], tokenId);
+              if (Object.keys(this.selectedTokens[setName]) == 0) {
+                Vue.delete(this.selectedTokens, setName);
+              }
+            } else {
+              Vue.set(this.selectedTokens[setName], tokenId, true);
+            }
+            console.log("toggleToken: " + JSON.stringify(this.selectedTokens));
           },
           toggleTrait(layer, trait) {
             if (!this.selectedTraits[layer]) {
