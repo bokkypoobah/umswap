@@ -336,11 +336,11 @@
                 </div>
                 <b-card-group v-if="set.tokens.length > 0" deck class="m-0 p-0">
                   <div v-for="(token, tokenIndex) in pagedFilteredTokens(selectedCollection, selectedPool, set.name)" :key="tokenIndex">
-                    <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 7rem;">
-                      <b-avatar v-if="['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" button @click="toggleToken(set.name, token.tokenId)" rounded size="7rem" :src="token.image" style="background-color: #fafafa">
+                    <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 7.5rem;">
+                      <b-avatar v-if="['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" button @click="toggleToken(set.name, token.tokenId)" rounded size="7.5rem" :src="token.image" style="background-color: #fafafa">
                         <template v-if="selectedTokens[set.name] && selectedTokens[set.name][token.tokenId]" #badge><b-icon icon="check"></b-icon></template>
                       </b-avatar>
-                      <b-avatar v-if="!['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" rounded size="7rem" :src="token.image" style="background-color: #fafafa">
+                      <b-avatar v-if="!['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" rounded size="7.5rem" :src="token.image" style="background-color: #fafafa">
                       </b-avatar>
                       <b-card-text>
                         <div class="d-flex justify-content-between m-0 p-0">
@@ -397,17 +397,17 @@
             },
             'validTokenIdsNotInPoolOrOwned': {
               currentPage: 1,
-              pageSize: 100,
+              pageSize: 10,
               sortOption: 'idasc',
             },
             'invalidTokenIdsOwned': {
               currentPage: 1,
-              pageSize: 100,
+              pageSize: 10,
               sortOption: 'idasc',
             },
             'invalidTokenIdsNotInPoolOrOwned': {
               currentPage: 1,
-              pageSize: 100,
+              pageSize: 10,
               sortOption: 'idasc',
             },
             'tokenIdsOwned': {
@@ -417,7 +417,7 @@
             },
             'tokenIdsNotOwned': {
               currentPage: 1,
-              pageSize: 100,
+              pageSize: 10,
               sortOption: 'idasc',
             },
           },
