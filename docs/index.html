@@ -1247,6 +1247,12 @@
                   h('b-col', ')'),
                 ]
               ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'Note:'),
+                  h('b-col', 'Resync collection after your transaction has successfully been mined'),
+                ]
+              ),
             ])
             this.$bvModal.msgBoxConfirm([messageVNode], {
               title: 'Send Transaction',
@@ -1327,6 +1333,12 @@
                 }, [
                   h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
                   h('b-col', ')'),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'Note:'),
+                  h('b-col', 'Resync collection after your transaction has successfully been mined'),
                 ]
               ),
             ])
