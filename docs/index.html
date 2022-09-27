@@ -1182,18 +1182,12 @@
           },
           async approveTransfer(approved) {
             console.log("approveTransfer: " + approved);
-
             // this.newUmswap.txHash = null;
             // this.newUmswap.error = null;
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const nftContract = new ethers.Contract(this.selectedCollection, ERC721ABI, provider);
             const nftContractWithSigner = nftContract.connect(provider.getSigner());
             const from = await provider.getSigner().getAddress();
-            // const collection = this.newUmswap.collection == null || this.newUmswap.collection.trim().length == 0 ? null : this.newUmswap.collection.trim();
-            // const name = this.newUmswap.name == null || this.newUmswap.name.trim().length == 0 ? null : this.newUmswap.name.trim();
-            // const tokenIds = this.newUmswap.tokenIds == null || this.newUmswap.tokenIds.trim().length == 0 ? [] : this.newUmswap.tokenIds.split(/[, \t\n]+/).sort((a, b) => (BigInt(a) > BigInt(b))? 0 : -1);
-            // const integrator = ADDRESS0;
-            // const tip = this.newUmswap.tip == null || this.newUmswap.tip.trim().length == 0 ? 0 : ethers.utils.parseEther(this.newUmswap.tip);
             const h = this.$createElement;
             const messageVNode = h('div', { class: ['confirm-modal'] }, [
               h('b-row', {
@@ -1272,7 +1266,6 @@
               // this.newUmswap.error = err.message.toString();
               console.log("approveTransfer error: " + JSON.stringify(e));
             });
-
           },
           async swapIt() {
             console.log("swapIt");
