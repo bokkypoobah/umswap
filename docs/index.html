@@ -312,7 +312,16 @@
                     <b-form-input type="text" size="sm" readonly v-model.trim="formatETH(umswapBalance)" class="w-25"></b-form-input>
                   </b-form-group>
                   <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Approved:" class="mx-0 my-1 p-0">
-                    <b-form-input type="text" size="sm" readonly :value="umswapApproved ? 'Yes' : 'No'" class="w-25"></b-form-input>
+                    <b-input-group class="m-0 w-25">
+                      <b-form-input type="text" size="sm" readonly :value="umswapApproved ? 'Yes' : 'No'"></b-form-input>
+                      <b-input-group-append>
+                        <b-button v-if="!umswapApproved" size="sm" @click="approveTransfer(true)" variant="warning">Approve</b-button>
+                        <b-button v-if="umswapApproved" size="sm" @click="approveTransfer(false)" variant="warning">Revoke Approval</b-button>
+                      </b-input-group-append>
+                    </b-input-group>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label="" class="mx-0 my-1 p-0">
+                    <b-button size="sm" @click="swapIt" :disabled="!umswapApproved" variant="warning">Swap</b-button>
                   </b-form-group>
                 </b-card-text>
               </b-card>
@@ -656,7 +665,8 @@
             if (this.selectedCollection != null && this.selectedPool != null) {
               for (const umswapItem of this.collections[this.selectedCollection].umswaps) {
                 if (this.selectedPool == umswapItem.address) {
-                  return umswapItem.isApprovedForAll;
+                  // console.log("umswapApproved: " + JSON.stringify(umswapItem, null, 2));
+                  return umswapItem.isApprovedForAll == 1;
                 }
               }
             }
@@ -1169,6 +1179,223 @@
               db0.close();
               this.sync.section = null;
             }
+          },
+          async approveTransfer(approved) {
+            console.log("approveTransfer: " + approved);
+
+            // this.newUmswap.txHash = null;
+            // this.newUmswap.error = null;
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const nftContract = new ethers.Contract(this.selectedCollection, ERC721ABI, provider);
+            const nftContractWithSigner = nftContract.connect(provider.getSigner());
+            const from = await provider.getSigner().getAddress();
+            // const collection = this.newUmswap.collection == null || this.newUmswap.collection.trim().length == 0 ? null : this.newUmswap.collection.trim();
+            // const name = this.newUmswap.name == null || this.newUmswap.name.trim().length == 0 ? null : this.newUmswap.name.trim();
+            // const tokenIds = this.newUmswap.tokenIds == null || this.newUmswap.tokenIds.trim().length == 0 ? [] : this.newUmswap.tokenIds.split(/[, \t\n]+/).sort((a, b) => (BigInt(a) > BigInt(b))? 0 : -1);
+            // const integrator = ADDRESS0;
+            // const tip = this.newUmswap.tip == null || this.newUmswap.tip.trim().length == 0 ? 0 : ethers.utils.parseEther(this.newUmswap.tip);
+            const h = this.$createElement;
+            const messageVNode = h('div', { class: ['confirm-modal'] }, [
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'From:'),
+                  h('b-col',
+                    [
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + from, 'target': '_blank' } }, from),
+                    ]
+                  ),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'To ERC-721 Contract:'),
+                  h('b-col',
+                    [
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + this.selectedCollection + '#code', 'target': '_blank' } }, this.selectedCollection),
+                    ]
+                  ),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'Function:'),
+                  h('b-col', 'setApprovalForAll('),
+                ]
+              ),
+              // function setApprovalForAll(address operator, bool approved) public virtual override {
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
+                  h('b-col', { class: ['text-right'], props: { cols: 2 } }, 'operator:'),
+                  h('b-col',
+                    [
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + this.selectedPool + '#code', 'target': '_blank' } }, this.selectedPool),
+                    ]
+                  ),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
+                  h('b-col', { class: ['text-right'], props: { cols: 2 } }, 'approved:'),
+                  h('b-col', approved),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
+                  h('b-col', ')'),
+                ]
+              ),
+            ])
+            this.$bvModal.msgBoxConfirm([messageVNode], {
+              title: 'Send Transaction',
+              size: 'lg',
+              buttonSize: 'sm',
+              centered: true,
+              okVariant: 'danger',
+              okTitle: 'Confirm',
+              cancelTitle: 'Cancel',
+            }).then( async value1 => {
+              if (value1) {
+                event.preventDefault();
+                try {
+                  const tx = await nftContractWithSigner.setApprovalForAll(this.selectedPool, approved);
+            //       this.newUmswap.txHash = tx.hash;
+                  console.log("tx: " + JSON.stringify(tx));
+                } catch (e) {
+            //       this.newUmswap.error = e.message.toString();
+                  console.log("approveTransfer error: " + JSON.stringify(e));
+                }
+              }
+            }).catch(err => {
+              // this.newUmswap.error = err.message.toString();
+              console.log("approveTransfer error: " + JSON.stringify(e));
+            });
+
+          },
+          async swapIt() {
+            console.log("swapIt");
+            // this.newUmswap.txHash = null;
+            // this.newUmswap.error = null;
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const umswapContract = new ethers.Contract(this.selectedPool, UMSWAPABI, provider);
+            // const umswapFactoryWithSigner = umswapFactory.connect(provider.getSigner());
+            // const from = await provider.getSigner().getAddress();
+            // const collection = this.newUmswap.collection == null || this.newUmswap.collection.trim().length == 0 ? null : this.newUmswap.collection.trim();
+            // const name = this.newUmswap.name == null || this.newUmswap.name.trim().length == 0 ? null : this.newUmswap.name.trim();
+            // const tokenIds = this.newUmswap.tokenIds == null || this.newUmswap.tokenIds.trim().length == 0 ? [] : this.newUmswap.tokenIds.split(/[, \t\n]+/).sort((a, b) => (BigInt(a) > BigInt(b))? 0 : -1);
+            // const integrator = ADDRESS0;
+            // const tip = this.newUmswap.tip == null || this.newUmswap.tip.trim().length == 0 ? 0 : ethers.utils.parseEther(this.newUmswap.tip);
+            const h = this.$createElement;
+            const messageVNode = h('div', { class: ['confirm-modal'] }, [
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'From:'),
+                  h('b-col',
+                    [
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + this.coinbase, 'target': '_blank' } }, this.coinbase),
+                    ]
+                  ),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'To Contract:'),
+                  h('b-col',
+                    [
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + this.selectedPool + '#code', 'target': '_blank' } }, this.selectedPool),
+                    ]
+                  ),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'Function:'),
+                  h('b-col', 'swap('),
+                ]
+              ),
+              // function swap(uint[] calldata inTokenIds, uint[] calldata outTokenIds) public reentrancyGuard {
+            //   h('b-row', {
+            //     }, [
+            //       h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
+            //       h('b-col', { class: ['text-right'], props: { cols: 2 } }, 'collection:'),
+            //       h('b-col',
+            //         [
+            //           h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + collection, 'target': '_blank' } }, collection),
+            //         ]
+            //       ),
+            //     ]
+            //   ),
+            //   h('b-row', {
+            //     }, [
+            //       h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
+            //       h('b-col', { class: ['text-right'], props: { cols: 2 } }, 'name:'),
+            //       h('b-col', name),
+            //     ]
+            //   ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
+                  h('b-col', { class: ['text-right'], props: { cols: 2 } }, 'inTokenIds:'),
+                  h('b-col', this.tokenIdsToSwapIn.join(",")),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
+                  h('b-col', { class: ['text-right'], props: { cols: 2 } }, 'outTokenIds:'),
+                  h('b-col', this.tokenIdsToSwapOut.join(",")),
+                ]
+              ),
+            //   h('b-row', {
+            //     }, [
+            //       h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
+            //       h('b-col', { class: ['text-right'], props: { cols: 2 } }, 'integrator:'),
+            //       h('b-col',
+            //         [
+            //           h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + integrator, 'target': '_blank' } }, integrator),
+            //         ]
+            //       ),
+            //     ]
+            //   ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, ''),
+                  h('b-col', ')'),
+                ]
+              ),
+            //   h('b-row', {
+            //     }, [
+            //       h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'Tip:'),
+            //       h('b-col', ethers.utils.formatEther(tip)),
+            //     ]
+            //   ),
+            ])
+            this.$bvModal.msgBoxConfirm([messageVNode], {
+              title: 'Send Transaction',
+              size: 'lg',
+              buttonSize: 'sm',
+              centered: true,
+              okVariant: 'danger',
+              okTitle: 'Confirm',
+              cancelTitle: 'Cancel',
+            }).then( async value1 => {
+              if (value1) {
+                event.preventDefault();
+            //     try {
+            //       const tx = await umswapFactoryWithSigner.newUmswap(collection, name, tokenIds, integrator, { value: tip });
+            //       this.newUmswap.txHash = tx.hash;
+            //       console.log("tx: " + JSON.stringify(tx));
+            //     } catch (e) {
+            //       this.newUmswap.error = e.message.toString();
+            //       console.log("newUmswap.newUmswap error: " + JSON.stringify(e));
+            //     }
+              }
+            }).catch(err => {
+              // this.newUmswap.error = err.message.toString();
+              console.log("newUmswap.newUmswap error: " + JSON.stringify(e));
+            });
           },
         },
         mounted() {
