@@ -287,11 +287,19 @@
               </b-card-body>
             </b-card>
 
-            <div v-if="selectedCollection != null">
+            <div v-if="selectedCollection != null && selectedPool != null">
               <b-card class="mx-0 my-1" body-class="m-1 p-1">
                 <template #header>
                   <h6 class="mb-0">Swap</h6>
                 </template>
+                <b-card-text>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Into Pool:" class="mx-0 my-1 p-0">
+                    <b-form-textarea size="sm" readonly v-model.trim="Object.keys(selectedTokens['validTokenIdsOwned'] || {}).join(',')" rows="1" max-rows="5" class="w-75"></b-form-textarea>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Out Of Pool:" class="mx-0 my-1 p-0">
+                    <b-form-textarea size="sm" readonly v-model.trim="Object.keys(selectedTokens['validTokenIdsInPool'] || {}).join(',')" rows="1" max-rows="5" class="w-75"></b-form-textarea>
+                  </b-form-group>
+                </b-card-text>
               </b-card>
             </div>
 
@@ -373,9 +381,7 @@
           },
           prices: {},
           owners: {},
-          // ensMap: {},
           selectedTokens: {},
-          selectedTraits: {},
           sync: {
             section: null,
             // ? error: false,
@@ -879,19 +885,6 @@
               Vue.set(this.selectedTokens[setName], tokenId, true);
             }
             console.log("toggleToken: " + JSON.stringify(this.selectedTokens));
-          },
-          toggleTrait(layer, trait) {
-            if (!this.selectedTraits[layer]) {
-              Vue.set(this.selectedTraits, layer, {});
-            }
-            if (this.selectedTraits[layer][trait]) {
-              Vue.delete(this.selectedTraits[layer], trait);
-              if (Object.keys(this.selectedTraits[layer]) == 0) {
-                Vue.delete(this.selectedTraits, layer);
-              }
-            } else {
-              Vue.set(this.selectedTraits[layer], trait, true);
-            }
           },
           owner(tokenId, length = 24) {
             const address = this.owners[tokenId] || null;
