@@ -74,7 +74,7 @@
               <div class="mt-0 flex-grow-1">
               </div>
               <div class="mt-1" style="width: 200px;">
-                <b-progress v-if="selectedCollection == null && sync.section != null" height="1.5rem" :max="sync.total" show-progress :animated="sync.section != null" :variant="sync.section != null ? 'success' : 'secondary'" v-b-popover.hover.top="'Click on the Sync(ing) button to (un)pause'">
+                <b-progress v-if="(selectedCollection == null || newUmswap) && sync.section != null" height="1.5rem" :max="sync.total" show-progress :animated="sync.section != null" :variant="sync.section != null ? 'success' : 'secondary'" v-b-popover.hover.top="'Click on the Sync(ing) button to (un)pause'">
                   <b-progress-bar :value="sync.completed">
                     {{ sync.total == null ? (sync.completed + ' ' + sync.section) : (sync.completed + '/' + sync.total + ' ' + ((sync.completed / sync.total) * 100).toFixed(0) + '% ' + sync.section) }}
                   </b-progress-bar>
@@ -425,12 +425,19 @@
                 <b-card-text>
                   <b-form-group label-cols="3" label-size="sm" label-align="right" label="ERC-721 Collection Address:" class="mx-0 my-1 p-0">
                     <b-input-group class="m-0 w-50">
-                      <b-form-input type="text" size="sm" v-model.trim="newUmswap.collection"></b-form-input>
+                      <b-form-input type="text" size="sm" v-model.trim="newUmswap.collectionAddress"></b-form-input>
                       <b-input-group-append>
-                        <b-button size="sm" @click="approveTransfer(true)" variant="primary">Check</b-button>
+                        <b-button size="sm" @click="doIt('newUmswap')" variant="primary">Check</b-button>
                       </b-input-group-append>
                     </b-input-group>
                   </b-form-group>
+                  <b-form-group v-if="collectionLoadedForNewUmswap != null" label-cols="3" label-size="sm" label-align="right" label="Name:" class="mx-0 my-1 p-0">
+                    <b-form-input type="text" size="sm" readonly v-model.trim="collection.name" class="w-25"></b-form-input>
+                  </b-form-group>
+                  <b-form-group v-if="collectionLoadedForNewUmswap != null" label-cols="3" label-size="sm" label-align="right" label="Slug:" class="mx-0 my-1 p-0">
+                    <b-form-input type="text" size="sm" readonly v-model.trim="collection.slug" class="w-25"></b-form-input>
+                  </b-form-group>
+
 
                   <!-- function newUmswap(IERC721Partial collection, string calldata name, uint[] calldata tokenIds) public { -->
 
@@ -538,7 +545,7 @@
           },
           // owners: {},
           newUmswap: {
-            collection: "0x72a94e6c51cb06453b84c049ce1e1312f7c05e2c", // TODO: null,
+            collectionAddress: "0x2f46E37477Ca4033D74986b15F0572e9913B4858", // TODO: null,
             name: null,
             tokenIds: [],
           },
@@ -712,6 +719,9 @@
           },
           collectionLoaded() {
             return this.selectedCollection && this.collection && this.collection.address && this.collection.address == this.selectedCollection && this.collection.timestamp || null;
+          },
+          collectionLoadedForNewUmswap() {
+            return this.newUmswap && this.collection && this.collection.address && this.collection.address == this.newUmswap.collectionAddress && this.collection.timestamp || null;
           },
           tokenAttributes() {
             const collator = { };
@@ -1127,12 +1137,21 @@
                 console.log("error: " + error);
               });
 
-              if (this.selectedCollection != null) {
+              let collectionAddress = null;
+              if (action == 'newUmswap') {
+                collectionAddress = this.newUmswap.collectionAddress;
+              } else {
+                if (this.selectedCollection != null) {
+                  collectionAddress = this.selectedCollection;
+                }
+              }
+
+              if (collectionAddress != null) {
                 this.sync.section = null;
                 this.sync.completed = 0;
                 this.sync.total = 1;
                 this.sync.section = "Collection Metadata";
-                let infoUrl = "https://api.reservoir.tools/collection/v2?id=" + this.selectedCollection;
+                let infoUrl = "https://api.reservoir.tools/collection/v2?id=" + collectionAddress;
                 const reservoirInfo = await fetch(infoUrl)
                   .then(handleErrors)
                   .then(response => response.json())
@@ -1150,7 +1169,7 @@
                 let continuation = null;
                 let tokens = {};
                 do {
-                  let tokensUrl = "https://api.reservoir.tools/tokens/v5?contract=" + this.selectedCollection + "&limit=100&includeAttributes=true" +
+                  let tokensUrl = "https://api.reservoir.tools/tokens/v5?contract=" + collectionAddress + "&limit=100&includeAttributes=true" +
                     (continuation != null ? "&continuation=" + continuation : '');
                   const reservoirTokens = await fetch(tokensUrl)
                     .then(handleErrors)
@@ -1199,7 +1218,7 @@
                 const NFTOWNERBATCHSIZE = 200; // 500 OK
                 for (let i = 0; i < tokenIds.length; i += NFTOWNERBATCHSIZE) {
                   const batch = tokenIds.slice(i, parseInt(i) + NFTOWNERBATCHSIZE);
-                  const ownersResult = await erc721Helper.ownersByTokenIds(this.selectedCollection, batch);
+                  const ownersResult = await erc721Helper.ownersByTokenIds(collectionAddress, batch);
                   for (let j = 0; j < ownersResult[0].length; j++) {
                     tokens[tokenIds[j]].owner = ownersResult[1][j];
                   }
@@ -1235,7 +1254,7 @@
 
                 if (reservoirInfo && reservoirInfo.collection) {
                   // console.log(JSON.stringify(reservoirInfo.collection, null, 2));
-                  this.collection.address = this.selectedCollection;
+                  this.collection.address = collectionAddress;
                   this.collection.symbol = reservoirInfo.collection.symbol || null;
                   this.collection.name = reservoirInfo.collection.name || null;
                   this.collection.slug = reservoirInfo.collection.slug || null;
@@ -1443,14 +1462,12 @@
             const records = await db0.cache.where("objectName").equals('collections').toArray();
             if (records.length == 1) {
               this.collections = records[0].object;
-              // console.log("mounted - this.collections: " + JSON.stringify(this.collections, null, 2));
             }
             if (window.location.href.indexOf("0x") >= 0) {
               this.selectedCollection = window.location.href.replace(/^.*0x/, "0x");
               const records = await db0.collection.where("address").equalsIgnoreCase(this.selectedCollection).toArray();
               if (records.length == 1) {
                 this.collection = records[0];
-                // console.log("mounted - records: " + JSON.stringify(this.collection, null, 2));
               }
             }
             db0.close();
