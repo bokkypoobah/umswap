@@ -326,7 +326,60 @@
               </b-card>
             </div>
 
-            <b-row v-if="selectedCollection != null && !newPool" class="m-0 p-0">
+            <!-- NEW POOL -->
+            <div v-if="newPool">
+              <b-card class="mx-1 my-1" body-class="m-1 p-0">
+                <template #header>
+                  <h6 class="mb-0">New Pool</h6>
+                </template>
+                <b-card-text>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="ERC-721 Collection Address:" class="mx-0 my-1 p-0">
+                    <b-input-group class="m-0 w-50">
+                      <b-form-input type="text" size="sm" v-model.trim="newUmswap.collectionAddress"></b-form-input>
+                      <b-input-group-append>
+                        <b-button size="sm" @click="doIt('newUmswap')" variant="primary">Check</b-button>
+                      </b-input-group-append>
+                    </b-input-group>
+                  </b-form-group>
+                  <b-form-group v-if="collectionLoadedForNewUmswap != null" label-cols="3" label-size="sm" label-align="right" label="Name:" class="mx-0 my-1 p-0">
+                    <b-form-input type="text" size="sm" readonly v-model.trim="collection.name" class="w-25"></b-form-input>
+                  </b-form-group>
+                  <b-form-group v-if="collectionLoadedForNewUmswap != null" label-cols="3" label-size="sm" label-align="right" label="Slug:" class="mx-0 my-1 p-0">
+                    <b-form-input type="text" size="sm" readonly v-model.trim="collection.slug" class="w-25"></b-form-input>
+                  </b-form-group>
+
+
+                  <!-- function newUmswap(IERC721Partial collection, string calldata name, uint[] calldata tokenIds) public { -->
+
+                  <!-- <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Into Pool:" class="mx-0 my-1 p-0">
+                    <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapIn.join(',')" rows="1" max-rows="5" class="w-50"></b-form-textarea>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Out Of Pool:" class="mx-0 my-1 p-0">
+                    <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapOut.join(',')" rows="1" max-rows="5" class="w-50"></b-form-textarea>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Change:" class="mx-0 my-1 p-0">
+                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapChange" class="w-25"></b-form-input>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="My Umswap Balance:" class="mx-0 my-1 p-0">
+                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapBalance" class="w-25"></b-form-input>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Approved:" class="mx-0 my-1 p-0">
+                    <b-input-group class="m-0 w-25">
+                      <b-form-input type="text" size="sm" readonly :value="umswapApproved ? 'Yes' : 'No'"></b-form-input>
+                      <b-input-group-append>
+                        <b-button v-if="!umswapApproved" size="sm" @click="approveTransfer(true)" variant="warning">Approve</b-button>
+                        <b-button v-if="umswapApproved" size="sm" @click="approveTransfer(false)" variant="warning">Revoke Approval</b-button>
+                      </b-input-group-append>
+                    </b-input-group>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label="" class="mx-0 my-1 p-0">
+                    <b-button size="sm" @click="swapIt" :disabled="!umswapApproved || (parseFloat(convertETH(umswapBalance)) + parseFloat(umswapChange) < 0) || (tokenIdsToSwapIn.length == 0 && tokenIdsToSwapOut.length == 0)" variant="warning">Swap</b-button>
+                  </b-form-group> -->
+                </b-card-text>
+              </b-card>
+            </div>
+
+            <b-row v-if="selectedCollection != null || newPool" class="m-0 p-0">
               <!-- FILTER -->
               <b-col v-if="showFilter" cols="2" class="m-0 p-0 border-0">
                 <b-card no-header no-body class="m-0 p-0 border-0">
@@ -385,10 +438,10 @@
                     <b-card-group v-if="set.tokens.length > 0" deck class="m-0 p-0">
                       <div v-for="(token, tokenIndex) in pagedFilteredTokens(selectedCollection, selectedPool, set.name)" :key="tokenIndex">
                         <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 12rem;">
-                          <b-avatar v-if="['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" button @click="toggleToken(set.name, token.tokenId)" rounded size="12rem" :src="token.image" style="background-color: #fafafa">
+                          <b-avatar v-if="['tokenIdsSelected', 'tokenIdsUnselected', 'validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" button @click="toggleToken(set.name, token.tokenId)" rounded size="12rem" :src="token.image" style="background-color: #fafafa">
                             <template v-if="selectedTokens[set.name] && selectedTokens[set.name][token.tokenId]" #badge><b-icon icon="check"></b-icon></template>
                           </b-avatar>
-                          <b-avatar v-if="!['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" rounded size="12rem" :src="token.image" style="background-color: #fafafa">
+                          <b-avatar v-if="!['tokenIdsSelected', 'tokenIdsUnselected', 'validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" rounded size="12rem" :src="token.image" style="background-color: #fafafa">
                           </b-avatar>
                           <b-card-text>
                             <div class="d-flex justify-content-between m-0 p-0">
@@ -416,59 +469,6 @@
               </b-col>
             </b-row>
 
-            <!-- NEW POOL -->
-            <div v-if="newPool">
-              <b-card class="mx-1 my-1" body-class="m-1 p-0">
-                <template #header>
-                  <h6 class="mb-0">New Pool</h6>
-                </template>
-                <b-card-text>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="ERC-721 Collection Address:" class="mx-0 my-1 p-0">
-                    <b-input-group class="m-0 w-50">
-                      <b-form-input type="text" size="sm" v-model.trim="newUmswap.collectionAddress"></b-form-input>
-                      <b-input-group-append>
-                        <b-button size="sm" @click="doIt('newUmswap')" variant="primary">Check</b-button>
-                      </b-input-group-append>
-                    </b-input-group>
-                  </b-form-group>
-                  <b-form-group v-if="collectionLoadedForNewUmswap != null" label-cols="3" label-size="sm" label-align="right" label="Name:" class="mx-0 my-1 p-0">
-                    <b-form-input type="text" size="sm" readonly v-model.trim="collection.name" class="w-25"></b-form-input>
-                  </b-form-group>
-                  <b-form-group v-if="collectionLoadedForNewUmswap != null" label-cols="3" label-size="sm" label-align="right" label="Slug:" class="mx-0 my-1 p-0">
-                    <b-form-input type="text" size="sm" readonly v-model.trim="collection.slug" class="w-25"></b-form-input>
-                  </b-form-group>
-
-
-                  <!-- function newUmswap(IERC721Partial collection, string calldata name, uint[] calldata tokenIds) public { -->
-
-                  <!-- <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Into Pool:" class="mx-0 my-1 p-0">
-                    <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapIn.join(',')" rows="1" max-rows="5" class="w-50"></b-form-textarea>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Out Of Pool:" class="mx-0 my-1 p-0">
-                    <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapOut.join(',')" rows="1" max-rows="5" class="w-50"></b-form-textarea>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Change:" class="mx-0 my-1 p-0">
-                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapChange" class="w-25"></b-form-input>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="My Umswap Balance:" class="mx-0 my-1 p-0">
-                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapBalance" class="w-25"></b-form-input>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Approved:" class="mx-0 my-1 p-0">
-                    <b-input-group class="m-0 w-25">
-                      <b-form-input type="text" size="sm" readonly :value="umswapApproved ? 'Yes' : 'No'"></b-form-input>
-                      <b-input-group-append>
-                        <b-button v-if="!umswapApproved" size="sm" @click="approveTransfer(true)" variant="warning">Approve</b-button>
-                        <b-button v-if="umswapApproved" size="sm" @click="approveTransfer(false)" variant="warning">Revoke Approval</b-button>
-                      </b-input-group-append>
-                    </b-input-group>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label="" class="mx-0 my-1 p-0">
-                    <b-button size="sm" @click="swapIt" :disabled="!umswapApproved || (parseFloat(convertETH(umswapBalance)) + parseFloat(umswapChange) < 0) || (tokenIdsToSwapIn.length == 0 && tokenIdsToSwapOut.length == 0)" variant="warning">Swap</b-button>
-                  </b-form-group> -->
-                </b-card-text>
-              </b-card>
-            </div>
-
           </b-card-body>
         </b-card>
       </b-container>
@@ -493,6 +493,16 @@
           poolsPageSize: 100,
           poolsSortOption: 'nameasc',
           tokens: {
+            'tokenIdsSelected': {
+              currentPage: 1,
+              pageSize: 100,
+              sortOption: 'idasc',
+            },
+            'tokenIdsUnselected': {
+              currentPage: 1,
+              pageSize: 100,
+              sortOption: 'idasc',
+            },
             'validTokenIdsInPool': {
               currentPage: 1,
               pageSize: 100,
@@ -877,8 +887,35 @@
                   }
                 }
               }
-              if (umswap) {
-                const tokens = {};
+              const tokens = {};
+              if (this.newPool) {
+                for (const setName of ['tokenIdsSelected', 'tokenIdsUnselected']) {
+                  tokens[setName] = [];
+                }
+                for (const tokenId of selectedTokenIds) {
+                  const token = this.collection.tokens[tokenId];
+                  if (token.owner == this.coinbase) {
+                    setName = 'tokenIdsSelected';
+                  } else {
+                    setName = 'tokenIdsUnselected';
+                  }
+                  tokens[setName].push(token);
+                }
+                for (const setName of ['tokenIdsSelected', 'tokenIdsUnselected']) {
+                  if (this.tokens[setName].sortOption == 'idasc') {
+                    tokens[setName].sort((a, b) => a.tokenId - b.tokenId);
+                  } else if (this.tokens[setName].sortOption == 'iddsc') {
+                    tokens[setName].sort((a, b) => b.tokenId - a.tokenId);
+                  } else {
+                    tokens[setName].sort(() => { return Math.random() - 0.5; });
+                  }
+                }
+                return [
+                  { name: 'tokenIdsSelected', description: 'Selected Tokens', tokens: tokens['tokenIdsSelected'] },
+                  { name: 'tokenIdsUnselected', description: 'Unselected Tokens', tokens: tokens['tokenIdsUnselected'] },
+                ];
+
+              } else if (umswap) {
                 for (const setName of ['validTokenIdsInPool', 'validTokenIdsOwned', 'validTokenIdsNotInPoolOrOwned', 'invalidTokenIdsOwned', 'invalidTokenIdsNotInPoolOrOwned']) {
                   tokens[setName] = [];
                 }
@@ -942,7 +979,6 @@
                   { name: 'invalidTokenIdsNotInPoolOrOwned', description: 'Other Tokens Not Eligible For This Pool', tokens: tokens['invalidTokenIdsNotInPoolOrOwned'] },
                 ];
               } else {
-                const tokens = {};
                 for (const setName of ['tokenIdsOwned', 'tokenIdsNotOwned']) {
                   tokens[setName] = [];
                 }
@@ -976,7 +1012,11 @@
             const allTokens = this.getPoolTokens(collectionAddress, poolAddress);
             if (allTokens) {
               let tokens;
-              if (setName == 'tokenIdsOwned') {
+              if (setName == 'tokenIdsSelected') {
+                tokens = allTokens[0].tokens;
+              } else if (setName == 'tokenIdsUnselected') {
+                tokens = allTokens[1].tokens;
+              } else if (setName == 'tokenIdsOwned') {
                 tokens = allTokens[0].tokens;
               } else if (setName == 'tokenIdsNotOwned') {
                 tokens = allTokens[1].tokens;
@@ -1179,10 +1219,10 @@
                        // Want to work around API data unavailablity - state.sync.error = true;
                        return [];
                     });
+                  // TODO
                   continuation = reservoirTokens.continuation;
                   if (reservoirTokens && reservoirTokens.tokens) {
                     for (const token of reservoirTokens.tokens) {
-                      // console.log(JSON.stringify(token, null, 2));
                       let price = null;
                       let validUntil = null;
                       let source = null;
@@ -1208,7 +1248,6 @@
                     this.sync.completed = Object.keys(tokens).length;
                   }
                 } while (continuation != null /*&& !state.halt && !state.sync.error */);
-                // console.log(JSON.stringify(tokens, null, 2));
 
                 this.sync.section = null;
                 this.sync.completed = 0;
@@ -1220,12 +1259,11 @@
                   const batch = tokenIds.slice(i, parseInt(i) + NFTOWNERBATCHSIZE);
                   const ownersResult = await erc721Helper.ownersByTokenIds(collectionAddress, batch);
                   for (let j = 0; j < ownersResult[0].length; j++) {
-                    tokens[tokenIds[j]].owner = ownersResult[1][j];
+                    tokens[batch[j]].owner = ownersResult[1][j];
                   }
                   this.sync.completed = parseInt(this.sync.completed) + batch.length;
                 }
                 this.collection.tokens = tokens;
-                // console.log('this.collection', JSON.stringify(Object.values(this.collection).slice(0, 10), null, 2));
 
                 this.sync.section = null;
                 const ensMap = {};
