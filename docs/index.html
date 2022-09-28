@@ -127,6 +127,10 @@
               </b-card>
             </div>
 
+            <b-alert size="sm" dismissible variant="warning" show class="m-0 mt-1">
+              The current contract is deprecated and a new version will be deployed shortly
+            </b-alert>
+
             <b-card v-if="!newPool" no-header no-body class="m-0 mt-1 p-0 border-0">
               <b-card-body class="m-0 p-0">
                 <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='collectionsRowSelected' :fields="collectionsFields" :items="selectedCollection ? (collections[selectedCollection] ? [collections[selectedCollection]] : []) : pagedFilteredCollections" head-variant="light" class="m-0">
@@ -1068,7 +1072,7 @@
               this.sync.section = null;
               this.sync.completed = 0;
               this.sync.total = Object.keys(collections).length;
-              this.sync.section = "Collection Info";
+              this.sync.section = "Collection Metadata";
               for (const [address, collection] of Object.entries(collections)) {
                 const info = await erc721Helper.tokenInfo([address]);
                 collection.type = info[0][0].toString();
@@ -1098,7 +1102,7 @@
                 this.sync.section = null;
                 this.sync.completed = 0;
                 this.sync.total = 1;
-                this.sync.section = "Collection";
+                this.sync.section = "Collection Metadata";
                 let infoUrl = "https://api.reservoir.tools/collection/v2?id=" + this.selectedCollection;
                 const reservoirInfo = await fetch(infoUrl)
                   .then(handleErrors)
@@ -1113,7 +1117,7 @@
                 this.sync.section = null;
                 this.sync.completed = 0;
                 this.sync.total = null;
-                this.sync.section = "Collection Tokens";
+                this.sync.section = "Token Metadata";
                 let continuation = null;
                 let tokens = {};
                 do {
@@ -1183,7 +1187,7 @@
                 this.sync.completed = 0;
                 let addresses = Object.keys(ensMap);
                 this.sync.total = addresses.length;
-                this.sync.section = "Reverse ENS";
+                this.sync.section = "ENS Names";
                 const ENSOWNERBATCHSIZE = 200; // 500 fails occassionally
                 for (let i = 0; i < addresses.length; i += ENSOWNERBATCHSIZE) {
                   const batch = addresses.slice(i, parseInt(i) + ENSOWNERBATCHSIZE);
@@ -1196,8 +1200,6 @@
                   }
                   this.sync.completed = parseInt(this.sync.completed) + batch.length;
                 }
-                // this.ensMap = ensMap;
-                // localStorage.setItem('umsENSMap', JSON.stringify(ensMap));
                 this.collection.ensMap = ensMap;
 
                 if (reservoirInfo && reservoirInfo.collection) {
