@@ -827,7 +827,6 @@
             })();
           },
           getPoolTokens(collectionAddress, poolAddress) {
-            const coinbaseLower = this.coinbase && this.coinbase.toLowerCase() || null;
             if (collectionAddress == this.collection.address) {
               let umswap = null;
               if (poolAddress != null) {
@@ -855,7 +854,6 @@
                 }
               }
               if (umswap) {
-                const umswapAddressLower = umswap.address.toLowerCase();
                 const tokens = {};
                 for (const setName of ['validTokenIdsInPool', 'validTokenIdsOwned', 'validTokenIdsNotInPoolOrOwned', 'invalidTokenIdsOwned', 'invalidTokenIdsNotInPoolOrOwned']) {
                   tokens[setName] = [];
@@ -863,11 +861,10 @@
                 for (const tokenId of selectedTokenIds) {
                   const token = this.collection.tokens[tokenId];
                   const validInPool = umswap.validTokenIds.length == 0 || umswap.validTokenIds.includes(parseInt(tokenId));
-                  const tokenOwner = token.owner.toLowerCase();
                   let setName;
-                  if (tokenOwner == umswapAddressLower) {
+                  if (token.owner == umswap.address) {
                     setName = 'validTokenIdsInPool';
-                  } else if (tokenOwner == coinbaseLower) {
+                  } else if (token.owner == this.coinbase) {
                     if (validInPool) {
                       setName = 'validTokenIdsOwned';
                     } else {
@@ -907,9 +904,7 @@
                 }
                 for (const tokenId of selectedTokenIds) {
                   const token = this.collection.tokens[tokenId];
-                  const tokenOwner = token.owner.toLowerCase();
-                  let setName;
-                  if (tokenOwner == coinbaseLower) {
+                  if (token.owner == this.coinbase) {
                     setName = 'tokenIdsOwned';
                   } else {
                     setName = 'tokenIdsNotOwned';
@@ -1146,7 +1141,7 @@
                       }
                       tokens[token.token.tokenId] = {
                         tokenId: token.token.tokenId,
-                        owner: token.token.owner || null,
+                        owner: token.token.owner && ethers.utils.getAddress(token.token.owner) || null,
                         name: token.token.name || null,
                         image: token.token.image || null,
                         attributes: token.token.attributes.map(e => ({ key: e.key, value: e.value })) || [],
