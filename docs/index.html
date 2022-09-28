@@ -52,6 +52,8 @@
         </b-navbar>
 
         <b-card no-body class="p-0 mt-0">
+
+          <!-- COLLECTION TOOLBAR -->
           <b-card-body class="m-0 p-1">
             <div class="d-flex flex-wrap m-0 p-0">
               <div class="mt-0 pr-1">
@@ -97,6 +99,7 @@
               </div>
             </div>
 
+            <!-- INFO -->
             <div v-if="showInfo">
               <b-card no-header no-body class="mx-0 my-1 p-0">
                 <b-card-body class="m-0 p-0">
@@ -131,6 +134,7 @@
               The current contract is deprecated and a new version will be deployed shortly
             </b-alert>
 
+            <!-- TABLE OF COLLECTIONS -->
             <b-card v-if="!newPool" no-header no-body class="m-0 mt-1 p-0 border-0">
               <b-card-body class="m-0 p-0">
                 <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='collectionsRowSelected' :fields="collectionsFields" :items="selectedCollection ? (collections[selectedCollection] ? [collections[selectedCollection]] : []) : pagedFilteredCollections" head-variant="light" class="m-0">
@@ -176,6 +180,7 @@
             </b-card>
 
             <b-card v-if="selectedCollection != null && !newPool" no-header no-body class="m-0 mt-1 p-1 border-1">
+              <!-- UMSWAPS TOOLBAR -->
               <div class="d-flex flex-wrap m-0 p-0">
                 <div class="mt-0 pr-1">
                   <b-button :disabled="sync.section != null" size="sm" @click="doIt('syncUmswapsAndCollection')" variant="primary" style="min-width: 40px;" v-b-popover.hover.top="'Sync Umswaps and collection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download></b-button>
@@ -217,6 +222,7 @@
                 </div>
               </div>
 
+              <!-- TABLE OF UMSWAPS -->
               <b-card-body class="m-0 mt-1 p-0">
                 <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='poolsRowSelected' :fields="poolsFields" :items="selectedPool != null ? [getSelectedPoolRecord] : pagedFilteredPools" head-variant="light" class="m-0">
                   <template #head(address)="data">
@@ -321,6 +327,7 @@
             </div>
 
             <b-row v-if="selectedCollection != null && !newPool" class="m-0 p-0">
+              <!-- FILTER -->
               <b-col v-if="showFilter" cols="2" class="m-0 p-0 border-0">
                 <b-card no-header no-body class="m-0 p-0 border-0">
                   <b-card-body class="m-0 p-1" style="flex-grow: 1; max-height: 1000px; overflow-y: auto;">
@@ -350,6 +357,7 @@
                 </b-card>
               </b-col>
               <b-col class="m-0 p-0">
+                <!-- TOKENS BY GROUPS -->
                 <div v-for="(set, setIndex) in getPoolTokens(selectedCollection, selectedPool)" :key="setIndex">
                   <b-card class="mx-0 my-1" body-class="m-1 p-0">
                     <template #header>
@@ -403,7 +411,7 @@
               </b-col>
             </b-row>
 
-
+            <!-- NEW POOL -->
             <div v-if="newPool">
               <b-card class="mx-1 my-1" body-class="m-1 p-0">
                 <template #header>
@@ -457,6 +465,7 @@
     <script>
       window.app = new Vue({
         el: '#app',
+        // --- DATA ---
         data: {
           coinbase: null,
           showInfo: false,
@@ -466,15 +475,11 @@
           selectedPool: null,
           tokenAttributesFilter: {},
           collectionsCurrentPage: 1,
-          poolsCurrentPage: 1,
-          currentPage: 0,
-          collectionsSortOption: 'nameasc',
-          poolsSortOption: 'nameasc',
-          sortOption: 'priceasc',
           collectionsPageSize: 100,
+          collectionsSortOption: 'nameasc',
+          poolsCurrentPage: 1,
           poolsPageSize: 100,
-          pageSize: 100,
-          currentPage: 1,
+          poolsSortOption: 'nameasc',
           tokens: {
             'validTokenIdsInPool': {
               currentPage: 1,
@@ -600,12 +605,9 @@
             { key: 'attributeOption', label: 'Attribute' /*, sortable: true*/ },
             { key: 'attributeTotal', label: 'Count', /*sortable: true,*/ thStyle: 'width: 30%;', thClass: 'text-right', tdClass: 'text-right' },
           ],
-          ownersFields: [
-            { key: 'index', label: '#' },
-            { key: 'owner', label: 'Owner' },
-            { key: 'tokens1', label: 'Tokens' },
-          ],
         },
+
+        // --- COMPUTED ---
         computed: {
           umswapFactoryAddress() {
             return UMSWAPFACTORYADDRESS;
@@ -764,6 +766,8 @@
             return false;
           },
         },
+
+        // --- METHODS ---
         methods: {
           formatTimestamp(ts) {
             if (ts != null) {
@@ -1399,6 +1403,8 @@
             });
           },
         },
+
+        // --- MOUNTED ---
         mounted() {
           if ('coinbase' in localStorage) {
             this.coinbase = localStorage.coinbase;
