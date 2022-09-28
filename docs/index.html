@@ -195,7 +195,7 @@
                 </div>
                 <div class="mt-0 flex-grow-1">
                 </div>
-                <div v-if="sync.section != null" class="mt-1 pr-1" style="width: 200px;">
+                <div v-if="false && sync.section != null" class="mt-1 pr-1" style="width: 200px;">
                   <b-progress height="1.5rem" :max="sync.total" show-progress :animated="sync.section != null" :variant="sync.section != null ? 'success' : 'secondary'" v-b-popover.hover.top="'Click on the Sync(ing) button to (un)pause'">
                     <b-progress-bar :value="sync.completed">
                       {{ sync.total == null ? (sync.completed + ' ' + sync.section) : (sync.completed + '/' + sync.total + ' ' + ((sync.completed / sync.total) * 100).toFixed(0) + '% ' + sync.section) }}
@@ -348,13 +348,16 @@
                     <b-form-input type="text" size="sm" readonly v-model.trim="collection.slug" class="w-25"></b-form-input>
                   </b-form-group>
                   <b-form-group v-if="collectionLoadedForNewUmswap != null" label-cols="3" label-size="sm" label-align="right" label="Umswap Name:" description="Choose a suitable name to describe this NFT collection subset. > 0 and <= 48 regular alphanumeric characters and some symbols" class="mx-0 my-1 p-0">
-                    <b-form-input type="text" size="sm" v-model.trim="newUmswap.name" class="w-25"></b-form-input>
+                    <b-form-input type="text" size="sm" v-model.trim="newUmswap.name" debounce="600" class="w-25"></b-form-input>
                   </b-form-group>
                   <b-form-group v-if="collectionLoadedForNewUmswap != null" label-cols="3" label-size="sm" label-align="right" label="Selected Token Ids:" description="Leave this empty for the whole NFT collection to be included" class="mx-0 my-1 p-0">
                     <b-form-textarea size="sm" readonly v-model.trim="Object.keys(selectedTokenIds).join(',')" rows="1" max-rows="100" class="w-75"></b-form-textarea>
                   </b-form-group>
                   <b-form-group label-cols="3" label-size="sm" label="" description="Note that duplicate (collection, tokenIds) sets will be rejected" class="mx-0 my-1 p-0">
                     <b-button size="sm" @click="createNewUmswap" :disabled="!collectionLoadedForNewUmswap || newUmswap.name == null || newUmswap.name.length == 0" variant="warning">Create New Pool</b-button>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label="" description="Click this if the collection images and/or attributes incomplete, wait for a few minutes, then Check again" class="mx-0 my-1 p-0">
+                    <b-button size="sm" @click="refreshMetadata" variant="primary">Request Metadata Refresh</b-button>
                   </b-form-group>
                 </b-card-text>
               </b-card>
@@ -392,6 +395,7 @@
               </b-col>
               <b-col class="m-0 p-0">
                 <!-- TOKENS BY GROUPS -->
+                <!-- {{ getPoolTokens(selectedCollection, selectedPool) }} -->
                 <div v-if="collectionLoaded != null || collectionLoadedForNewUmswap != null" v-for="(set, setIndex) in getPoolTokens(selectedCollection, selectedPool)" :key="setIndex">
                   <b-card class="mx-0 my-1" body-class="m-1 p-0">
                     <template #header>
@@ -562,7 +566,7 @@
             completed: null,
           },
           db: {
-            name: "umswapdb",
+            name: "umswapdb090",
             version: 1,
             schemaDefinition: {
               cache: '&objectName',
@@ -821,7 +825,7 @@
               (async() => {
                 const db0 = new Dexie(this.db.name);
                 db0.version(this.db.version).stores(this.db.schemaDefinition);
-                const records = await db0.collection.where("address").equalsIgnoreCase(this.selectedCollection || '').toArray();
+                const records = await db0.collection.where("address").equals(this.selectedCollection || '').toArray();
                 // console.log("collectionsRowSelected - records: " + JSON.stringify(records, null, 2));
                 if (records.length == 1) {
                   this.collection = records[0];
@@ -848,17 +852,24 @@
             (async() => {
               const db0 = new Dexie(this.db.name);
               db0.version(this.db.version).stores(this.db.schemaDefinition);
-              const records = await db0.collection.where("address").equalsIgnoreCase(this.selectedCollection || '').toArray();
+              const records = await db0.collection.where("address").equals(this.selectedCollection || '').toArray();
               if (records.length == 1) {
+                // console.log("selectedCollectionChanged: " + JSON.stringify(records[0], null, 2));
                 this.collection = records[0];
               }
               db0.close();
             })();
           },
           getPoolTokens(collectionAddress, poolAddress) {
-            if (collectionAddress == this.collection.address) {
+            if (this.newPool) {
+              collectionAddress = this.collection.address && ethers.utils.getAddress(this.collection.address) || null;
+            } else {
+              collectionAddress = this.selectedCollection && ethers.utils.getAddress(this.selectedCollection) || null;
+            }
+            // console.log("getPoolTokens: " + collectionAddress + " " + poolAddress);
+            if (collectionAddress != null && collectionAddress == this.collection.address) {
               let umswap = null;
-              if (poolAddress != null) {
+              if (poolAddress != null && this.collections[collectionAddress]) {
                 for (const umswapItem of this.collections[collectionAddress].umswaps) {
                   if (poolAddress == umswapItem.address) {
                     umswap = umswapItem;
@@ -1148,11 +1159,12 @@
                   const swappedIn = stats[0].toString();
                   const swappedOut = stats[1].toString();
                   const totalScores = stats[2].toString();
-                  const totalSupply = stats[3].toString();
-                  const raters = stats[4].toString();
-                  const isApprovedForAll = stats[5].toString();
-                  const umswapContract = new ethers.Contract(address, UMSWAPABI, provider);
-                  const balance = ethers.utils.formatEther(await umswapContract.balanceOf(this.coinbase)).toString();
+                  const balance = stats[3].toString();
+                  const totalSupply = stats[4].toString();
+                  const raters = stats[5].toString();
+                  const isApprovedForAll = stats[6].toString();
+                  // const umswapContract = new ethers.Contract(address, UMSWAPABI, provider);
+                  // const balance = ethers.utils.formatEther(await umswapContract.balanceOf(this.coinbase)).toString();
                   if (!(collection in collections)) {
                     collections[collection] = { address: collection, type: null, symbol: null, name: null, balance: null, totalSupply: null, reservoirInfo: null, allTokens: [], umswaps: [] };
                   }
@@ -1193,10 +1205,10 @@
 
               let collectionAddress = null;
               if (action == 'newUmswapRetrieveCollection') {
-                collectionAddress = this.newUmswap.collectionAddress;
+                collectionAddress = this.newUmswap.collectionAddress == null ? null : ethers.utils.getAddress(this.newUmswap.collectionAddress);
               } else {
                 if (this.selectedCollection != null) {
-                  collectionAddress = this.selectedCollection;
+                  collectionAddress = this.selectedCollection == null ? null : ethers.utils.getAddress(this.selectedCollection);
                 }
               }
 
@@ -1233,7 +1245,6 @@
                        // Want to work around API data unavailablity - state.sync.error = true;
                        return [];
                     });
-                  // TODO
                   continuation = reservoirTokens.continuation;
                   if (reservoirTokens && reservoirTokens.tokens) {
                     for (const token of reservoirTokens.tokens) {
@@ -1314,7 +1325,7 @@
                   this.collection.blockNumber = blockNumber;
                   this.collection.timestamp = timestamp;
                 }
-
+                // TODO console.log(JSON.stringify(this.collection, null, 2));
                 await db0.collection.put(this.collection).then (function() {
                 }).catch(function(error) {
                   console.log("error: " + error);
@@ -1587,6 +1598,18 @@
               console.log("swapIt error: " + JSON.stringify(e));
             });
           },
+          async refreshMetadata() {
+            console.log("refreshMetadata");
+            const options = {
+              method: 'POST',
+              headers: {accept: '*/*', 'content-type': 'application/json', 'x-api-key': 'demo-api-key'},
+              body: JSON.stringify({collection: this.newUmswap.collectionAddress })
+            };
+            fetch('https://api.reservoir.tools/collections/refresh/v1', options)
+              .then(response => response.json())
+              .then(response => console.log(response))
+              .catch(err => console.error(err));
+          },
         },
 
         // --- MOUNTED ---
@@ -1604,7 +1627,7 @@
             }
             if (window.location.href.indexOf("0x") >= 0) {
               this.selectedCollection = window.location.href.replace(/^.*0x/, "0x");
-              const records = await db0.collection.where("address").equalsIgnoreCase(this.selectedCollection).toArray();
+              const records = await db0.collection.where("address").equals(this.selectedCollection).toArray();
               if (records.length == 1) {
                 this.collection = records[0];
               }
