@@ -1166,12 +1166,12 @@
                   const batch = tokenIds.slice(i, parseInt(i) + NFTOWNERBATCHSIZE);
                   const ownersResult = await erc721Helper.ownersByTokenIds(this.selectedCollection, batch);
                   for (let j = 0; j < ownersResult[0].length; j++) {
-                    // tokens[tokenIds[j]].owner = ownersResult[1][j];
+                    tokens[tokenIds[j]].owner = ownersResult[1][j];
                   }
                   this.sync.completed = parseInt(this.sync.completed) + batch.length;
                 }
                 this.collection.tokens = tokens;
-                // localStorage.setItem('umsCollection', JSON.stringify(this.collection));
+                // console.log('this.collection', JSON.stringify(Object.values(this.collection).slice(0, 10), null, 2));
 
                 this.sync.section = null;
                 const ensMap = {};
