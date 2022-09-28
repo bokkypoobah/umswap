@@ -63,6 +63,9 @@
               <div class="mt-0 pr-1">
                 <b-form-select size="sm" v-model="selectedCollection" :options="collectionsOptions" @change="selectedCollectionChanged" v-b-popover.hover.top="'ERC-721 NFT Collection'"></b-form-select>
               </div>
+              <div v-if="false" class="mt-0">
+                <b-button size="sm" :pressed.sync="newPool" variant="link" v-b-popover.hover.top="'Create new pool'"><span v-if="newPool"><b-icon-pencil-square shift-v="+1" font-scale="1.0"></b-icon-pencil-square></span><span v-else><b-icon-pencil-square shift-v="+1" font-scale="1.0"></b-icon-pencil-square></span></b-button>
+              </div>
               <div class="mt-0 flex-grow-1">
               </div>
               <div class="mt-1" style="width: 200px;">
@@ -121,7 +124,7 @@
               </b-card>
             </div>
 
-            <b-card no-header no-body class="m-0 mt-1 p-0 border-0">
+            <b-card v-if="!newPool" no-header no-body class="m-0 mt-1 p-0 border-0">
               <b-card-body class="m-0 p-0">
                 <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='collectionsRowSelected' :fields="collectionsFields" :items="selectedCollection ? (collections[selectedCollection] ? [collections[selectedCollection]] : []) : pagedFilteredCollections" head-variant="light" class="m-0">
                   <template #head(address)="data">
@@ -165,7 +168,7 @@
               </b-card-body>
             </b-card>
 
-            <b-card v-if="selectedCollection != null" no-header no-body class="m-0 mt-1 p-1 border-1">
+            <b-card v-if="selectedCollection != null && !newPool" no-header no-body class="m-0 mt-1 p-1 border-1">
               <div class="d-flex flex-wrap m-0 p-0">
                 <div class="mt-0 pr-1">
                   <b-button :disabled="sync.section != null" size="sm" @click="doIt" variant="primary" style="min-width: 40px;" v-b-popover.hover.top="'Sync UmswapFactory and collection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download></b-button>
@@ -276,7 +279,7 @@
               </b-card-body>
             </b-card>
 
-            <div v-if="selectedCollection != null && selectedPool != null">
+            <div v-if="selectedCollection != null && selectedPool != null && !newPool">
               <b-card class="mx-0 my-1" body-class="m-1 p-0">
                 <template #header>
                   <h6 class="mb-0">Swap</h6>
@@ -310,7 +313,7 @@
               </b-card>
             </div>
 
-            <div v-if="selectedCollection != null" v-for="(set, setIndex) in getPoolTokens(selectedCollection, selectedPool)" :key="setIndex">
+            <div v-if="selectedCollection != null && !newPool" v-for="(set, setIndex) in getPoolTokens(selectedCollection, selectedPool)" :key="setIndex">
               <b-card class="mx-0 my-1" body-class="m-1 p-0">
                 <template #header>
                   <h6 class="mb-0">{{ set.description }}</h6>
@@ -361,6 +364,51 @@
               </b-card-body>
             </b-card>
 
+            <div v-if="newPool">
+              <b-card class="mx-1 my-1" body-class="m-1 p-0">
+                <template #header>
+                  <h6 class="mb-0">New Pool</h6>
+                </template>
+                <b-card-text>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="ERC-721 Collection Address:" class="mx-0 my-1 p-0">
+                    <b-input-group class="m-0 w-50">
+                      <b-form-input type="text" size="sm" v-model.trim="newUmswap.collection"></b-form-input>
+                      <b-input-group-append>
+                        <b-button size="sm" @click="approveTransfer(true)" variant="primary">Check</b-button>
+                      </b-input-group-append>
+                    </b-input-group>
+                  </b-form-group>
+
+                  <!-- function newUmswap(IERC721Partial collection, string calldata name, uint[] calldata tokenIds) public { -->
+
+                  <!-- <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Into Pool:" class="mx-0 my-1 p-0">
+                    <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapIn.join(',')" rows="1" max-rows="5" class="w-50"></b-form-textarea>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Out Of Pool:" class="mx-0 my-1 p-0">
+                    <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapOut.join(',')" rows="1" max-rows="5" class="w-50"></b-form-textarea>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Change:" class="mx-0 my-1 p-0">
+                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapChange" class="w-25"></b-form-input>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="My Umswap Balance:" class="mx-0 my-1 p-0">
+                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapBalance" class="w-25"></b-form-input>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Approved:" class="mx-0 my-1 p-0">
+                    <b-input-group class="m-0 w-25">
+                      <b-form-input type="text" size="sm" readonly :value="umswapApproved ? 'Yes' : 'No'"></b-form-input>
+                      <b-input-group-append>
+                        <b-button v-if="!umswapApproved" size="sm" @click="approveTransfer(true)" variant="warning">Approve</b-button>
+                        <b-button v-if="umswapApproved" size="sm" @click="approveTransfer(false)" variant="warning">Revoke Approval</b-button>
+                      </b-input-group-append>
+                    </b-input-group>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label="" class="mx-0 my-1 p-0">
+                    <b-button size="sm" @click="swapIt" :disabled="!umswapApproved || (parseFloat(convertETH(umswapBalance)) + parseFloat(umswapChange) < 0) || (tokenIdsToSwapIn.length == 0 && tokenIdsToSwapOut.length == 0)" variant="warning">Swap</b-button>
+                  </b-form-group> -->
+                </b-card-text>
+              </b-card>
+            </div>
+
           </b-card-body>
         </b-card>
       </b-container>
@@ -372,6 +420,7 @@
         data: {
           coinbase: null,
           showInfo: false,
+          newPool: false,
           selectedCollection: null,
           selectedPool: null,
           collectionsCurrentPage: 1,
@@ -436,6 +485,11 @@
             timestamp: null,
           },
           // owners: {},
+          newUmswap: {
+            collection: "0x72a94e6c51cb06453b84c049ce1e1312f7c05e2c", // TODO: null,
+            name: null,
+            tokenIds: [],
+          },
           selectedTokens: {},
           sync: {
             section: null,
