@@ -508,13 +508,14 @@ contract Umswap is BasicToken, ReentrancyGuard {
             tokenIds_[i] = tokenIds.index[i];
         }
         creator_ = creator;
-        stats_ = new uint[](6);
+        stats_ = new uint[](7);
         stats_[0] = stats[uint(Stats.SwappedIn)];
         stats_[1] = stats[uint(Stats.SwappedOut)];
         stats_[2] = stats[uint(Stats.TotalScores)];
-        stats_[3] = _totalSupply;
-        stats_[4] = raters.length;
-        stats_[5] = isApprovedForAll(tokenOwner) ? 1 : 0;
+        stats_[3] = this.balanceOf(tokenOwner);
+        stats_[4] = _totalSupply;
+        stats_[5] = raters.length;
+        stats_[6] = isApprovedForAll(tokenOwner) ? 1 : 0;
     }
 
     function getRatings(uint[] memory indices) public view returns (Rating[] memory ratings_) {
@@ -688,8 +689,8 @@ contract UmswapFactory is CloneFactory {
         creators = new address[](length);
         stats = new uint[][](length);
         for (uint i = 0; i < length; i = onePlus(i)) {
-            umswaps_[i] = umswaps[i];
-            (symbols[i], names[i], collections[i], validTokenIds[i], tokenIds[i], creators[i], stats[i]) = umswaps[i].getInfo(tokenOwner);
+            umswaps_[i] = umswaps[indices[i]];
+            (symbols[i], names[i], collections[i], validTokenIds[i], tokenIds[i], creators[i], stats[i]) = umswaps[indices[i]].getInfo(tokenOwner);
         }
     }
 }

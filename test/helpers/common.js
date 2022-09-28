@@ -191,23 +191,24 @@ class Data {
       let indices = generateRange(0, getUmswapsLength - 1, 1);
       const getUmswaps = await this.umswapFactory.getUmswaps(this.user0, indices);
       // console.log("getUmswaps: " + JSON.stringify(getUmswaps, null, 2));
-      console.log("            # Address              Creator              Symbol   Name                           ERC-721 Collection       TotalSupply   In  Out  Rts  Rt# Aprv TokenIds                      ");
-      console.log("          --- -------------------- -------------------- -------- ------------------------------ -------------------- --------------- ---- ---- ---- ---- ---- ------------------------------");
+      console.log("            # Address              Creator              Symbol   Name                           ERC-721 Collection     User0 Balance     TotalSupply   In  Out  Rts  Rt# Aprv TokenIds                      ");
+      console.log("          --- -------------------- -------------------- -------- ------------------------------ -------------------- --------------- --------------- ---- ---- ---- ---- ---- ------------------------------");
       for (let i = 0; i < getUmswaps[0].length; i++) {
         const stats = getUmswaps[7][i];
         // console.log("stats: " + JSON.stringify(stats, null, 2));
         // console.log("stats[0]: " + stats[0]);
-        const ratingsLength = stats[4];
+        const ratingsLength = stats[5];
         console.log("          " + this.padLeft(i, 3) + " " + this.padRight(this.getShortAccountName(getUmswaps[0][i]), 20) + " " +
           this.padRight(this.getShortAccountName(getUmswaps[6][i]), 20) + " " + getUmswaps[1][i] + " " +
           this.padRight(getUmswaps[2][i], 30) + " " +
           this.padRight(this.getShortAccountName(getUmswaps[3][i]), 20) + " " +
           this.padLeft(ethers.utils.formatEther(stats[3]), 15) + " " +
+          this.padLeft(ethers.utils.formatEther(stats[4]), 15) + " " +
           this.padLeft(stats[0], 4) + " " +
           this.padLeft(stats[1], 4) + " " +
           this.padLeft(stats[2], 4) + " " +
           this.padLeft(ratingsLength, 4) + " " +
-          this.padLeft(stats[5], 4) + " " +
+          this.padLeft(stats[6], 4) + " " +
           this.padRight(JSON.stringify(getUmswaps[4][i].map((x) => { return parseInt(x.toString()); })) + "/" + JSON.stringify(getUmswaps[5][i].map((x) => { return parseInt(x.toString()); })), 30)
         );
         if (ratingsLength > 0 && i == 0 && this.umswap != null) {
