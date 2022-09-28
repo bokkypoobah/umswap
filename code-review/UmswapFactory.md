@@ -16,13 +16,13 @@ Source file [../../contracts/UmswapFactory.sol](../../contracts/UmswapFactory.so
 pragma solidity ^0.8.0;
 
 // ----------------------------------------------------------------------------
-// Umswap v0.8.9 testing
+// Umswap v0.9.0 testing
 //
 // https://github.com/bokkypoobah/Umswap
 //
 // Deployments:
-// - UmswapFactory 0x0AE45D0a938f4F07F236e5f43ffB05E79ceE8268
-// - Template Umswap 0x130753707d301836992C8A6233Ffc77A1685D8c0
+// - UmswapFactory
+// - Template Umswap
 //
 // SPDX-License-Identifier: MIT
 //
@@ -519,13 +519,14 @@ contract Umswap is BasicToken, ReentrancyGuard {
             tokenIds_[i] = tokenIds.index[i];
         }
         creator_ = creator;
-        stats_ = new uint[](6);
+        stats_ = new uint[](7);
         stats_[0] = stats[uint(Stats.SwappedIn)];
         stats_[1] = stats[uint(Stats.SwappedOut)];
         stats_[2] = stats[uint(Stats.TotalScores)];
-        stats_[3] = _totalSupply;
-        stats_[4] = raters.length;
-        stats_[5] = isApprovedForAll(tokenOwner) ? 1 : 0;
+        stats_[3] = this.balanceOf(tokenOwner);
+        stats_[4] = _totalSupply;
+        stats_[5] = raters.length;
+        stats_[6] = isApprovedForAll(tokenOwner) ? 1 : 0;
     }
 
     function getRatings(uint[] memory indices) public view returns (Rating[] memory ratings_) {
@@ -699,8 +700,8 @@ contract UmswapFactory is CloneFactory {
         creators = new address[](length);
         stats = new uint[][](length);
         for (uint i = 0; i < length; i = onePlus(i)) {
-            umswaps_[i] = umswaps[i];
-            (symbols[i], names[i], collections[i], validTokenIds[i], tokenIds[i], creators[i], stats[i]) = umswaps[i].getInfo(tokenOwner);
+            umswaps_[i] = umswaps[indices[i]];
+            (symbols[i], names[i], collections[i], validTokenIds[i], tokenIds[i], creators[i], stats[i]) = umswaps[indices[i]].getInfo(tokenOwner);
         }
     }
 }

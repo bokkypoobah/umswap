@@ -5,13 +5,13 @@
 pragma solidity ^0.8.0;
 
 // ----------------------------------------------------------------------------
-// Umswap v0.8.9 testing
+// Umswap v0.9.0 testing
 //
 // https://github.com/bokkypoobah/Umswap
 //
 // Deployments:
-// - UmswapFactory 0x0AE45D0a938f4F07F236e5f43ffB05E79ceE8268
-// - Template Umswap 0x130753707d301836992C8A6233Ffc77A1685D8c0
+// - UmswapFactory
+// - Template Umswap
 //
 // SPDX-License-Identifier: MIT
 //
