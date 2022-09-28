@@ -55,6 +55,9 @@
           <b-card-body class="m-0 p-1">
             <div class="d-flex flex-wrap m-0 p-0">
               <div class="mt-0 pr-1">
+                <b-button size="sm" :pressed.sync="showFilter" variant="link" v-b-popover.hover.top="'Show filter'"><span v-if="showFilter"><b-icon-layout-sidebar-inset shift-v="+1" font-scale="1.0"></b-icon-layout-sidebar-inset></span><span v-else><b-icon-layout-sidebar shift-v="+1" font-scale="1.0"></b-icon-layout-sidebar></span></b-button>
+              </div>
+              <div class="mt-0 pr-1">
                 <b-button :disabled="selectedCollection != null || sync.section != null" size="sm" @click="doIt('syncUmswaps')" variant="primary" style="min-width: 40px;" v-b-popover.hover.top="'Sync Umswaps'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download></b-button>
               </div>
               <div class="mt-0 pr-1">
@@ -313,56 +316,89 @@
               </b-card>
             </div>
 
-            <div v-if="selectedCollection != null && !newPool" v-for="(set, setIndex) in getPoolTokens(selectedCollection, selectedPool)" :key="setIndex">
-              <b-card class="mx-0 my-1" body-class="m-1 p-0">
-                <template #header>
-                  <h6 class="mb-0">{{ set.description }}</h6>
-                </template>
-                <b-card-text v-if="set.tokens.length == 0">
-                  Empty
-                </b-card-text>
-                <div v-if="set.tokens.length > 0" class="d-flex flex-wrap m-0 p-0">
-                  <div class="mt-0 flex-grow-1">
-                  </div>
-                  <div class="mt-0 pr-1">
-                    <b-form-select size="sm" v-model="tokens[set.name].sortOption" :options="tokensSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
-                  </div>
-                  <div class="mt-0 pr-1">
-                    <font size="-2" v-b-popover.hover.top="'# tokens'">{{ set.tokens.length }}</font>
-                  </div>
-                  <div class="mt-0 pr-1">
-                    <b-pagination size="sm" v-model="tokens[set.name].currentPage" :total-rows="set.tokens.length" :per-page="tokens[set.name].pageSize" style="height: 0;"></b-pagination>
-                  </div>
-                  <div class="mt-0 pl-1">
-                    <b-form-select size="sm" v-model="tokens[set.name].pageSize" :options="pageSizes" v-b-popover.hover.top="'Tokens Page size'"></b-form-select>
-                  </div>
-                </div>
-                <b-card-group v-if="set.tokens.length > 0" deck class="m-0 p-0">
-                  <div v-for="(token, tokenIndex) in pagedFilteredTokens(selectedCollection, selectedPool, set.name)" :key="tokenIndex">
-                    <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 7.5rem;">
-                      <b-avatar v-if="['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" button @click="toggleToken(set.name, token.tokenId)" rounded size="7.5rem" :src="token.image" style="background-color: #fafafa">
-                        <template v-if="selectedTokens[set.name] && selectedTokens[set.name][token.tokenId]" #badge><b-icon icon="check"></b-icon></template>
-                      </b-avatar>
-                      <b-avatar v-if="!['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" rounded size="7.5rem" :src="token.image" style="background-color: #fafafa">
-                      </b-avatar>
-                      <b-card-text>
-                        <div class="d-flex justify-content-between m-0 p-0">
-                          <div>
-                            <font size="-1">
-                              <b-link :href="'https://opensea.io/assets/ethereum/' + selectedCollection + '/' + token.tokenId" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">
-                                <b-badge variant="light">{{ token.tokenId }}</b-badge>
-                              </b-link>
-                            </font>
-                          </div>
-                          <div class="flex-grow-1">
-                          </div>
-                        </div>
-                      </b-card-text>
-                    </b-card>
-                  </div>
-                </div>
-              </b-card-body>
-            </b-card>
+            <b-row v-if="selectedCollection != null && !newPool" class="m-0 p-0">
+              <b-col v-if="showFilter" cols="2" class="m-0 p-0 border-0">
+                <b-card no-header no-body class="m-0 p-0 border-0">
+                  <b-card-body class="m-0 p-1" style="flex-grow: 1; max-height: 1000px; overflow-y: auto;">
+                    <div v-for="(attributeKey, attributeIndex) in Object.keys(tokenAttributes).sort()" v-bind:key="attributeIndex">
+                      <b-card header-class="m-0 px-2 pt-2 pb-0" body-class="p-0" class="m-0 p-0 border-0">
+                        <template #header>
+                          <span variant="secondary" class="small truncate">
+                            {{ attributeKey }}
+                          </span>
+                        </template>
+                        <font size="-2">
+                          <b-table small fixed striped sticky-header="200px" :fields="tokenAttributesFields" :items="getSortedTraitsForTokenAttributes(attributeKey)" head-variant="light">
+                            <template #cell(select)="data">
+                              <b-form-checkbox size="sm" :checked="(tokenAttributesFilter[attributeKey] && tokenAttributesFilter[attributeKey].attributeOption) ? 1 : 0" value="1" @change="collectionFilterChange(attributeKey, data.item.attributeOption)"></b-form-checkbox>
+                            </template>
+                            <template #cell(attributeOption)="data">
+                              {{ data.item.attributeOption }}
+                            </template>
+                            <template #cell(attributeTotal)="data">
+                              {{ data.item.attributeTotal.length }}
+                            </template>
+                          </b-table>
+                        </font>
+                      </b-card>
+                    </div>
+                  </b-card-body>
+                </b-card>
+              </b-col>
+              <b-col class="m-0 p-0">
+                <div v-for="(set, setIndex) in getPoolTokens(selectedCollection, selectedPool)" :key="setIndex">
+                  <b-card class="mx-0 my-1" body-class="m-1 p-0">
+                    <template #header>
+                      <h6 class="mb-0">{{ set.description }}</h6>
+                    </template>
+                    <b-card-text v-if="set.tokens.length == 0">
+                      Empty
+                    </b-card-text>
+                    <div v-if="set.tokens.length > 0" class="d-flex flex-wrap m-0 p-0">
+                      <div class="mt-0 flex-grow-1">
+                      </div>
+                      <div class="mt-0 pr-1">
+                        <b-form-select size="sm" v-model="tokens[set.name].sortOption" :options="tokensSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
+                      </div>
+                      <div class="mt-0 pr-1">
+                        <font size="-2" v-b-popover.hover.top="'# tokens'">{{ set.tokens.length }}</font>
+                      </div>
+                      <div class="mt-0 pr-1">
+                        <b-pagination size="sm" v-model="tokens[set.name].currentPage" :total-rows="set.tokens.length" :per-page="tokens[set.name].pageSize" style="height: 0;"></b-pagination>
+                      </div>
+                      <div class="mt-0 pl-1">
+                        <b-form-select size="sm" v-model="tokens[set.name].pageSize" :options="pageSizes" v-b-popover.hover.top="'Tokens Page size'"></b-form-select>
+                      </div>
+                    </div>
+                    <b-card-group v-if="set.tokens.length > 0" deck class="m-0 p-0">
+                      <div v-for="(token, tokenIndex) in pagedFilteredTokens(selectedCollection, selectedPool, set.name)" :key="tokenIndex">
+                        <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 7.5rem;">
+                          <b-avatar v-if="['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" button @click="toggleToken(set.name, token.tokenId)" rounded size="7.5rem" :src="token.image" style="background-color: #fafafa">
+                            <template v-if="selectedTokens[set.name] && selectedTokens[set.name][token.tokenId]" #badge><b-icon icon="check"></b-icon></template>
+                          </b-avatar>
+                          <b-avatar v-if="!['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" rounded size="7.5rem" :src="token.image" style="background-color: #fafafa">
+                          </b-avatar>
+                          <b-card-text>
+                            <div class="d-flex justify-content-between m-0 p-0">
+                              <div>
+                                <font size="-1">
+                                  <b-link :href="'https://opensea.io/assets/ethereum/' + selectedCollection + '/' + token.tokenId" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">
+                                    <b-badge variant="light">{{ token.tokenId }}</b-badge>
+                                  </b-link>
+                                </font>
+                              </div>
+                              <div class="flex-grow-1">
+                              </div>
+                            </div>
+                          </b-card-text>
+                        </b-card>
+                      </div>
+                    </div>
+                  </b-card-body>
+                </b-card>
+              </b-col>
+            </b-row>
+
 
             <div v-if="newPool">
               <b-card class="mx-1 my-1" body-class="m-1 p-0">
@@ -420,9 +456,11 @@
         data: {
           coinbase: null,
           showInfo: false,
+          showFilter: true, // TODO false
           newPool: false,
           selectedCollection: null,
           selectedPool: null,
+          tokenAttributesFilter: {},
           collectionsCurrentPage: 1,
           poolsCurrentPage: 1,
           currentPage: 0,
@@ -553,6 +591,11 @@
             { key: 'totalSupply', label: 'Total Supply', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
             { key: 'isApprovedForAll', label: 'Approved', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
           ],
+          tokenAttributesFields: [
+            { key: 'select', label: '', thStyle: 'width: 10%;' },
+            { key: 'attributeOption', label: 'Attribute' /*, sortable: true*/ },
+            { key: 'attributeTotal', label: 'Count', /*sortable: true,*/ thStyle: 'width: 30%;', thClass: 'text-right', tdClass: 'text-right' },
+          ],
           ownersFields: [
             { key: 'index', label: '#' },
             { key: 'owner', label: 'Owner' },
@@ -657,6 +700,26 @@
           },
           collectionLoaded() {
             return this.selectedCollection && this.collection && this.collection.address && this.collection.address.toLowerCase() == this.selectedCollection.toLowerCase() && this.collection.timestamp || null;
+          },
+          tokenAttributes() {
+            const collator = { };
+            if (this.collectionLoaded) {
+              for (const [tokenId, token] of Object.entries(this.collection.tokens)) {
+                for (let attribute of token.attributes) {
+                    const key = attribute.key;
+                    const value = attribute.value;
+                    if (!collator[key]) {
+                      collator[key] = {};
+                    }
+                    if (!collator[key][value]) {
+                      collator[key][value] = [token.tokenId];
+                    } else {
+                      collator[key][value].push(token.tokenId);
+                    }
+                }
+              }
+            }
+            return collator;
           },
           tokenIdsToSwapIn() {
             if ('validTokenIdsOwned' in this.selectedTokens) {
@@ -774,13 +837,31 @@
                   }
                 }
               }
+              let selectedTokenIds = [];
+              if (Object.keys(this.tokenAttributesFilter) == 0) {
+                selectedTokenIds = Object.keys(this.collection.tokens);
+              } else {
+                for (const [trait, value] of Object.entries(this.tokenAttributesFilter)) {
+                  let thisTraitTokenIds = [];
+                  for (const selectedValue of Object.keys(value)) {
+                    const tokenIds = this.tokenAttributes[trait][selectedValue];
+                    thisTraitTokenIds = [...thisTraitTokenIds, ...tokenIds];
+                  }
+                  if (selectedTokenIds.length == 0) {
+                    selectedTokenIds = thisTraitTokenIds;
+                  } else {
+                    selectedTokenIds = selectedTokenIds.filter(tokenId => thisTraitTokenIds.includes(tokenId));
+                  }
+                }
+              }
               if (umswap) {
                 const umswapAddressLower = umswap.address.toLowerCase();
                 const tokens = {};
                 for (const setName of ['validTokenIdsInPool', 'validTokenIdsOwned', 'validTokenIdsNotInPoolOrOwned', 'invalidTokenIdsOwned', 'invalidTokenIdsNotInPoolOrOwned']) {
                   tokens[setName] = [];
                 }
-                for (const [tokenId, token] of Object.entries(this.collection.tokens)) {
+                for (const tokenId of selectedTokenIds) {
+                  const token = this.collection.tokens[tokenId];
                   const validInPool = umswap.validTokenIds.length == 0 || umswap.validTokenIds.includes(parseInt(tokenId));
                   const tokenOwner = token.owner.toLowerCase();
                   let setName;
@@ -824,7 +905,8 @@
                 for (const setName of ['tokenIdsOwned', 'tokenIdsNotOwned']) {
                   tokens[setName] = [];
                 }
-                for (const [tokenId, token] of Object.entries(this.collection.tokens)) {
+                for (const tokenId of selectedTokenIds) {
+                  const token = this.collection.tokens[tokenId];
                   const tokenOwner = token.owner.toLowerCase();
                   let setName;
                   if (tokenOwner == coinbaseLower) {
@@ -875,6 +957,28 @@
               return tokens.slice((this.tokens[setName].currentPage - 1) * this.tokens[setName].pageSize, this.tokens[setName].currentPage * this.tokens[setName].pageSize);
             } else {
               return [];
+            }
+          },
+          getSortedTraitsForTokenAttributes(category) {
+            const results = [];
+            for (let attributeKey in this.tokenAttributes[category]) {
+              const c = this.tokenAttributes[category][attributeKey];
+              results.push({ attributeOption: attributeKey, attributeTotal: c })
+            }
+            results.sort((a, b) => b.attributeTotal.length - a.attributeTotal.length);
+            return results;
+          },
+          collectionFilterChange(attribute, option) {
+            if (!this.tokenAttributesFilter[attribute]) {
+              Vue.set(this.tokenAttributesFilter, attribute, {});
+            }
+            if (this.tokenAttributesFilter[attribute][option]) {
+              Vue.delete(this.tokenAttributesFilter[attribute], option);
+              if (Object.keys(this.tokenAttributesFilter[attribute]) == 0) {
+                Vue.delete(this.tokenAttributesFilter, attribute);
+              }
+            } else {
+              Vue.set(this.tokenAttributesFilter[attribute], option, true);
             }
           },
           toggleToken(setName, tokenId) {
