@@ -68,8 +68,7 @@
               <div class="mt-0 pr-1">
                 <b-form-select :disabled="newPool" size="sm" v-model="selectedCollection" :options="collectionsOptions" @change="selectedCollectionChanged" v-b-popover.hover.top="'ERC-721 NFT Collection'"></b-form-select>
               </div>
-              <!-- TODO -->
-              <div v-if="false" class="mt-0">
+              <div class="mt-0">
                 <b-button size="sm" :pressed.sync="newPool" variant="link" v-b-popover.hover.top="'Create new pool'"><span v-if="newPool"><b-icon-pencil-square shift-v="+1" font-scale="1.0"></b-icon-pencil-square></span><span v-else><b-icon-pencil-square shift-v="+1" font-scale="1.0"></b-icon-pencil-square></span></b-button>
               </div>
               <div class="mt-0 flex-grow-1">
@@ -334,48 +333,29 @@
                   <h6 class="mb-0">New Pool</h6>
                 </template>
                 <b-card-text>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="ERC-721 Collection Address:" class="mx-0 my-1 p-0">
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="ERC-721 Collection Address:" description="This UI will only handle ~10k ERC-721 NFT collections" class="mx-0 my-1 p-0">
                     <b-input-group class="m-0 w-50">
                       <b-form-input type="text" size="sm" v-model.trim="newUmswap.collectionAddress"></b-form-input>
                       <b-input-group-append>
-                        <b-button size="sm" @click="doIt('newUmswap')" variant="primary">Check</b-button>
+                        <b-button size="sm" @click="doIt('newUmswapRetrieveCollection')" variant="primary">Check</b-button>
                       </b-input-group-append>
                     </b-input-group>
                   </b-form-group>
-                  <b-form-group v-if="collectionLoadedForNewUmswap != null" label-cols="3" label-size="sm" label-align="right" label="Name:" class="mx-0 my-1 p-0">
+                  <b-form-group v-if="collectionLoadedForNewUmswap != null" label-cols="3" label-size="sm" label-align="right" label="NFT Collection Name:" class="mx-0 my-1 p-0">
                     <b-form-input type="text" size="sm" readonly v-model.trim="collection.name" class="w-25"></b-form-input>
                   </b-form-group>
-                  <b-form-group v-if="collectionLoadedForNewUmswap != null" label-cols="3" label-size="sm" label-align="right" label="Slug:" class="mx-0 my-1 p-0">
+                  <b-form-group v-if="collectionLoadedForNewUmswap != null" label-cols="3" label-size="sm" label-align="right" label="NFT Collection Slug:" class="mx-0 my-1 p-0">
                     <b-form-input type="text" size="sm" readonly v-model.trim="collection.slug" class="w-25"></b-form-input>
                   </b-form-group>
-
-
-                  <!-- function newUmswap(IERC721Partial collection, string calldata name, uint[] calldata tokenIds) public { -->
-
-                  <!-- <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Into Pool:" class="mx-0 my-1 p-0">
-                    <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapIn.join(',')" rows="1" max-rows="5" class="w-50"></b-form-textarea>
+                  <b-form-group v-if="collectionLoadedForNewUmswap != null" label-cols="3" label-size="sm" label-align="right" label="Umswap Name:" description="Choose a suitable name to describe this NFT collection subset. > 0 and <= 48 regular alphanumeric characters and some symbols" class="mx-0 my-1 p-0">
+                    <b-form-input type="text" size="sm" v-model.trim="newUmswap.name" class="w-25"></b-form-input>
                   </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Out Of Pool:" class="mx-0 my-1 p-0">
-                    <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapOut.join(',')" rows="1" max-rows="5" class="w-50"></b-form-textarea>
+                  <b-form-group v-if="collectionLoadedForNewUmswap != null" label-cols="3" label-size="sm" label-align="right" label="Selected Token Ids:" description="Leave this empty for the whole NFT collection to be included" class="mx-0 my-1 p-0">
+                    <b-form-textarea size="sm" readonly v-model.trim="Object.keys(selectedTokenIds).join(',')" rows="1" max-rows="100" class="w-75"></b-form-textarea>
                   </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Change:" class="mx-0 my-1 p-0">
-                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapChange" class="w-25"></b-form-input>
+                  <b-form-group label-cols="3" label-size="sm" label="" description="Note that duplicate (collection, tokenIds) sets will be rejected" class="mx-0 my-1 p-0">
+                    <b-button size="sm" @click="createNewUmswap" :disabled="!collectionLoadedForNewUmswap || newUmswap.name == null || newUmswap.name.length == 0" variant="warning">Create New Pool</b-button>
                   </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="My Umswap Balance:" class="mx-0 my-1 p-0">
-                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapBalance" class="w-25"></b-form-input>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Approved:" class="mx-0 my-1 p-0">
-                    <b-input-group class="m-0 w-25">
-                      <b-form-input type="text" size="sm" readonly :value="umswapApproved ? 'Yes' : 'No'"></b-form-input>
-                      <b-input-group-append>
-                        <b-button v-if="!umswapApproved" size="sm" @click="approveTransfer(true)" variant="warning">Approve</b-button>
-                        <b-button v-if="umswapApproved" size="sm" @click="approveTransfer(false)" variant="warning">Revoke Approval</b-button>
-                      </b-input-group-append>
-                    </b-input-group>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label="" class="mx-0 my-1 p-0">
-                    <b-button size="sm" @click="swapIt" :disabled="!umswapApproved || (parseFloat(convertETH(umswapBalance)) + parseFloat(umswapChange) < 0) || (tokenIdsToSwapIn.length == 0 && tokenIdsToSwapOut.length == 0)" variant="warning">Swap</b-button>
-                  </b-form-group> -->
                 </b-card-text>
               </b-card>
             </div>
@@ -412,7 +392,7 @@
               </b-col>
               <b-col class="m-0 p-0">
                 <!-- TOKENS BY GROUPS -->
-                <div v-for="(set, setIndex) in getPoolTokens(selectedCollection, selectedPool)" :key="setIndex">
+                <div v-if="collectionLoaded != null || collectionLoadedForNewUmswap != null" v-for="(set, setIndex) in getPoolTokens(selectedCollection, selectedPool)" :key="setIndex">
                   <b-card class="mx-0 my-1" body-class="m-1 p-0">
                     <template #header>
                       <h6 class="mb-0">{{ set.description }}</h6>
@@ -497,7 +477,7 @@
           coinbase: null,
           showInfo: false,
           showFilter: false,
-          newPool: false, // TODO false,
+          newPool: false,
           selectedCollection: null,
           selectedPool: null,
           tokenAttributesFilter: {},
@@ -568,9 +548,8 @@
             blockNumber: null,
             timestamp: null,
           },
-          // owners: {},
           newUmswap: {
-            collectionAddress: "0x2f46E37477Ca4033D74986b15F0572e9913B4858", // TODO: null,
+            collectionAddress: null,
             name: null,
             tokenIds: [],
           },
@@ -744,14 +723,14 @@
             return null;
           },
           collectionLoaded() {
-            return this.selectedCollection && this.collection && this.collection.address && this.collection.address == this.selectedCollection && this.collection.timestamp || null;
+            return !this.newPool && this.selectedCollection && this.collection && this.collection.address && this.collection.address == this.selectedCollection && this.collection.timestamp || null;
           },
           collectionLoadedForNewUmswap() {
-            return this.newUmswap && this.collection && this.collection.address && this.collection.address == this.newUmswap.collectionAddress && this.collection.timestamp || null;
+            return this.newPool && this.newUmswap.collectionAddress != null && this.newUmswap.collectionAddress.length > 0&& this.collection && this.collection.address && this.collection.address == this.newUmswap.collectionAddress && this.collection.timestamp || null;
           },
           tokenAttributes() {
             const collator = { };
-            if (this.collectionLoaded) {
+            if (this.collectionLoaded || this.collectionLoadedForNewUmswap) {
               for (const [tokenId, token] of Object.entries(this.collection.tokens)) {
                 for (let attribute of token.attributes) {
                     const key = attribute.key;
@@ -1099,10 +1078,8 @@
             this.selectedTokenIds = {};
           },
           selectTokenIds(tokens) {
-            console.log("selectTokenIds: " + JSON.stringify(tokens));
             for (const token of tokens) {
               Vue.set(this.selectedTokenIds, token.tokenId, true);
-              // console.log(token.tokenId);
             }
           },
           selectAllPages() {
@@ -1215,7 +1192,7 @@
               });
 
               let collectionAddress = null;
-              if (action == 'newUmswap') {
+              if (action == 'newUmswapRetrieveCollection') {
                 collectionAddress = this.newUmswap.collectionAddress;
               } else {
                 if (this.selectedCollection != null) {
@@ -1413,7 +1390,7 @@
               ),
             ])
             this.$bvModal.msgBoxConfirm([messageVNode], {
-              title: 'Send Transaction',
+              title: 'Set/Revoke Approval For Umswap To Transfer Your NFTs Into This Pool',
               size: 'lg',
               buttonSize: 'sm',
               centered: true,
@@ -1435,6 +1412,93 @@
             }).catch(err => {
               // this.newUmswap.error = err.message.toString();
               console.log("approveTransfer error: " + JSON.stringify(e));
+            });
+          },
+          async createNewUmswap() {
+            console.log("createNewUmswap");
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const umswapFactoryContract = new ethers.Contract(UMSWAPFACTORYADDRESS, UMSWAPFACTORYABI, provider);
+            const umswapFactoryContractWithSigner = umswapFactoryContract.connect(provider.getSigner());
+            const from = await provider.getSigner().getAddress();
+            const collectionAddress = this.newUmswap.collectionAddress;
+            const name = this.newUmswap.name == null || this.newUmswap.name.trim().length == 0 ? null : this.newUmswap.name.trim();
+            const selectedTokenIds = Object.keys(this.selectedTokenIds);
+            const h = this.$createElement;
+            const messageVNode = h('div', { class: ['confirm-modal'] }, [
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'From:'),
+                  h('b-col',
+                    [
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + from, 'target': '_blank' } }, from),
+                    ]
+                  ),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'newUmswap('),
+                  h('b-col', ''),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'collection:'),
+                  h('b-col',
+                    [
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/token/' + collectionAddress + '#code', 'target': '_blank' } }, collectionAddress),
+                    ]
+                  ),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'name:'),
+                  h('b-col', name),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'tokenIds:'),
+                  h('b-col', '[' + selectedTokenIds.join(',') + ']'),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, ')'),
+                  h('b-col', ''),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'Note:'),
+                  h('b-col', 'Please resync a few minutes after your transaction has successfully been mined'),
+                ]
+              ),
+            ])
+            this.$bvModal.msgBoxConfirm([messageVNode], {
+              title: 'Create New Umswap Pool',
+              size: 'lg',
+              buttonSize: 'sm',
+              centered: true,
+              okVariant: 'danger',
+              okTitle: 'Confirm',
+              cancelTitle: 'Cancel',
+            }).then( async value1 => {
+              if (value1) {
+                event.preventDefault();
+                try {
+                  const tx = await umswapFactoryContractWithSigner.newUmswap(collectionAddress, name, selectedTokenIds);
+            //       this.newUmswap.txHash = tx.hash;
+                  console.log("tx: " + JSON.stringify(tx));
+                } catch (e) {
+            //       this.newUmswap.error = e.message.toString();
+                  console.log("swapIt error: " + JSON.stringify(e));
+                }
+              }
+            }).catch(err => {
+              // this.newUmswap.error = err.message.toString();
+              console.log("swapIt error: " + JSON.stringify(e));
             });
           },
           async swapIt() {
@@ -1499,7 +1563,7 @@
               ),
             ])
             this.$bvModal.msgBoxConfirm([messageVNode], {
-              title: 'Send Transaction',
+              title: 'Swap NFTs Into or Out Of This Pool',
               size: 'lg',
               buttonSize: 'sm',
               centered: true,

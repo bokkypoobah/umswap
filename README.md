@@ -27,6 +27,10 @@ UI being built at [https://bokkypoobah.github.io/umswap/](https://bokkypoobah.gi
 
 * 2022-08-15 [UmswapFactory 0.8.9 testing](deployed/UmswapFactory_0.8.9_0x0AE45D0a938f4F07F236e5f43ffB05E79ceE8268.sol]) deployed to [0x0AE45D0a938f4F07F236e5f43ffB05E79ceE8268](https://etherscan.io/address/0x0AE45D0a938f4F07F236e5f43ffB05E79ceE8268#code)
   * [Bug bounty](https://twitter.com/BokkyPooBah/status/1553875661248270337) now on offer on this contract
+    * Cancelled 2022-09-28 - new version
+
+* 2022-09-28 [UmswapFactory 0.9.0 testing](deployed/UmswapFactory_0.9.0_0x8f093895cD4C54eaB897C6377e1Bf85Fe5B4E948.sol]) deployed to [0x8f093895cD4C54eaB897C6377e1Bf85Fe5B4E948](https://etherscan.io/address/0x8f093895cD4C54eaB897C6377e1Bf85Fe5B4E948#code)
+  * [Bug bounty](https://twitter.com/BokkyPooBah/status/1553875661248270337) now on offer on this contract
 
 <br />
 
