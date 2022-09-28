@@ -63,11 +63,12 @@
                 <b-button :disabled="selectedCollection != null || sync.section != null" size="sm" @click="doIt('syncUmswaps')" variant="primary" style="min-width: 40px;" v-b-popover.hover.top="'Sync Umswaps'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download></b-button>
               </div>
               <div class="mt-0 pr-1">
-                <b-form-input type="text" size="sm" v-model.trim="searchCollections" debounce="600" v-b-popover.hover.top="'Filter by partial ERC-721 NFT collection address, symbol or name'" placeholder="🔍 collection"></b-form-input>
+                <b-form-input :disabled="newPool" type="text" size="sm" v-model.trim="searchCollections" debounce="600" v-b-popover.hover.top="'Filter by partial ERC-721 NFT collection address, symbol or name'" placeholder="🔍 collection"></b-form-input>
               </div>
               <div class="mt-0 pr-1">
-                <b-form-select size="sm" v-model="selectedCollection" :options="collectionsOptions" @change="selectedCollectionChanged" v-b-popover.hover.top="'ERC-721 NFT Collection'"></b-form-select>
+                <b-form-select :disabled="newPool" size="sm" v-model="selectedCollection" :options="collectionsOptions" @change="selectedCollectionChanged" v-b-popover.hover.top="'ERC-721 NFT Collection'"></b-form-select>
               </div>
+              <!-- TODO -->
               <div v-if="false" class="mt-0">
                 <b-button size="sm" :pressed.sync="newPool" variant="link" v-b-popover.hover.top="'Create new pool'"><span v-if="newPool"><b-icon-pencil-square shift-v="+1" font-scale="1.0"></b-icon-pencil-square></span><span v-else><b-icon-pencil-square shift-v="+1" font-scale="1.0"></b-icon-pencil-square></span></b-button>
               </div>
@@ -420,6 +421,15 @@
                       Empty
                     </b-card-text>
                     <div v-if="set.tokens.length > 0" class="d-flex flex-wrap m-0 p-0">
+                      <div v-if="set.name == 'tokenIdsSelected'" class="mt-0 pr-1">
+                        <b-button size="sm" @click="resetSelection" variant="link" v-b-popover.hover.top="'Reset selection'"><b-icon-trash shift-v="+1" font-scale="1.0"></b-icon-trash></b-button>
+                      </div>
+                      <div v-if="set.name == 'tokenIdsUnselected'" class="mt-0 pr-1">
+                        <b-button size="sm" @click="selectTokenIds(pagedFilteredTokens(selectedCollection, selectedPool, set.name))" variant="link" v-b-popover.hover.top="'Select all from current page'"><b-icon-check shift-v="+1" font-scale="1.0"></b-icon-check></b-button>
+                      </div>
+                      <div v-if="set.name == 'tokenIdsUnselected'" class="mt-0 pr-1">
+                        <b-button size="sm" @click="selectTokenIds(getPoolTokens(selectedCollection, selectedPool)[1].tokens)" variant="link" v-b-popover.hover.top="'Select all from all pages'"><b-icon-check-all shift-v="+1" font-scale="1.0"></b-icon-check-all></b-button>
+                      </div>
                       <div class="mt-0 flex-grow-1">
                       </div>
                       <div class="mt-0 pr-1">
@@ -438,11 +448,16 @@
                     <b-card-group v-if="set.tokens.length > 0" deck class="m-0 p-0">
                       <div v-for="(token, tokenIndex) in pagedFilteredTokens(selectedCollection, selectedPool, set.name)" :key="tokenIndex">
                         <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 12rem;">
-                          <b-avatar v-if="['tokenIdsSelected', 'tokenIdsUnselected', 'validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" button @click="toggleToken(set.name, token.tokenId)" rounded size="12rem" :src="token.image" style="background-color: #fafafa">
+                          <b-avatar v-if="['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" button @click="toggleToken(set.name, token.tokenId)" rounded size="12rem" :src="token.image" style="background-color: #fafafa">
                             <template v-if="selectedTokens[set.name] && selectedTokens[set.name][token.tokenId]" #badge><b-icon icon="check"></b-icon></template>
                           </b-avatar>
-                          <b-avatar v-if="!['tokenIdsSelected', 'tokenIdsUnselected', 'validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" rounded size="12rem" :src="token.image" style="background-color: #fafafa">
+                          <b-avatar v-else-if="['tokenIdsSelected'].includes(set.name)" button @click="selectTokenId(token.tokenId, false)" rounded size="12rem" :src="token.image" style="background-color: #fafafa">
                           </b-avatar>
+                          <b-avatar v-else-if="['tokenIdsUnselected'].includes(set.name)" button @click="selectTokenId(token.tokenId, true)" rounded size="12rem" :src="token.image" style="background-color: #fafafa">
+                          </b-avatar>
+                          <b-avatar v-else="!['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" rounded size="12rem" :src="token.image" style="background-color: #fafafa">
+                          </b-avatar>
+
                           <b-card-text>
                             <div class="d-flex justify-content-between m-0 p-0">
                               <div>
@@ -482,7 +497,7 @@
           coinbase: null,
           showInfo: false,
           showFilter: false,
-          newPool: false,
+          newPool: false, // TODO false,
           selectedCollection: null,
           selectedPool: null,
           tokenAttributesFilter: {},
@@ -560,6 +575,7 @@
             tokenIds: [],
           },
           selectedTokens: {},
+          selectedTokenIds: {},
           sync: {
             section: null,
             // ? error: false,
@@ -870,9 +886,9 @@
                   }
                 }
               }
-              let selectedTokenIds = [];
+              let filteredTokenIds = [];
               if (Object.keys(this.tokenAttributesFilter) == 0) {
-                selectedTokenIds = Object.keys(this.collection.tokens);
+                filteredTokenIds = Object.keys(this.collection.tokens);
               } else {
                 for (const [trait, value] of Object.entries(this.tokenAttributesFilter)) {
                   let thisTraitTokenIds = [];
@@ -880,10 +896,10 @@
                     const tokenIds = this.tokenAttributes[trait][selectedValue];
                     thisTraitTokenIds = [...thisTraitTokenIds, ...tokenIds];
                   }
-                  if (selectedTokenIds.length == 0) {
-                    selectedTokenIds = thisTraitTokenIds;
+                  if (filteredTokenIds.length == 0) {
+                    filteredTokenIds = thisTraitTokenIds;
                   } else {
-                    selectedTokenIds = selectedTokenIds.filter(tokenId => thisTraitTokenIds.includes(tokenId));
+                    filteredTokenIds = filteredTokenIds.filter(tokenId => thisTraitTokenIds.includes(tokenId));
                   }
                 }
               }
@@ -892,9 +908,10 @@
                 for (const setName of ['tokenIdsSelected', 'tokenIdsUnselected']) {
                   tokens[setName] = [];
                 }
-                for (const tokenId of selectedTokenIds) {
+                const selectedTokenIds = Object.keys(this.selectedTokenIds);
+                for (const tokenId of filteredTokenIds) {
                   const token = this.collection.tokens[tokenId];
-                  if (token.owner == this.coinbase) {
+                  if (selectedTokenIds.includes(tokenId)) {
                     setName = 'tokenIdsSelected';
                   } else {
                     setName = 'tokenIdsUnselected';
@@ -919,7 +936,7 @@
                 for (const setName of ['validTokenIdsInPool', 'validTokenIdsOwned', 'validTokenIdsNotInPoolOrOwned', 'invalidTokenIdsOwned', 'invalidTokenIdsNotInPoolOrOwned']) {
                   tokens[setName] = [];
                 }
-                for (const tokenId of selectedTokenIds) {
+                for (const tokenId of filteredTokenIds) {
                   const token = this.collection.tokens[tokenId];
                   const validInPool = umswap.validTokenIds.length == 0 || umswap.validTokenIds.includes(parseInt(tokenId));
                   let setName;
@@ -982,7 +999,7 @@
                 for (const setName of ['tokenIdsOwned', 'tokenIdsNotOwned']) {
                   tokens[setName] = [];
                 }
-                for (const tokenId of selectedTokenIds) {
+                for (const tokenId of filteredTokenIds) {
                   const token = this.collection.tokens[tokenId];
                   if (token.owner == this.coinbase) {
                     setName = 'tokenIdsOwned';
@@ -1070,6 +1087,26 @@
             } else {
               Vue.set(this.selectedTokens[setName], tokenId, true);
             }
+          },
+          selectTokenId(tokenId, offOrOn) {
+            if (offOrOn) {
+              Vue.set(this.selectedTokenIds, tokenId, true);
+            } else {
+              Vue.delete(this.selectedTokenIds, tokenId);
+            }
+          },
+          resetSelection() {
+            this.selectedTokenIds = {};
+          },
+          selectTokenIds(tokens) {
+            console.log("selectTokenIds: " + JSON.stringify(tokens));
+            for (const token of tokens) {
+              Vue.set(this.selectedTokenIds, token.tokenId, true);
+              // console.log(token.tokenId);
+            }
+          },
+          selectAllPages() {
+
           },
           ensOrAddress(address, length = 24) {
             if (this.collection && this.collection.ensMap) {
