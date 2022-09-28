@@ -384,11 +384,11 @@
                     </div>
                     <b-card-group v-if="set.tokens.length > 0" deck class="m-0 p-0">
                       <div v-for="(token, tokenIndex) in pagedFilteredTokens(selectedCollection, selectedPool, set.name)" :key="tokenIndex">
-                        <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 7.5rem;">
-                          <b-avatar v-if="['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" button @click="toggleToken(set.name, token.tokenId)" rounded size="7.5rem" :src="token.image" style="background-color: #fafafa">
+                        <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 12rem;">
+                          <b-avatar v-if="['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" button @click="toggleToken(set.name, token.tokenId)" rounded size="12rem" :src="token.image" style="background-color: #fafafa">
                             <template v-if="selectedTokens[set.name] && selectedTokens[set.name][token.tokenId]" #badge><b-icon icon="check"></b-icon></template>
                           </b-avatar>
-                          <b-avatar v-if="!['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" rounded size="7.5rem" :src="token.image" style="background-color: #fafafa">
+                          <b-avatar v-if="!['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" rounded size="12rem" :src="token.image" style="background-color: #fafafa">
                           </b-avatar>
                           <b-card-text>
                             <div class="d-flex justify-content-between m-0 p-0">
@@ -400,6 +400,11 @@
                                 </font>
                               </div>
                               <div class="flex-grow-1">
+                              </div>
+                              <div>
+                                <font size="-1">
+                                  <b-badge variant="light" class="truncate">{{ ensOrAddress(token.owner) }}</b-badge>
+                                </font>
                               </div>
                             </div>
                           </b-card-text>
@@ -1016,10 +1021,11 @@
               Vue.set(this.selectedTokens[setName], tokenId, true);
             }
           },
-          owner(tokenId, length = 24) {
-            const address = this.owners[tokenId] || null;
-            if (address in this.ensMap) {
-              return this.ensMap[address].substring(0, length);
+          ensOrAddress(address, length = 24) {
+            if (this.collection && this.collection.ensMap) {
+              if (address in this.collection.ensMap) {
+                return this.collection.ensMap[address].substring(0, length);
+              }
             }
             return address == null ? null : address.substring(0, length);
           },
