@@ -570,6 +570,10 @@
           tokensSortOptions: [
             { value: 'idasc', text: '▲ Id' },
             { value: 'iddsc', text: '▼ Id' },
+            { value: 'rarityasc', text: '▲ Rarity' },
+            { value: 'raritydsc', text: '▼ Rarity' },
+            { value: 'rarityrankasc', text: '▲ RarityRank' },
+            { value: 'rarityrankdsc', text: '▼ RarityRank' },
             { value: 'random', text: 'Random' },
           ],
           pageSizes: [
@@ -892,6 +896,14 @@
                     tokens[setName].sort((a, b) => a.tokenId - b.tokenId);
                   } else if (this.tokens[setName].sortOption == 'iddsc') {
                     tokens[setName].sort((a, b) => b.tokenId - a.tokenId);
+                  } else if (this.tokens[setName].sortOption == 'rarityasc') {
+                    tokens[setName].sort((a, b) => a.rarity - b.rarity);
+                  } else if (this.tokens[setName].sortOption == 'raritydsc') {
+                    tokens[setName].sort((a, b) => b.rarity - a.rarity);
+                  } else if (this.tokens[setName].sortOption == 'rarityrankasc') {
+                    tokens[setName].sort((a, b) => a.rarityRank - b.rarityRank);
+                  } else if (this.tokens[setName].sortOption == 'rarityrankdsc') {
+                    tokens[setName].sort((a, b) => b.rarityRank - a.rarityRank);
                   } else {
                     tokens[setName].sort(() => {
                       return Math.random() - 0.5;
@@ -1157,6 +1169,8 @@
                         validUntil,
                         source,
                         lastSell: token.token.lastSell,
+                        rarity: token.token.rarity || null,
+                        rarityRank: token.token.rarityRank || null,
                       };
                     }
                     this.sync.completed = Object.keys(tokens).length;
