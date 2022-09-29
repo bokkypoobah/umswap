@@ -1093,6 +1093,7 @@
           },
           newUmswapCollectionAddressChanged(item) {
             // console.log("newUmswapCollectionAddressChanged: " + JSON.stringify(item));
+            this.selectedTokenIds = {};
             (async() => {
               const db0 = new Dexie(this.db.name);
               db0.version(this.db.version).stores(this.db.schemaDefinition);
