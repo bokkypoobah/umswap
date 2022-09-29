@@ -53,6 +53,13 @@
 
         <b-card no-body class="p-0 mt-0">
 
+          <!-- <b-card no-body sub-title="Debug" class="m-1 p-1 border-1">
+            <b-card-body class="m-1 p-1">
+              collectionLoaded: {{ collectionLoaded || '(null)' }}
+              collection.address: {{ collection && collection.address || '(null)' }}
+            </b-card-body>
+          </b-card> -->
+
           <!-- COLLECTION TOOLBAR -->
           <b-card-body class="m-0 p-1">
             <div class="d-flex flex-wrap m-0 p-0">
@@ -335,29 +342,29 @@
                 <b-card-text>
                   <b-form-group label-cols="3" label-size="sm" label-align="right" label="ERC-721 Collection Address:" description="This UI will only handle ~10k ERC-721 NFT collections" class="mx-0 my-1 p-0">
                     <b-input-group class="m-0 w-50">
-                      <b-form-input type="text" size="sm" v-model.trim="newUmswap.collectionAddress"></b-form-input>
+                      <b-form-input type="text" size="sm" v-model.trim="newUmswap.collectionAddress" @change="newUmswapCollectionAddressChanged"></b-form-input>
                       <b-input-group-append>
                         <b-button size="sm" @click="doIt('newUmswapRetrieveCollection')" variant="primary">Check</b-button>
                       </b-input-group-append>
                     </b-input-group>
                   </b-form-group>
-                  <b-form-group v-if="collectionLoadedForNewUmswap != null" label-cols="3" label-size="sm" label-align="right" label="NFT Collection Name:" class="mx-0 my-1 p-0">
+                  <b-form-group v-if="collectionLoaded != null" label-cols="3" label-size="sm" label-align="right" label="NFT Collection Name:" class="mx-0 my-1 p-0">
                     <b-form-input type="text" size="sm" readonly v-model.trim="collection.name" class="w-25"></b-form-input>
                   </b-form-group>
-                  <b-form-group v-if="collectionLoadedForNewUmswap != null" label-cols="3" label-size="sm" label-align="right" label="NFT Collection Slug:" class="mx-0 my-1 p-0">
+                  <b-form-group v-if="collectionLoaded != null" label-cols="3" label-size="sm" label-align="right" label="NFT Collection Slug:" class="mx-0 my-1 p-0">
                     <b-form-input type="text" size="sm" readonly v-model.trim="collection.slug" class="w-25"></b-form-input>
                   </b-form-group>
-                  <b-form-group v-if="collectionLoadedForNewUmswap != null" label-cols="3" label-size="sm" label-align="right" label="Umswap Name:" description="Choose a suitable name to describe this NFT collection subset. > 0 and <= 48 regular alphanumeric characters and some symbols" class="mx-0 my-1 p-0">
-                    <b-form-input type="text" size="sm" v-model.trim="newUmswap.name" debounce="600" class="w-25"></b-form-input>
-                  </b-form-group>
-                  <b-form-group v-if="collectionLoadedForNewUmswap != null" label-cols="3" label-size="sm" label-align="right" label="Selected Token Ids:" description="Leave this empty for the whole NFT collection to be included" class="mx-0 my-1 p-0">
+                  <b-form-group v-if="collectionLoaded != null" label-cols="3" label-size="sm" label-align="right" label="Selected Token Ids:" description="Leave this empty for the whole NFT collection to be included" class="mx-0 my-1 p-0">
                     <b-form-textarea size="sm" readonly v-model.trim="Object.keys(selectedTokenIds).join(',')" rows="1" max-rows="100" class="w-75"></b-form-textarea>
                   </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label="" description="Note that duplicate (collection, tokenIds) sets will be rejected" class="mx-0 my-1 p-0">
-                    <b-button size="sm" @click="createNewUmswap" :disabled="!collectionLoadedForNewUmswap || newUmswap.name == null || newUmswap.name.length == 0" variant="warning">Create New Pool</b-button>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label="" description="Click this if the collection images and/or attributes incomplete, wait for a few minutes, then Check again" class="mx-0 my-1 p-0">
+                  <b-form-group label-cols="3" label-size="sm" label="" description="Request for Reservoir API to refresh the collection data that takes several minutes to complete" class="mx-0 my-1 p-0">
                     <b-button size="sm" @click="refreshMetadata" variant="primary">Request Metadata Refresh</b-button>
+                  </b-form-group>
+                  <b-form-group v-if="collectionLoaded != null" label-cols="3" label-size="sm" label-align="right" label="Umswap Name:" description="Choose a suitable name to describe this NFT collection subset. > 0 and <= 48 regular alphanumeric characters and some symbols" class="mx-0 my-1 p-0">
+                    <b-form-input type="text" size="sm" v-model.trim="newUmswap.name" debounce="600" class="w-25"></b-form-input>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label="" description="Note that duplicate (collection, tokenIds) sets will be rejected" class="mx-0 my-1 p-0">
+                    <b-button size="sm" @click="createNewUmswap" :disabled="!collectionLoaded || newUmswap.name == null || newUmswap.name.length == 0" variant="warning">Create New Pool</b-button>
                   </b-form-group>
                 </b-card-text>
               </b-card>
@@ -396,7 +403,7 @@
               <b-col class="m-0 p-0">
                 <!-- TOKENS BY GROUPS -->
                 <!-- {{ getPoolTokens(selectedCollection, selectedPool) }} -->
-                <div v-if="collectionLoaded != null || collectionLoadedForNewUmswap != null" v-for="(set, setIndex) in getPoolTokens(selectedCollection, selectedPool)" :key="setIndex">
+                <div v-if="collectionLoaded != null" v-for="(set, setIndex) in getPoolTokens(selectedCollection, selectedPool)" :key="setIndex">
                   <b-card class="mx-0 my-1" body-class="m-1 p-0">
                     <template #header>
                       <h6 class="mb-0">{{ set.description }}</h6>
@@ -726,15 +733,19 @@
             }
             return null;
           },
+          // 3 modes - Collection, Pool, NewPool
           collectionLoaded() {
-            return !this.newPool && this.selectedCollection && this.collection && this.collection.address && this.collection.address == this.selectedCollection && this.collection.timestamp || null;
-          },
-          collectionLoadedForNewUmswap() {
-            return this.newPool && this.newUmswap.collectionAddress != null && this.newUmswap.collectionAddress.length > 0&& this.collection && this.collection.address && this.collection.address == this.newUmswap.collectionAddress && this.collection.timestamp || null;
+            let checkAddress;
+            if (this.newPool) {
+              checkAddress = this.newUmswap.collectionAddress && ethers.utils.getAddress(this.newUmswap.collectionAddress) || null;
+            } else {
+              checkAddress = this.selectedCollection && ethers.utils.getAddress(this.selectedCollection) || null;
+            }
+            return checkAddress && this.collection && this.collection.address == checkAddress && this.collection.timestamp || null;
           },
           tokenAttributes() {
             const collator = { };
-            if (this.collectionLoaded || this.collectionLoadedForNewUmswap) {
+            if (this.collectionLoaded) {
               for (const [tokenId, token] of Object.entries(this.collection.tokens)) {
                 for (let attribute of token.attributes) {
                     const key = attribute.key;
@@ -1093,8 +1104,18 @@
               Vue.set(this.selectedTokenIds, token.tokenId, true);
             }
           },
-          selectAllPages() {
-
+          newUmswapCollectionAddressChanged(item) {
+            console.log("newUmswapCollectionAddressChanged: " + JSON.stringify(item));
+            (async() => {
+              const db0 = new Dexie(this.db.name);
+              db0.version(this.db.version).stores(this.db.schemaDefinition);
+              const records = await db0.collection.where("address").equals(ethers.utils.getAddress(this.newUmswap.collectionAddress) || '').toArray();
+              if (records.length == 1) {
+                console.log("newUmswapCollectionAddressChanged: " + JSON.stringify(records[0], null, 2));
+                this.collection = records[0];
+              }
+              db0.close();
+            })();
           },
           ensOrAddress(address, length = 24) {
             if (this.collection && this.collection.ensMap) {
