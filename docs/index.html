@@ -138,7 +138,7 @@
             </div>
 
             <b-alert size="sm" dismissible variant="warning" show class="m-0 mt-1">
-              Sep 29 2022 - v0.9.0 contract has been deployed. Fix for bulk data retrieval indexing. Added token balance to the bulk data retrieval
+              Sep 29 2022 - v0.9.0 contract deployed
             </b-alert>
 
             <!-- TABLE OF COLLECTIONS -->
@@ -521,17 +521,17 @@
             },
             'validTokenIdsNotInPoolOrOwned': {
               currentPage: 1,
-              pageSize: 10,
+              pageSize: 25,
               sortOption: 'idasc',
             },
             'invalidTokenIdsOwned': {
               currentPage: 1,
-              pageSize: 10,
+              pageSize: 25,
               sortOption: 'idasc',
             },
             'invalidTokenIdsNotInPoolOrOwned': {
               currentPage: 1,
-              pageSize: 10,
+              pageSize: 25,
               sortOption: 'idasc',
             },
             'tokenIdsOwned': {
@@ -541,7 +541,7 @@
             },
             'tokenIdsNotOwned': {
               currentPage: 1,
-              pageSize: 10,
+              pageSize: 25,
               sortOption: 'idasc',
             },
           },
@@ -607,6 +607,7 @@
           ],
           pageSizes: [
             { value: 10, text: '10' },
+            { value: 25, text: '25' },
             { value: 50, text: '50' },
             { value: 100, text: '100' },
             { value: 500, text: '500' },
