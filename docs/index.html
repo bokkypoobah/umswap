@@ -231,71 +231,73 @@
 
               <!-- TABLE OF UMSWAPS -->
               <b-card-body class="m-0 mt-1 p-0">
-                <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='poolsRowSelected' :fields="poolsFields" :items="selectedPool != null ? [getSelectedPoolRecord] : pagedFilteredPools" head-variant="light" class="m-0">
-                  <template #head(address)="data">
-                    <span v-b-popover.hover="'ERC-20 Umswap pool contract address'">{{ data.label }}</span>
-                  </template>
-                  <template #head(symbol)="data">
-                    <span v-b-popover.hover="'ERC-20 Umswap pool symbol'">{{ data.label }}</span>
-                  </template>
-                  <template #head(name)="data">
-                    <span v-b-popover.hover="'ERC-20 Umswap pool name'">{{ data.label }}</span>
-                  </template>
-                  <template #head(validTokenIds)="data">
-                    <span v-b-popover.hover="'ERC-721 token ids accepted by this Umswap pool'">{{ data.label }}</span>
-                  </template>
-                  <template #head(swappedIn)="data">
-                    <span v-b-popover.hover="'Number of ERC-721 tokens swapped into this Umswap pool'">{{ data.label }}</span>
-                  </template>
-                  <template #head(swappedOut)="data">
-                    <span v-b-popover.hover="'Number of ERC-721 tokens swapped out of this Umswap pool'">{{ data.label }}</span>
-                  </template>
-                  <template #head(balance)="data">
-                    <span v-b-popover.hover="'My number of Umswap tokens'">{{ data.label }}</span>
-                  </template>
-                  <template #head(totalSupply)="data">
-                    <span v-b-popover.hover="'Total number of Umswap tokens = number of ERC-721 tokens currently in this pool'">{{ data.label }}</span>
-                  </template>
-                  <template #head(isApprovedForAll)="data">
-                    <span v-b-popover.hover="'Umswap contract has been approved by NFT contract to transfer in tokens'">{{ data.label }}</span>
-                  </template>
-                  <template #cell(address)="data">
-                    <b-link :href="'https://etherscan.io/token/' + data.item.address + '#balances'" v-b-popover.hover.bottom="'View Umswap pool contract in Etherscan.io'" target="_blank">
-                      {{ data.item.address }}
-                    </b-link>
-                  </template>
-                  <template #cell(symbol)="data">
-                    <b-link :href="'https://opensea.io/' + data.item.address" v-b-popover.hover.bottom="'View pool wallet in Opensea.io'" target="_blank">
-                      {{ data.item.symbol }}
-                    </b-link>
-                  </template>
-                  <template #cell(name)="data">
-                    {{ data.item.name }}
-                  </template>
-                  <template #cell(validTokenIds)="data">
-                    <div v-if="data.item.validTokenIds.length == 0">
-                      (All in collection)
-                    </div>
-                    <div v-else>
-                      {{ data.item.validTokenIds.length + 'x: [' + data.item.validTokenIds.join(",") + ']' }}
-                    </div>
-                  </template>
-                  <template #cell(swappedIn)="data">
-                    {{ data.item.swappedIn }}
-                  </template>
-                  <template #cell(swappedOut)="data">
-                    {{ data.item.swappedOut }}
-                  </template>
-                  <template #cell(balance)="data">
-                    {{ parseFloat(data.item.balance).toFixed(9) }}
-                  </template>
-                  <template #cell(totalSupply)="data">
-                    {{ formatETH(data.item.totalSupply) }}
-                  </template>
-                  <template #cell(isApprovedForAll)="data">
-                    {{ data.item.isApprovedForAll == 0 ? 'No' : 'Yes' }}
-                  </template>
-                </b-table>
+                <font size="-1">
+                  <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='poolsRowSelected' :fields="poolsFields" :items="selectedPool != null ? [getSelectedPoolRecord] : pagedFilteredPools" head-variant="light" class="m-0">
+                    <template #head(address)="data">
+                      <span v-b-popover.hover="'ERC-20 Umswap pool contract address'">{{ data.label }}</span>
+                    </template>
+                    <template #head(symbol)="data">
+                      <span v-b-popover.hover="'ERC-20 Umswap pool symbol'">{{ data.label }}</span>
+                    </template>
+                    <template #head(name)="data">
+                      <span v-b-popover.hover="'ERC-20 Umswap pool name'">{{ data.label }}</span>
+                    </template>
+                    <template #head(validTokenIds)="data">
+                      <span v-b-popover.hover="'ERC-721 token ids accepted by this Umswap pool'">{{ data.label }}</span>
+                    </template>
+                    <template #head(swappedIn)="data">
+                      <span v-b-popover.hover="'Number of ERC-721 tokens swapped into this Umswap pool'">{{ data.label }}</span>
+                    </template>
+                    <template #head(swappedOut)="data">
+                      <span v-b-popover.hover="'Number of ERC-721 tokens swapped out of this Umswap pool'">{{ data.label }}</span>
+                    </template>
+                    <template #head(balance)="data">
+                      <span v-b-popover.hover="'My number of Umswap tokens'">{{ data.label }}</span>
+                    </template>
+                    <template #head(totalSupply)="data">
+                      <span v-b-popover.hover="'Total number of Umswap tokens = number of ERC-721 tokens currently in this pool'">{{ data.label }}</span>
+                    </template>
+                    <template #head(isApprovedForAll)="data">
+                      <span v-b-popover.hover="'Umswap contract has been approved by NFT contract to transfer in tokens'">{{ data.label }}</span>
+                    </template>
+                    <template #cell(address)="data">
+                      <b-link :href="'https://etherscan.io/token/' + data.item.address + '#balances'" v-b-popover.hover.bottom="'View Umswap pool contract in Etherscan.io'" target="_blank">
+                        {{ data.item.address }}
+                      </b-link>
+                    </template>
+                    <template #cell(symbol)="data">
+                      <b-link :href="'https://opensea.io/' + data.item.address" v-b-popover.hover.bottom="'View pool wallet in Opensea.io'" target="_blank">
+                        {{ data.item.symbol }}
+                      </b-link>
+                    </template>
+                    <template #cell(name)="data">
+                      {{ data.item.name }}
+                    </template>
+                    <template #cell(validTokenIds)="data">
+                      <div v-if="data.item.validTokenIds.length == 0">
+                        (All in collection)
+                      </div>
+                      <div v-else>
+                        {{ data.item.validTokenIds.length + 'x: [' + data.item.validTokenIds.join(",") + ']' }}
+                      </div>
+                    </template>
+                    <template #cell(swappedIn)="data">
+                      {{ data.item.swappedIn }}
+                    </template>
+                    <template #cell(swappedOut)="data">
+                      {{ data.item.swappedOut }}
+                    </template>
+                    <template #cell(balance)="data">
+                      {{ parseFloat(data.item.balance).toFixed(9) }}
+                    </template>
+                    <template #cell(totalSupply)="data">
+                      {{ formatETH(data.item.totalSupply) }}
+                    </template>
+                    <template #cell(isApprovedForAll)="data">
+                      {{ data.item.isApprovedForAll == 0 ? 'No' : 'Yes' }}
+                    </template>
+                  </b-table>
+                </font>
               </b-card-body>
             </b-card>
 
@@ -626,13 +628,13 @@
           poolsFields: [
             { key: 'address', label: 'Pool', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
             { key: 'symbol', label: 'Symbol', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            { key: 'name', label: 'Name', thStyle: 'width: 20%;', tdClass: 'text-truncate' },
-            { key: 'validTokenIds', label: 'Valid Token Ids', thStyle: 'width: 20%;', tdClass: 'text-truncate' },
+            { key: 'name', label: 'Name', thStyle: 'width: 30%;', tdClass: 'text-truncate' },
+            { key: 'validTokenIds', label: 'Valid Token Ids', thStyle: 'width: 15%;', tdClass: 'text-truncate' },
             { key: 'swappedIn', label: '# In', thStyle: 'width: 5%;', thClass: 'text-right', tdClass: 'text-right' },
             { key: 'swappedOut', label: '# Out', thStyle: 'width: 5%;', thClass: 'text-right', tdClass: 'text-right' },
             { key: 'balance', label: 'Balance', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
             { key: 'totalSupply', label: 'Total Supply', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
-            { key: 'isApprovedForAll', label: 'Approved', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
+            { key: 'isApprovedForAll', label: 'Apprv', thStyle: 'width: 5%;', thClass: 'text-right', tdClass: 'text-right' },
           ],
           tokenAttributesFields: [
             { key: 'select', label: '', thStyle: 'width: 10%;' },
