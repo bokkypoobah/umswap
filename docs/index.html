@@ -300,81 +300,74 @@
               </b-card-body>
             </b-card>
 
-            <div v-if="selectedCollection != null && selectedPool != null && !newPool">
-
-              <b-card-group deck class="m-0 p-0">
-              <!-- <b-row class="m-0 p-0"> -->
-                <!-- <b-col class="m-0 p-0 pr-1 border-0"> -->
-                  <b-card class="mx-0 mt-1 mr-1" body-class="m-1 p-0">
-                    <template #header>
-                      <h6 class="mb-0">Swap</h6>
-                    </template>
-                    <b-card-text>
-                      <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Into Pool:" class="mx-0 my-1 p-0">
-                        <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapIn.join(',')" rows="1" max-rows="5" class="w-100"></b-form-textarea>
-                      </b-form-group>
-                      <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Out Of Pool:" class="mx-0 my-1 p-0">
-                        <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapOut.join(',')" rows="1" max-rows="5" class="w-100"></b-form-textarea>
-                      </b-form-group>
-                      <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Change:" class="mx-0 my-1 p-0">
-                        <b-form-input type="text" size="sm" readonly v-model.trim="umswapChange" class="w-50"></b-form-input>
-                      </b-form-group>
-                      <b-form-group label-cols="3" label-size="sm" label-align="right" label="My Umswap Balance:" class="mx-0 my-1 p-0">
-                        <b-form-input type="text" size="sm" readonly v-model.trim="umswapBalance" class="w-50"></b-form-input>
-                      </b-form-group>
-                      <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Approved:" class="mx-0 my-1 p-0">
-                        <b-input-group class="m-0 w-50">
-                          <b-form-input type="text" size="sm" readonly :value="umswapApproved ? 'Yes' : 'No'"></b-form-input>
-                          <b-input-group-append>
-                            <b-button v-if="!umswapApproved" size="sm" @click="approveTransfer(true)" variant="warning">Approve</b-button>
-                            <b-button v-if="umswapApproved" size="sm" @click="approveTransfer(false)" variant="warning">Revoke Approval</b-button>
-                          </b-input-group-append>
-                        </b-input-group>
-                      </b-form-group>
-                      <b-form-group label-cols="3" label-size="sm" label="" class="mx-0 my-1 p-0">
-                        <b-button size="sm" @click="swapIt" :disabled="!umswapApproved || (parseFloat(convertETH(umswapBalance)) + parseFloat(umswapChange) < 0) || (tokenIdsToSwapIn.length == 0 && tokenIdsToSwapOut.length == 0)" variant="warning">Swap</b-button>
-                      </b-form-group>
-                    </b-card-text>
-                  </b-card>
-                </b-col>
-                <b-col class="m-0 p-0 border-0">
-                  <b-card v-if="false" class="mx-0 mt-1" body-class="m-1 p-0">
-                    <template #header>
-                      <h6 class="mb-0">Info</h6>
-                    </template>
-                    <!--
-                    <b-card-text>
-                      <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Into Pool:" class="mx-0 my-1 p-0">
-                        <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapIn.join(',')" rows="1" max-rows="5" class="w-50"></b-form-textarea>
-                      </b-form-group>
-                      <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Out Of Pool:" class="mx-0 my-1 p-0">
-                        <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapOut.join(',')" rows="1" max-rows="5" class="w-50"></b-form-textarea>
-                      </b-form-group>
-                      <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Change:" class="mx-0 my-1 p-0">
-                        <b-form-input type="text" size="sm" readonly v-model.trim="umswapChange" class="w-25"></b-form-input>
-                      </b-form-group>
-                      <b-form-group label-cols="3" label-size="sm" label-align="right" label="My Umswap Balance:" class="mx-0 my-1 p-0">
-                        <b-form-input type="text" size="sm" readonly v-model.trim="umswapBalance" class="w-25"></b-form-input>
-                      </b-form-group>
-                      <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Approved:" class="mx-0 my-1 p-0">
-                        <b-input-group class="m-0 w-25">
-                          <b-form-input type="text" size="sm" readonly :value="umswapApproved ? 'Yes' : 'No'"></b-form-input>
-                          <b-input-group-append>
-                            <b-button v-if="!umswapApproved" size="sm" @click="approveTransfer(true)" variant="warning">Approve</b-button>
-                            <b-button v-if="umswapApproved" size="sm" @click="approveTransfer(false)" variant="warning">Revoke Approval</b-button>
-                          </b-input-group-append>
-                        </b-input-group>
-                      </b-form-group>
-                      <b-form-group label-cols="3" label-size="sm" label="" class="mx-0 my-1 p-0">
-                        <b-button size="sm" @click="swapIt" :disabled="!umswapApproved || (parseFloat(convertETH(umswapBalance)) + parseFloat(umswapChange) < 0) || (tokenIdsToSwapIn.length == 0 && tokenIdsToSwapOut.length == 0)" variant="warning">Swap</b-button>
-                      </b-form-group>
-                    </b-card-text>
-                    -->
-                  </b-card>
-                <!-- </b-col> -->
-              <!-- </b-row> -->
-              </b-card-group>
-            </div>
+            <b-card-group deck v-if="selectedCollection != null && selectedPool != null && !newPool" class="m-0 p-0">
+              <b-card class="mx-0 mt-1 mr-1" body-class="m-1 p-0">
+                <template #header>
+                  <h6 class="mb-0">Swap</h6>
+                </template>
+                <b-card-text>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Into Pool:" class="mx-0 my-1 p-0">
+                    <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapIn.join(',')" rows="1" max-rows="5" class="w-100"></b-form-textarea>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Out Of Pool:" class="mx-0 my-1 p-0">
+                    <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapOut.join(',')" rows="1" max-rows="5" class="w-100"></b-form-textarea>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Change:" class="mx-0 my-1 p-0">
+                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapChange" class="w-50"></b-form-input>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="My Umswap Balance:" class="mx-0 my-1 p-0">
+                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapBalance" class="w-50"></b-form-input>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Approved:" class="mx-0 my-1 p-0">
+                    <b-input-group class="m-0 w-50">
+                      <b-form-input type="text" size="sm" readonly :value="umswapApproved ? 'Yes' : 'No'"></b-form-input>
+                      <b-input-group-append>
+                        <b-button v-if="!umswapApproved" size="sm" @click="approveTransfer(true)" variant="warning">Approve</b-button>
+                        <b-button v-if="umswapApproved" size="sm" @click="approveTransfer(false)" variant="warning">Revoke Approval</b-button>
+                      </b-input-group-append>
+                    </b-input-group>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label="" class="mx-0 my-1 p-0">
+                    <b-button size="sm" @click="swapIt" :disabled="!umswapApproved || (parseFloat(convertETH(umswapBalance)) + parseFloat(umswapChange) < 0) || (tokenIdsToSwapIn.length == 0 && tokenIdsToSwapOut.length == 0)" variant="warning">Swap</b-button>
+                  </b-form-group>
+                </b-card-text>
+              </b-card>
+            </b-col>
+            <b-col class="m-0 p-0 border-0">
+              <b-card v-if="false" class="mx-0 mt-1" body-class="m-1 p-0">
+                <template #header>
+                  <h6 class="mb-0">Info</h6>
+                </template>
+                <!--
+                <b-card-text>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Into Pool:" class="mx-0 my-1 p-0">
+                    <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapIn.join(',')" rows="1" max-rows="5" class="w-50"></b-form-textarea>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Out Of Pool:" class="mx-0 my-1 p-0">
+                    <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapOut.join(',')" rows="1" max-rows="5" class="w-50"></b-form-textarea>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Change:" class="mx-0 my-1 p-0">
+                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapChange" class="w-25"></b-form-input>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="My Umswap Balance:" class="mx-0 my-1 p-0">
+                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapBalance" class="w-25"></b-form-input>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Approved:" class="mx-0 my-1 p-0">
+                    <b-input-group class="m-0 w-25">
+                      <b-form-input type="text" size="sm" readonly :value="umswapApproved ? 'Yes' : 'No'"></b-form-input>
+                      <b-input-group-append>
+                        <b-button v-if="!umswapApproved" size="sm" @click="approveTransfer(true)" variant="warning">Approve</b-button>
+                        <b-button v-if="umswapApproved" size="sm" @click="approveTransfer(false)" variant="warning">Revoke Approval</b-button>
+                      </b-input-group-append>
+                    </b-input-group>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label="" class="mx-0 my-1 p-0">
+                    <b-button size="sm" @click="swapIt" :disabled="!umswapApproved || (parseFloat(convertETH(umswapBalance)) + parseFloat(umswapChange) < 0) || (tokenIdsToSwapIn.length == 0 && tokenIdsToSwapOut.length == 0)" variant="warning">Swap</b-button>
+                  </b-form-group>
+                </b-card-text>
+                -->
+              </b-card>
+            </b-card-group>
 
             <!-- NEW POOL -->
             <div v-if="newPool">
