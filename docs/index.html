@@ -138,7 +138,7 @@
             </div>
 
             <b-alert size="sm" dismissible variant="warning" show class="m-0 mt-1">
-              The current contract is deprecated and a new version will be deployed shortly
+              Sep 29 2022 - v0.9.0 contract has been deployed. Fix for bulk data retrieval indexing. Added token balance to the bulk data retrieval
             </b-alert>
 
             <!-- TABLE OF COLLECTIONS -->
@@ -1180,7 +1180,7 @@
                   const swappedIn = stats[0].toString();
                   const swappedOut = stats[1].toString();
                   const totalScores = stats[2].toString();
-                  const balance = stats[3].toString();
+                  const balance = ethers.utils.formatEther(stats[3]).toString();
                   const totalSupply = stats[4].toString();
                   const raters = stats[5].toString();
                   const isApprovedForAll = stats[6].toString();
