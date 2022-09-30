@@ -300,92 +300,104 @@
               </b-card-body>
             </b-card>
 
-            <b-card-group deck v-if="selectedCollection != null && !newPool" class="m-0 p-0">
-              <b-card class="mx-0 mt-1 mr-1" body-class="m-1 p-0">
-                <template #header>
-                  <h6 class="mb-0">Info And Messages</h6>
-                </template>
-                <b-card-text>
-                  <b-form-group v-if="getSelectedCollection" label-cols="3" label-size="sm" label-align="right" label="Collection Address:" class="mx-0 my-1 p-0">
-                    <b-link :href="'https://etherscan.io/token/' + getSelectedCollection.address + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedCollection.address }}</b-link>
-                  </b-form-group>
-                  <b-form-group v-if="getSelectedCollection && getSelectedCollection.reservoirInfo" label-cols="3" label-size="sm" label-align="right" label="Collection Name:" class="mx-0 my-1 p-0">
-                    <b-link :href="'https://opensea.io/collection/' + getSelectedCollection.reservoirInfo.slug" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedCollection.name }}</b-link>
-                  </b-form-group>
-                  <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Pool Balances:" class="mx-0 my-1 p-0">
-                    <b-link :href="'https://etherscan.io/token/' + getSelectedPoolRecord.address + '#balances'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
-                  </b-form-group>
-                  <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Pool NFTs:" class="mx-0 my-1 p-0">
-                    <b-link :href="'https://opensea.io/' + getSelectedPoolRecord.address" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
-                  </b-form-group>
+            <b-card v-if="!newPool" class="mx-0 mt-1 mr-1" body-class="m-1 p-0">
+              <template #header>
+                <h6 class="mb-0">Info And History</h6>
+              </template>
+              <b-card-text>
+                <b-form-group v-if="getSelectedCollection" label-cols="3" label-size="sm" label-align="right" label="Collection Address:" class="mx-0 my-1 p-0">
+                  <b-link :href="'https://etherscan.io/token/' + getSelectedCollection.address + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedCollection.address }}</b-link>
+                </b-form-group>
+                <b-form-group v-if="getSelectedCollection && getSelectedCollection.reservoirInfo" label-cols="3" label-size="sm" label-align="right" label="Collection Name:" class="mx-0 my-1 p-0">
+                  <b-link :href="'https://opensea.io/collection/' + getSelectedCollection.reservoirInfo.slug" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedCollection.name }}</b-link>
+                </b-form-group>
+                <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Pool Balances:" class="mx-0 my-1 p-0">
+                  <b-link :href="'https://etherscan.io/token/' + getSelectedPoolRecord.address + '#balances'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
+                </b-form-group>
+                <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Pool NFTs:" class="mx-0 my-1 p-0">
+                  <b-link :href="'https://opensea.io/' + getSelectedPoolRecord.address" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
+                </b-form-group>
 
-                  <font size="-1">
-                    <b-table small fixed striped responsive hover :fields="messagesFields" :items="pagedFilteredSortedMessages" head-variant="light" class="m-0">
-                    </b-table>
-                  </font>
-                  <!--
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Purchase Pool Tokens:" :description="'Manually paste in the Umswap address ' + getSelectedPoolRecord.address" class="mx-0 my-1 p-0">
-                    <b-link :href="'https://app.uniswap.org/#/swap?exactField=output&exactAmount=1&inputCurrency=ETH&outputCurrency=' + getSelectedPoolRecord.address + '?use=v1'" v-b-popover.hover.bottom="'Purchase in Uniswap.org'" target="_blank">{{ getSelectedPoolRecord.symbol }}</b-link>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Sell Pool Tokens:" :description="'Manually paste in the Umswap address ' + getSelectedPoolRecord.address" class="mx-0 my-1 p-0">
-                    <b-link :href="'https://app.uniswap.org/#/swap?exactField=input&exactAmount=1&outputCurrency=ETH&inputCurrency=' + getSelectedPoolRecord.address + '&use=v1'" v-b-popover.hover.bottom="'Sell in Uniswap.org'" target="_blank">{{ getSelectedPoolRecord.symbol }}</b-link>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Create Pool Exchange:" :description="'Manually paste in the Umswap address ' + getSelectedPoolRecord.address" class="mx-0 my-1 p-0">
-                    <b-link :href="'https://app.uniswap.org/#/swap?use=v1&create-exchange?tokenAddress=' + getSelectedPoolRecord.address + '&use=v1'" v-b-popover.hover.bottom="'Create Pool Exchange in Uniswap.org'" target="_blank">{{ getSelectedPoolRecord.symbol }}</b-link>
-                  </b-form-group>
-                  -->
-
-                  <!--
-
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Add Liquidity To Pool:" :description="'Manually paste in the Umswap address ' + getSelectedPoolRecord.address" class="mx-0 my-1 p-0">
-                    <b-link :href="'https://app.uniswap.org/#/add-liquidity?ethAmount=1.23&token=' + getSelectedPoolRecord.address + '&tokenAmount=300' + '&use=v1'" v-b-popover.hover.bottom="'Purchase in Uniswap.org'" target="_blank">{{ getSelectedPoolRecord.symbol }}</b-link>
-                  </b-form-group>
-
-                  getSelectedPoolRecord: {{ JSON.stringify(getSelectedPoolRecord) }}
-                  getSelectedCollection: {{ JSON.stringify(getSelectedCollection) }}
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="ERC-721 NFT Collection:" class="mx-0 my-1 p-0">
-                    <b-link :href="'https://etherscan.io/token/' + getSelectedCollection.address + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedCollection.address }}</b-link>
-                  </b-form-group>
-
-                  <b-form-group label-cols="2" label-size="sm" label-align="right" label="UmswapFactory:" class="mx-0 my-1 p-0">
-                    <b-link :href="'https://etherscan.io/address/' + umswapFactoryAddress + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ umswapFactoryAddress }}</b-link>
-                  </b-form-group>
-                  <b-form-group label-cols="2" label-size="sm" label-align="right" label="UmswapFactory:" class="mx-0 my-1 p-0">
-                    <b-link :href="'https://etherscan.io/address/' + umswapFactoryAddress + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ umswapFactoryAddress }}</b-link>
-                  </b-form-group>
-                  <b-form-group label-cols="2" label-size="sm" label-align="right" label="UmswapFactory:" class="mx-0 my-1 p-0">
-                    <b-link :href="'https://etherscan.io/address/' + umswapFactoryAddress + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ umswapFactoryAddress }}</b-link>
-                  </b-form-group>
-
-
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Into Pool:" class="mx-0 my-1 p-0">
-                    <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapIn.join(',')" rows="1" max-rows="5" class="w-50"></b-form-textarea>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Out Of Pool:" class="mx-0 my-1 p-0">
-                    <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapOut.join(',')" rows="1" max-rows="5" class="w-50"></b-form-textarea>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Change:" class="mx-0 my-1 p-0">
-                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapChange" class="w-25"></b-form-input>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="My Umswap Balance:" class="mx-0 my-1 p-0">
-                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapBalance" class="w-25"></b-form-input>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Approved:" class="mx-0 my-1 p-0">
-                    <b-input-group class="m-0 w-25">
-                      <b-form-input type="text" size="sm" readonly :value="umswapApproved ? 'Yes' : 'No'"></b-form-input>
-                      <b-input-group-append>
-                        <b-button v-if="!umswapApproved" size="sm" @click="approveTransfer(true)" variant="warning">Approve</b-button>
-                        <b-button v-if="umswapApproved" size="sm" @click="approveTransfer(false)" variant="warning">Revoke Approval</b-button>
-                      </b-input-group-append>
-                    </b-input-group>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label="" class="mx-0 my-1 p-0">
-                    <b-button size="sm" @click="swapIt" :disabled="!umswapApproved || (parseFloat(convertETH(umswapBalance)) + parseFloat(umswapChange) < 0) || (tokenIdsToSwapIn.length == 0 && tokenIdsToSwapOut.length == 0)" variant="warning">Swap</b-button>
-                  </b-form-group>
+                <font size="-1">
+                  <b-table small fixed striped responsive hover :fields="messagesFields" :items="pagedFilteredSortedMessages" head-variant="light" class="m-0">
+                    <template #cell(timestamp)="data">
+                      <b-link :href="'https://etherscan.io/tx/' + data.item.txHash" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ formatTimestamp(data.item.timestamp) }}</b-link>
+                    </template>
+                    <template #cell(account)="data">
+                      <b-link :href="'https://opensea.io/' + data.item.account" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ ensOrAddress(data.item.account) }}</b-link>
+                    </template>
+                    <template #cell(collection)="data">
+                      <b-link :href="'https://opensea.io/collection/' + (collections[data.item.collection] && collections[data.item.collection].reservoirInfo.slug || '')" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ collections[data.item.collection] && collections[data.item.collection].name || '' }}</b-link>
+                    </template>
+                    <template #cell(umswap)="data">
+                      <b-link :href="'https://opensea.io/' + (getUmswap(data.item.umswap) && getUmswap(data.item.umswap).address || '')" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getUmswap(data.item.umswap) && getUmswap(data.item.umswap).name || '' }}</b-link>
+                    </template>
+                  </b-table>
+                </font>
+                <!--
+                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Purchase Pool Tokens:" :description="'Manually paste in the Umswap address ' + getSelectedPoolRecord.address" class="mx-0 my-1 p-0">
+                  <b-link :href="'https://app.uniswap.org/#/swap?exactField=output&exactAmount=1&inputCurrency=ETH&outputCurrency=' + getSelectedPoolRecord.address + '?use=v1'" v-b-popover.hover.bottom="'Purchase in Uniswap.org'" target="_blank">{{ getSelectedPoolRecord.symbol }}</b-link>
+                </b-form-group>
+                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Sell Pool Tokens:" :description="'Manually paste in the Umswap address ' + getSelectedPoolRecord.address" class="mx-0 my-1 p-0">
+                  <b-link :href="'https://app.uniswap.org/#/swap?exactField=input&exactAmount=1&outputCurrency=ETH&inputCurrency=' + getSelectedPoolRecord.address + '&use=v1'" v-b-popover.hover.bottom="'Sell in Uniswap.org'" target="_blank">{{ getSelectedPoolRecord.symbol }}</b-link>
+                </b-form-group>
+                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Create Pool Exchange:" :description="'Manually paste in the Umswap address ' + getSelectedPoolRecord.address" class="mx-0 my-1 p-0">
+                  <b-link :href="'https://app.uniswap.org/#/swap?use=v1&create-exchange?tokenAddress=' + getSelectedPoolRecord.address + '&use=v1'" v-b-popover.hover.bottom="'Create Pool Exchange in Uniswap.org'" target="_blank">{{ getSelectedPoolRecord.symbol }}</b-link>
+                </b-form-group>
                 -->
-                </b-card-text>
-              </b-card>
 
+                <!--
+
+                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Add Liquidity To Pool:" :description="'Manually paste in the Umswap address ' + getSelectedPoolRecord.address" class="mx-0 my-1 p-0">
+                  <b-link :href="'https://app.uniswap.org/#/add-liquidity?ethAmount=1.23&token=' + getSelectedPoolRecord.address + '&tokenAmount=300' + '&use=v1'" v-b-popover.hover.bottom="'Purchase in Uniswap.org'" target="_blank">{{ getSelectedPoolRecord.symbol }}</b-link>
+                </b-form-group>
+
+                getSelectedPoolRecord: {{ JSON.stringify(getSelectedPoolRecord) }}
+                getSelectedCollection: {{ JSON.stringify(getSelectedCollection) }}
+                <b-form-group label-cols="3" label-size="sm" label-align="right" label="ERC-721 NFT Collection:" class="mx-0 my-1 p-0">
+                  <b-link :href="'https://etherscan.io/token/' + getSelectedCollection.address + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedCollection.address }}</b-link>
+                </b-form-group>
+
+                <b-form-group label-cols="2" label-size="sm" label-align="right" label="UmswapFactory:" class="mx-0 my-1 p-0">
+                  <b-link :href="'https://etherscan.io/address/' + umswapFactoryAddress + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ umswapFactoryAddress }}</b-link>
+                </b-form-group>
+                <b-form-group label-cols="2" label-size="sm" label-align="right" label="UmswapFactory:" class="mx-0 my-1 p-0">
+                  <b-link :href="'https://etherscan.io/address/' + umswapFactoryAddress + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ umswapFactoryAddress }}</b-link>
+                </b-form-group>
+                <b-form-group label-cols="2" label-size="sm" label-align="right" label="UmswapFactory:" class="mx-0 my-1 p-0">
+                  <b-link :href="'https://etherscan.io/address/' + umswapFactoryAddress + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ umswapFactoryAddress }}</b-link>
+                </b-form-group>
+
+
+                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Into Pool:" class="mx-0 my-1 p-0">
+                  <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapIn.join(',')" rows="1" max-rows="5" class="w-50"></b-form-textarea>
+                </b-form-group>
+                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Out Of Pool:" class="mx-0 my-1 p-0">
+                  <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapOut.join(',')" rows="1" max-rows="5" class="w-50"></b-form-textarea>
+                </b-form-group>
+                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Change:" class="mx-0 my-1 p-0">
+                  <b-form-input type="text" size="sm" readonly v-model.trim="umswapChange" class="w-25"></b-form-input>
+                </b-form-group>
+                <b-form-group label-cols="3" label-size="sm" label-align="right" label="My Umswap Balance:" class="mx-0 my-1 p-0">
+                  <b-form-input type="text" size="sm" readonly v-model.trim="umswapBalance" class="w-25"></b-form-input>
+                </b-form-group>
+                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Approved:" class="mx-0 my-1 p-0">
+                  <b-input-group class="m-0 w-25">
+                    <b-form-input type="text" size="sm" readonly :value="umswapApproved ? 'Yes' : 'No'"></b-form-input>
+                    <b-input-group-append>
+                      <b-button v-if="!umswapApproved" size="sm" @click="approveTransfer(true)" variant="warning">Approve</b-button>
+                      <b-button v-if="umswapApproved" size="sm" @click="approveTransfer(false)" variant="warning">Revoke Approval</b-button>
+                    </b-input-group-append>
+                  </b-input-group>
+                </b-form-group>
+                <b-form-group label-cols="3" label-size="sm" label="" class="mx-0 my-1 p-0">
+                  <b-button size="sm" @click="swapIt" :disabled="!umswapApproved || (parseFloat(convertETH(umswapBalance)) + parseFloat(umswapChange) < 0) || (tokenIdsToSwapIn.length == 0 && tokenIdsToSwapOut.length == 0)" variant="warning">Swap</b-button>
+                </b-form-group>
+              -->
+              </b-card-text>
+            </b-card>
+
+            <b-card-group deck v-if="selectedCollection != null && !newPool" class="m-0 p-0">
               <b-card v-if="selectedPool != null" class="mx-0 mt-1" body-class="m-1 p-0">
                 <template #header>
                   <h6 class="mb-0">Swap</h6>
@@ -733,8 +745,8 @@
             { key: 'attributeTotal', label: 'Count', /*sortable: true,*/ thStyle: 'width: 30%;', thClass: 'text-right', tdClass: 'text-right' },
           ],
           messagesFields: [
-            { key: 'type', label: 'Type', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            { key: 'timestamp', label: 'Timestamp', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
+            { key: 'type', label: 'Type', thStyle: 'width: 5%;', tdClass: 'text-truncate' },
+            { key: 'timestamp', label: 'Time', thStyle: 'width: 15%;', tdClass: 'text-truncate' },
             { key: 'account', label: 'Account', thStyle: 'width: 15%;', tdClass: 'text-truncate' },
             { key: 'collection', label: 'Collection', thStyle: 'width: 15%;', tdClass: 'text-truncate' },
             { key: 'umswap', label: 'Umswap Pool', thStyle: 'width: 15%;', tdClass: 'text-truncate' },
@@ -904,26 +916,31 @@
               let collection;
               let account;
               let message;
-              if (e.type == "NewUmswap") {
+              if (e.type == "New") {
                 account = e.creator;
                 collection = e.collection;
                 if (e.tokenIds.length == 0) {
                   message = "Created " + e.name + " valid for all tokens in the collection";
                 } else {
-                  message = "Created " + e.name + " valid only for tokenIds [" + e.tokenIds.join(",");
+                  let tokenIdsString = e.tokenIds.length > 10 ? e.tokenIds.slice(0, 10).join(",") + " + " + (e.tokenIds.length - 10) + " more": e.tokenIds.join(",");
+                  message = "Created " + e.name + " for [" + tokenIdsString + "]";
                 }
-              } else if (e.type == "Swapped") {
+              } else if (e.type == "Swap") {
                 account = e.account;
                 collection = umswapToCollection[e.umswap] || null;
-                message = "Swapped in [" + e.inTokenIds.join(",") + "] and out [" + e.outTokenIds.join(",") + "]";
+                let inTokenIdsString = e.inTokenIds.length > 10 ? e.inTokenIds.slice(0, 10).join(",") + " + " + (e.inTokenIds.length - 10) + " more": e.inTokenIds.join(",");
+                let outTokenIdsString = e.outTokenIds.length > 10 ? e.outTokenIds.slice(0, 10).join(",") + " + " + (e.outTokenIds.length - 10) + " more": e.outTokenIds.join(",");
+                message = "Swapped in [" + inTokenIdsString + "] and out [" + outTokenIdsString + "]";
               }
-              results.push({ txHash: e.txHash, type: e.type, timestamp: e.timestamp, account, collection, umswap: e.umswap, message });
+              if ((this.selectedCollection == null || this.selectedCollection == collection) && (this.selectedPool == null || this.selectedPool == e.umswap)) {
+                results.push({ txHash: e.txHash, type: e.type, timestamp: e.timestamp, account, collection, umswap: e.umswap, message });
+              }
             }
             return results;
           },
           filteredSortedMessages() {
-            // TODO:
             let results = this.filteredMessages;
+            results.sort((a, b) => b.timestamp - a.timestamp);
             return results;
           },
           pagedFilteredSortedMessages() {
@@ -1235,7 +1252,6 @@
             }
           },
           newUmswapCollectionAddressChanged(item) {
-            // console.log("newUmswapCollectionAddressChanged: " + JSON.stringify(item));
             this.selectedTokenIds = {};
             (async() => {
               const db0 = new Dexie(this.db.name);
@@ -1248,7 +1264,6 @@
               }
               const records = await db0.collection.where("address").equals(collectionAddress).toArray();
               if (records.length == 1) {
-                // console.log("newUmswapCollectionAddressChanged: " + JSON.stringify(records[0], null, 2));
                 this.collection = records[0];
               }
               db0.close();
@@ -1261,6 +1276,16 @@
               }
             }
             return address == null ? null : address.substring(0, length);
+          },
+          getUmswap(address) {
+            for (const c of Object.values(this.collections)) {
+              for (const u of c.umswaps) {
+                if (u.address == address) {
+                  return u;
+                }
+              }
+            }
+            return null;
           },
           async doIt(action) {
             console.log("doIt: " + action);
@@ -1314,7 +1339,7 @@
               for (const event of umswapFactoryEventLogs) {
                 const logData = umswapFactory.interface.parseLog(event);
                 if (logData.eventFragment.name == "NewUmswap") {
-                  const txHash = event.hash;
+                  const txHash = event.transactionHash;
                   const creator = logData.args[0] || null;
                   const blockNumber = event.blockNumber;
                   const timestamp = logData.args[1].toNumber();
@@ -1322,7 +1347,7 @@
                   const collection = logData.args[3];
                   const name = logData.args[4];
                   const tokenIds = logData.args[5].map(i => i.toNumber());
-                  umswapEvents.push({ type: "NewUmswap", txHash, creator, blockNumber, timestamp, umswap, collection, name, tokenIds });
+                  umswapEvents.push({ type: "New", txHash, creator, blockNumber, timestamp, umswap, collection, name, tokenIds });
                 }
               }
 
@@ -1390,7 +1415,7 @@
               for (const event of umswapEventLogs) {
                 const logData = umswapInterface.parseLog(event);
                 if (logData.eventFragment.name == "Swapped") {
-                  const txHash = event.hash;
+                  const txHash = event.transactionHash;
                   const umswap = event.address;
                   const blockNumber = event.blockNumber;
                   const account = logData.args[0];
@@ -1399,7 +1424,7 @@
                   const outTokenIds = logData.args[3].map(t => t.toNumber());
                   const stats = logData.args[4].map(s => s.toNumber());
                   // console.log("umswap: " + umswap + ", account: " + account + ", blockNumber: " + blockNumber + ", timestamp: " + timestamp + ", inTokenIds: " + inTokenIds + ", outTokenIds: " + outTokenIds + ", stats: " + stats);
-                  umswapEvents.push({ type: "Swapped", txHash, umswap, blockNumber, account, timestamp, inTokenIds, outTokenIds, stats });
+                  umswapEvents.push({ type: "Swap", txHash, umswap, blockNumber, account, timestamp, inTokenIds, outTokenIds, stats });
                 }
               }
               this.umswapEvents = umswapEvents;
@@ -1532,6 +1557,14 @@
                 // Get specific collection owner reverse ENS names
                 this.sync.section = null;
                 const ensMap = {};
+                ensMap[this.coinbase] = this.coinbase;
+                for (const c of Object.values(collections)) {
+                  for (const u of c.umswaps) {
+                    if (!ensMap[u.creator]) {
+                      ensMap[u.creator] = u.creator;
+                    }
+                  }
+                }
                 for (const [tokenId, token] of Object.entries(tokens)) {
                   if (!ensMap[token.owner]) {
                     ensMap[token.owner] = token.owner;
@@ -1876,7 +1909,6 @@
         mounted() {
           if ('coinbase' in localStorage) {
             this.coinbase = localStorage.coinbase;
-            // console.log("Loaded coinbase: " + this.coinbase);
           }
           (async() => {
             const db0 = new Dexie(this.db.name);
