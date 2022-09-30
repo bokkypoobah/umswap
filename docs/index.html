@@ -920,10 +920,10 @@
                 account = e.creator;
                 collection = e.collection;
                 if (e.tokenIds.length == 0) {
-                  message = "Created " + e.name + " valid for all tokens in the collection";
+                  message = "Created \"" + e.name + "\" valid for all tokens in the collection";
                 } else {
                   let tokenIdsString = e.tokenIds.length > 10 ? e.tokenIds.slice(0, 10).join(",") + " + " + (e.tokenIds.length - 10) + " more": e.tokenIds.join(",");
-                  message = "Created " + e.name + " for [" + tokenIdsString + "]";
+                  message = "Created \"" + e.name + "\" for [" + tokenIdsString + "]";
                 }
               } else if (e.type == "Swap") {
                 account = e.account;
