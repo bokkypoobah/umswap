@@ -300,18 +300,18 @@
               </b-card-body>
             </b-card>
 
-            <b-card v-if="!newPool" class="mx-0 mt-1 mr-1" body-class="m-1 p-0">
+            <b-card v-if="!newPool" class="mx-0 mt-1 mr-1" body-class="m-1 p-0" header-class="m-0 p-2">
               <template #header>
                 <div v-if="selectedCollection != null">
                   <div v-if="selectedPool == null">
-                    <h6 class="mb-0">Collection: {{ ensOrAddress(selectedCollection) }}</h6>
+                    <h6 class="m-0 p-0">Collection: {{ ensOrAddress(selectedCollection) }}</h6>
                   </div>
                   <div v-else>
-                    <h6 class="mb-0">Pool: {{ ensOrAddress(selectedPool) }}, Collection: {{ ensOrAddress(selectedCollection) }}</h6>
+                    <h6 class="m-0 p-0">Pool: {{ ensOrAddress(selectedPool) }}, Collection: {{ ensOrAddress(selectedCollection) }}</h6>
                   </div>
                 </div>
                 <div v-else>
-                  <h6 class="mb-0">All Collections</h6>
+                  <h6 class="m-0 p-0">All Collections</h6>
                 </div>
               </template>
               <b-card-text>
@@ -359,7 +359,7 @@
             </b-card>
 
             <b-card-group deck v-if="selectedCollection != null && !newPool" class="m-0 p-0">
-              <b-card v-if="selectedPool != null" class="mx-0 mt-1" body-class="m-1 p-0">
+              <b-card v-if="selectedPool != null" class="mx-0 mt-1" body-class="m-1 p-0" header-class="m-0 p-2">
                 <template #header>
                   <h6 class="mb-0">Swap</h6>
                 </template>
@@ -394,7 +394,7 @@
 
             <!-- NEW POOL -->
             <div v-if="newPool">
-              <b-card class="mx-1 my-1" body-class="m-1 p-0">
+              <b-card class="mx-1 my-1" body-class="m-1 p-0" header-class="m-0 p-2">
                 <template #header>
                   <h6 class="mb-0">New Pool</h6>
                 </template>
@@ -463,9 +463,19 @@
                 <!-- TOKENS BY GROUPS -->
                 <!-- {{ getPoolTokens(selectedCollection, selectedPool) }} -->
                 <div v-if="collectionLoaded != null" v-for="(set, setIndex) in getPoolTokens(selectedCollection, selectedPool)" :key="setIndex">
-                  <b-card class="mx-0 my-1" body-class="m-1 p-0">
+                  <b-card class="mx-0 my-1" body-class="m-1 p-0" header-class="m-0 p-2">
                     <template #header>
-                      <h6 class="mb-0">{{ set.description }}</h6>
+                      <div v-if="selectedCollection != null">
+                        <div v-if="selectedPool == null">
+                          <h6 class="m-0 p-0">Collection: {{ ensOrAddress(selectedCollection) }} - {{ set.description }}</h6>
+                        </div>
+                        <div v-else>
+                          <h6 class="m-0 p-0">Pool: {{ ensOrAddress(selectedPool) }}, Collection: {{ ensOrAddress(selectedCollection) }} - {{ set.description }}</h6>
+                        </div>
+                      </div>
+                      <div v-else>
+                        <h6 class="m-0 p-0">All Collections</h6>
+                      </div>
                     </template>
                     <b-card-text v-if="set.tokens.length == 0">
                       Empty
@@ -1146,11 +1156,11 @@
                   }
                 }
                 return [
-                  { name: 'validTokenIdsInPool', description: 'Tokens In This Pool', tokens: tokens['validTokenIdsInPool'] },
-                  { name: 'validTokenIdsOwned', description: 'My Tokens Eligible For This Pool', tokens: tokens['validTokenIdsOwned'] },
-                  { name: 'validTokenIdsNotInPoolOrOwned', description: 'Other Tokens Eligible For This Pool', tokens: tokens['validTokenIdsNotInPoolOrOwned'] },
-                  { name: 'invalidTokenIdsOwned', description: 'My Tokens Not Eligible For This Pool', tokens: tokens['invalidTokenIdsOwned'] },
-                  { name: 'invalidTokenIdsNotInPoolOrOwned', description: 'Other Tokens Not Eligible For This Pool', tokens: tokens['invalidTokenIdsNotInPoolOrOwned'] },
+                  { name: 'validTokenIdsInPool', description: 'Tokens In Pool', tokens: tokens['validTokenIdsInPool'] },
+                  { name: 'validTokenIdsOwned', description: 'My Tokens - Eligible For This Pool', tokens: tokens['validTokenIdsOwned'] },
+                  { name: 'validTokenIdsNotInPoolOrOwned', description: 'Not My Tokens - Eligible For This Pool', tokens: tokens['validTokenIdsNotInPoolOrOwned'] },
+                  { name: 'invalidTokenIdsOwned', description: 'My Tokens - Not Eligible For This Pool', tokens: tokens['invalidTokenIdsOwned'] },
+                  { name: 'invalidTokenIdsNotInPoolOrOwned', description: 'Not My Tokens - Not Eligible For This Pool', tokens: tokens['invalidTokenIdsNotInPoolOrOwned'] },
                 ];
               } else {
                 for (const setName of ['tokenIdsOwned', 'tokenIdsNotOwned']) {
