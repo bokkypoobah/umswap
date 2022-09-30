@@ -897,6 +897,25 @@
                 } else {
                   message = "To \"" + e.to + "\", topic \"" + e.topic + "\", message \"" + e.message + "\"";
                 }
+              } else if (e.type == "Rated") {
+                account = e.account;
+                umswap = e.umswap;
+                for (const c of Object.values(this.collections)) {
+                  for (const u of c.umswaps) {
+                    if (u.address == e.umswap) {
+                      umswap = u.address;
+                      collection = c.address;
+                      break;
+                    }
+                  }
+                  if (collection != null) {
+                    break;
+                  }
+                }
+                console.log(JSON.stringify(e.stats.map(e => e.toString())));
+                message = "Rated \"" + e.score + "\", text \"" + e.text + "\"";
+                // umswapEvents.push({ type: "Rated", txHash, umswap, blockNumber, account, timestamp, score, text, stats });
+
               }
               if ((this.selectedCollection == null || this.selectedCollection == collection) && (this.selectedPool == null || this.selectedPool == e.umswap)) {
                 results.push({ txHash: e.txHash, type: e.type, timestamp: e.timestamp, account, collection, umswap: umswap, message });
@@ -1381,6 +1400,7 @@
                 topics: [
                   [
                     '0xd03d7fc2b11276326661de98a5f2efeeb83b095eb821f2f282e5f589c2d4a59f', // event Swapped(address indexed account, uint indexed timestamp, uint[] inTokenIds, uint[] outTokenIds, uint64[3] stats);
+                    '0x645dc3ff76881bfb2bb80eaafe4f0e12fe5c517c3b5200ea9108bc6273ecaf05', // event Rated(address indexed account, uint indexed timestamp, uint score, string text, uint64[3] stats);
                   ],
                   null,
                   null,
@@ -1389,10 +1409,10 @@
               const umswapEventLogs = await provider.getLogs(umswapFilter);
               for (const event of umswapEventLogs) {
                 const logData = umswapInterface.parseLog(event);
+                const txHash = event.transactionHash;
+                const umswap = event.address;
+                const blockNumber = event.blockNumber;
                 if (logData.eventFragment.name == "Swapped") {
-                  const txHash = event.transactionHash;
-                  const umswap = event.address;
-                  const blockNumber = event.blockNumber;
                   const account = logData.args[0];
                   const timestamp = logData.args[1].toNumber();
                   const inTokenIds = logData.args[2].map(t => t.toNumber());
@@ -1400,6 +1420,14 @@
                   const stats = logData.args[4].map(s => s.toNumber());
                   // console.log("umswap: " + umswap + ", account: " + account + ", blockNumber: " + blockNumber + ", timestamp: " + timestamp + ", inTokenIds: " + inTokenIds + ", outTokenIds: " + outTokenIds + ", stats: " + stats);
                   umswapEvents.push({ type: "Swap", txHash, umswap, blockNumber, account, timestamp, inTokenIds, outTokenIds, stats });
+                } else if (logData.eventFragment.name == "Rated") {
+                  const account = logData.args[0];
+                  const timestamp = logData.args[1].toNumber();
+                  const score = logData.args[2].toNumber();
+                  const text = logData.args[3];
+                  const stats = logData.args[4];
+                  // console.log(JSON.stringify(stats, null, 2));
+                  umswapEvents.push({ type: "Rated", txHash, umswap, blockNumber, account, timestamp, score, text, stats });
                 }
               }
               this.umswapEvents = umswapEvents;
