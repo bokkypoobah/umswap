@@ -328,13 +328,13 @@
                   <b-link :href="'https://opensea.io/' + getSelectedPoolRecord.address" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
                 </b-form-group>
                 <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Pool Score:" :description="getSelectedPoolRecord.raters > 0 ? ('Number of ratings: ' + getSelectedPoolRecord.raters) : 'No ratings'" class="mx-0 my-1 p-0">
-                  <b-form-rating size="sm" :value="getSelectedPoolRecord.raters > 0 ? (getSelectedPoolRecord.totalScores / getSelectedPoolRecord.raters) : null" :stars="10" show-value color="#ff8800" class="w-50"></b-form-rating>
+                  <b-form-rating size="sm" :value="getSelectedPoolRecord.raters > 0 ? (getSelectedPoolRecord.totalScores / getSelectedPoolRecord.raters) : null" :stars="10" show-value color="#ff8800" class="w-25"></b-form-rating>
                 </b-form-group>
                 <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Rate This Pool:" description="1 to 10 stars" class="mx-0 my-1 p-0">
-                  <b-form-rating size="sm" v-model="poolRating.score" stars="10" show-value color="#ff8800" class="w-50"></b-form-rating>
+                  <b-form-rating size="sm" v-model="poolRating.score" stars="10" show-value color="#ff8800" class="w-25"></b-form-rating>
                 </b-form-group>
                 <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="" class="mx-0 my-1 p-0">
-                  <b-form-input type="text" size="sm" v-model.trim="poolRating.text" placeholder="text" class="w-50"></b-form-input>
+                  <b-form-input type="text" size="sm" v-model.trim="poolRating.text" placeholder="text" class="w-25"></b-form-input>
                 </b-form-group>
                 <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="" class="mx-0 my-1 p-0">
                   <b-button size="sm" @click="ratePool()" variant="warning">Rate Pool</b-button>
