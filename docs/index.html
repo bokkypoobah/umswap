@@ -1421,7 +1421,7 @@
                   const timestamp = logData.args[1].toNumber();
                   const score = logData.args[2].toNumber();
                   const text = logData.args[3];
-                  const stats = logData.args[4];
+                  const stats = logData.args[4].map(s => s.toNumber());
                   umswapEvents.push({ type: "Rated", txHash, umswap, blockNumber, account, timestamp, score, text, stats });
                 }
               }
