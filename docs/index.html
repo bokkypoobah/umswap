@@ -852,12 +852,14 @@
               }
             }
             for (const e of this.umswapEvents) {
-              let collection;
+              let collection = null;
+              let umswap = null;
               let account;
               let message;
               if (e.type == "New") {
                 account = e.creator;
                 collection = e.collection;
+                umswap = e.umswap;
                 if (e.tokenIds.length == 0) {
                   message = "Created \"" + e.name + "\" valid for all tokens in the collection";
                 } else {
@@ -866,13 +868,38 @@
                 }
               } else if (e.type == "Swap") {
                 account = e.account;
+                umswap = e.umswap;
                 collection = umswapToCollection[e.umswap] || null;
                 let inTokenIdsString = e.inTokenIds.length > 10 ? e.inTokenIds.slice(0, 10).join(",") + " + " + (e.inTokenIds.length - 10) + " more": e.inTokenIds.join(",");
                 let outTokenIdsString = e.outTokenIds.length > 10 ? e.outTokenIds.slice(0, 10).join(",") + " + " + (e.outTokenIds.length - 10) + " more": e.outTokenIds.join(",");
                 message = "Swapped in [" + inTokenIdsString + "] and out [" + outTokenIdsString + "]";
+              } else if (e.type == "Message") {
+                account = e.from;
+                if (e.umswapOrCollection != ADDRESS0) {
+                  for (const c of Object.values(this.collections)) {
+                    if (c.address == e.umswapOrCollection) {
+                      collection = c.address;
+                    }
+                    for (const u of c.umswaps) {
+                      if (u.address == e.umswapOrCollection) {
+                        umswap = u.address;
+                        collection = c.address;
+                        break;
+                      }
+                    }
+                    if (collection != null) {
+                      break;
+                    }
+                  }
+                }
+                if (e.to == ADDRESS0) {
+                  message = "Topic \"" + e.topic + "\", message \"" + e.message + "\"";
+                } else {
+                  message = "To \"" + e.to + "\", topic \"" + e.topic + "\", message \"" + e.message + "\"";
+                }
               }
               if ((this.selectedCollection == null || this.selectedCollection == collection) && (this.selectedPool == null || this.selectedPool == e.umswap)) {
-                results.push({ txHash: e.txHash, type: e.type, timestamp: e.timestamp, account, collection, umswap: e.umswap, message });
+                results.push({ txHash: e.txHash, type: e.type, timestamp: e.timestamp, account, collection, umswap: umswap, message });
               }
             }
             return results;
@@ -1268,6 +1295,7 @@
                 topics: [
                   [
                     '0x077e1cf6babf9ad326aba5f77f1dc9829deb8eb27be7e883108bb3837ad0214e', // NewUmswap (index_topic_1 address creator, uint256 timestamp, index_topic_2 address umswap, index_topic_3 address collection, string name, uint256[] tokenIds)
+                    '0xecf7cba0a43f1cd8521a490776b3d7ce17c6521eb4e164acede254de0551ba7f', // Message (index_topic_1 address from, uint256 timestamp, index_topic_2 address to, index_topic_3 address umswapOrCollection, string topic, string message)
                   ],
                   null,
                   null,
@@ -1277,16 +1305,24 @@
               const umswapEvents = [];
               for (const event of umswapFactoryEventLogs) {
                 const logData = umswapFactory.interface.parseLog(event);
+                const txHash = event.transactionHash;
+                const blockNumber = event.blockNumber;
                 if (logData.eventFragment.name == "NewUmswap") {
-                  const txHash = event.transactionHash;
                   const creator = logData.args[0] || null;
-                  const blockNumber = event.blockNumber;
                   const timestamp = logData.args[1].toNumber();
                   const umswap = logData.args[2];
                   const collection = logData.args[3];
                   const name = logData.args[4];
                   const tokenIds = logData.args[5].map(i => i.toNumber());
                   umswapEvents.push({ type: "New", txHash, creator, blockNumber, timestamp, umswap, collection, name, tokenIds });
+                } else if (logData.eventFragment.name == "Message") {
+                  const from = logData.args[0] || null;
+                  const timestamp = logData.args[1].toNumber();
+                  const to = logData.args[2] || null;
+                  const umswapOrCollection = logData.args[3];
+                  const topic = logData.args[4];
+                  const message = logData.args[5];
+                  umswapEvents.push({ type: "Message", txHash, from, blockNumber, timestamp, to, umswapOrCollection, topic, message });
                 }
               }
 
