@@ -334,12 +334,59 @@
               </b-card>
             </b-col>
             <b-col class="m-0 p-0 border-0">
-              <b-card v-if="false" class="mx-0 mt-1" body-class="m-1 p-0">
+              <b-card v-if="true" class="mx-0 mt-1" body-class="m-1 p-0">
                 <template #header>
                   <h6 class="mb-0">Info</h6>
                 </template>
-                <!--
                 <b-card-text>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Collection Address:" class="mx-0 my-1 p-0">
+                    <b-link :href="'https://etherscan.io/token/' + getSelectedCollection.address + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedCollection.address }}</b-link>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Collection Name:" class="mx-0 my-1 p-0">
+                    <b-link :href="'https://opensea.io/collection/' + getSelectedCollection.reservoirInfo.slug" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedCollection.name }}</b-link>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Pool Balances:" class="mx-0 my-1 p-0">
+                    <b-link :href="'https://etherscan.io/token/' + getSelectedPoolRecord.address + '#balances'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Pool NFTs:" class="mx-0 my-1 p-0">
+                    <b-link :href="'https://opensea.io/' + getSelectedPoolRecord.address" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
+                  </b-form-group>
+
+                  <!--
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Purchase Pool Tokens:" :description="'Manually paste in the Umswap address ' + getSelectedPoolRecord.address" class="mx-0 my-1 p-0">
+                    <b-link :href="'https://app.uniswap.org/#/swap?exactField=output&exactAmount=1&inputCurrency=ETH&outputCurrency=' + getSelectedPoolRecord.address + '?use=v1'" v-b-popover.hover.bottom="'Purchase in Uniswap.org'" target="_blank">{{ getSelectedPoolRecord.symbol }}</b-link>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Sell Pool Tokens:" :description="'Manually paste in the Umswap address ' + getSelectedPoolRecord.address" class="mx-0 my-1 p-0">
+                    <b-link :href="'https://app.uniswap.org/#/swap?exactField=input&exactAmount=1&outputCurrency=ETH&inputCurrency=' + getSelectedPoolRecord.address + '&use=v1'" v-b-popover.hover.bottom="'Sell in Uniswap.org'" target="_blank">{{ getSelectedPoolRecord.symbol }}</b-link>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Create Pool Exchange:" :description="'Manually paste in the Umswap address ' + getSelectedPoolRecord.address" class="mx-0 my-1 p-0">
+                    <b-link :href="'https://app.uniswap.org/#/swap?use=v1&create-exchange?tokenAddress=' + getSelectedPoolRecord.address + '&use=v1'" v-b-popover.hover.bottom="'Create Pool Exchange in Uniswap.org'" target="_blank">{{ getSelectedPoolRecord.symbol }}</b-link>
+                  </b-form-group>
+                  -->
+
+                  <!--
+
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Add Liquidity To Pool:" :description="'Manually paste in the Umswap address ' + getSelectedPoolRecord.address" class="mx-0 my-1 p-0">
+                    <b-link :href="'https://app.uniswap.org/#/add-liquidity?ethAmount=1.23&token=' + getSelectedPoolRecord.address + '&tokenAmount=300' + '&use=v1'" v-b-popover.hover.bottom="'Purchase in Uniswap.org'" target="_blank">{{ getSelectedPoolRecord.symbol }}</b-link>
+                  </b-form-group>
+
+                  getSelectedPoolRecord: {{ JSON.stringify(getSelectedPoolRecord) }}
+                  getSelectedCollection: {{ JSON.stringify(getSelectedCollection) }}
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="ERC-721 NFT Collection:" class="mx-0 my-1 p-0">
+                    <b-link :href="'https://etherscan.io/token/' + getSelectedCollection.address + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedCollection.address }}</b-link>
+                  </b-form-group>
+
+                  <b-form-group label-cols="2" label-size="sm" label-align="right" label="UmswapFactory:" class="mx-0 my-1 p-0">
+                    <b-link :href="'https://etherscan.io/address/' + umswapFactoryAddress + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ umswapFactoryAddress }}</b-link>
+                  </b-form-group>
+                  <b-form-group label-cols="2" label-size="sm" label-align="right" label="UmswapFactory:" class="mx-0 my-1 p-0">
+                    <b-link :href="'https://etherscan.io/address/' + umswapFactoryAddress + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ umswapFactoryAddress }}</b-link>
+                  </b-form-group>
+                  <b-form-group label-cols="2" label-size="sm" label-align="right" label="UmswapFactory:" class="mx-0 my-1 p-0">
+                    <b-link :href="'https://etherscan.io/address/' + umswapFactoryAddress + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ umswapFactoryAddress }}</b-link>
+                  </b-form-group>
+
+
                   <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Into Pool:" class="mx-0 my-1 p-0">
                     <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapIn.join(',')" rows="1" max-rows="5" class="w-50"></b-form-textarea>
                   </b-form-group>
@@ -364,8 +411,8 @@
                   <b-form-group label-cols="3" label-size="sm" label="" class="mx-0 my-1 p-0">
                     <b-button size="sm" @click="swapIt" :disabled="!umswapApproved || (parseFloat(convertETH(umswapBalance)) + parseFloat(umswapChange) < 0) || (tokenIdsToSwapIn.length == 0 && tokenIdsToSwapOut.length == 0)" variant="warning">Swap</b-button>
                   </b-form-group>
-                </b-card-text>
                 -->
+                </b-card-text>
               </b-card>
             </b-card-group>
 
@@ -764,6 +811,12 @@
           },
           pagedFilteredSortedPools() {
             return this.filteredSortedPools.slice((this.poolsCurrentPage - 1) * this.poolsPageSize, this.poolsCurrentPage * this.poolsPageSize);
+          },
+          getSelectedCollection() {
+            if (this.selectedCollection && this.collections[this.selectedCollection]) {
+              return this.collections[this.selectedCollection];
+            }
+            return null;
           },
           getSelectedPoolRecord() {
             const results = this.selectedCollection ? [] : [];
@@ -1190,6 +1243,7 @@
               const db0 = new Dexie(this.db.name);
               db0.version(this.db.version).stores(this.db.schemaDefinition);
 
+              // Get Umswap state
               const umswapsLength = (await umswapFactory.getUmswapsLength()).toNumber();
               var umswapsIndices = generateRange(0, umswapsLength - 1, 1);
               this.sync.completed = 0;
@@ -1228,6 +1282,7 @@
                 this.sync.completed = i + 1;
               }
 
+              // Get collection metadata
               this.sync.section = null;
               this.sync.completed = 0;
               this.sync.total = Object.keys(collections).length;
@@ -1257,6 +1312,7 @@
                 console.log("error: " + error);
               });
 
+              // Get specific collection if requested
               let collectionAddress = null;
               if (action == 'newUmswapRetrieveCollection') {
                 collectionAddress = this.newUmswap.collectionAddress == null ? null : ethers.utils.getAddress(this.newUmswap.collectionAddress);
@@ -1265,8 +1321,8 @@
                   collectionAddress = this.selectedCollection == null ? null : ethers.utils.getAddress(this.selectedCollection);
                 }
               }
-
               if (collectionAddress != null) {
+                // Get specific collection metadata
                 this.sync.section = null;
                 this.sync.completed = 0;
                 this.sync.total = 1;
@@ -1282,6 +1338,7 @@
                   });
                 this.sync.completed = 1;
 
+                // Get specific collection token metadata
                 this.sync.section = null;
                 this.sync.completed = 0;
                 this.sync.total = null;
@@ -1328,6 +1385,7 @@
                   }
                 } while (continuation != null /*&& !state.halt && !state.sync.error */);
 
+                // Get specific collection token owners
                 this.sync.section = null;
                 this.sync.completed = 0;
                 const tokenIds = Object.keys(tokens);
@@ -1344,6 +1402,7 @@
                 }
                 this.collection.tokens = tokens;
 
+                // Get specific collection owner reverse ENS names
                 this.sync.section = null;
                 const ensMap = {};
                 for (const [tokenId, token] of Object.entries(tokens)) {
@@ -1369,6 +1428,7 @@
                 }
                 this.collection.ensMap = ensMap;
 
+                // Aggregate attributes for filter
                 const tokenAttributes = {};
                 for (const [tokenId, token] of Object.entries(tokens)) {
                   for (let attribute of token.attributes) {
@@ -1387,6 +1447,7 @@
                 // console.log("tokenAttributes: " + JSON.stringify(tokenAttributes, null, 2));
                 this.collection.tokenAttributes = tokenAttributes;
 
+                // Saving metadata
                 if (reservoirInfo && reservoirInfo.collection) {
                   // console.log(JSON.stringify(reservoirInfo.collection, null, 2));
                   this.collection.address = collectionAddress;
