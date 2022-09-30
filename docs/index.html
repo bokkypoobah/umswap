@@ -1243,6 +1243,36 @@
               const db0 = new Dexie(this.db.name);
               db0.version(this.db.version).stores(this.db.schemaDefinition);
 
+              // Get Umswap events
+              const startBlock = UMSWAPFACTORYDEPLOYMENTBLOCK;
+              const endBlock = blockNumber;
+              const filter = {
+                address: UMSWAPFACTORYADDRESS,
+                fromBlock: startBlock,
+                toBlock: endBlock,
+                topics: [
+                  [
+                    '0x077e1cf6babf9ad326aba5f77f1dc9829deb8eb27be7e883108bb3837ad0214e', // NewUmswap (index_topic_1 address creator, uint256 timestamp, index_topic_2 address umswap, index_topic_3 address collection, string name, uint256[] tokenIds)
+                  ],
+                  null,
+                  null,
+                ],
+              };
+              const events = await provider.getLogs(filter);
+              for (const event of events) {
+                const logData = umswapFactory.interface.parseLog(event);
+                if (logData.eventFragment.name == "NewUmswap") {
+                  const creator = logData.args[0] || null;
+                  const blockNumber = event.blockNumber;
+                  const timestamp = logData.args[1].toNumber();
+                  const umswap = logData.args[2];
+                  const collection = logData.args[3];
+                  const name = logData.args[4];
+                  const tokenIds = logData.args[5];
+                  console.log("creator: " + creator + ", blockNumber: " + blockNumber + ", timestamp: " + timestamp + ", umswap: " + umswap + ", collection: " + collection + ", name: " + name + ", tokenIds: " + JSON.stringify(tokenIds.map(e => e.toNumber())));
+                }
+              }
+
               // Get Umswap state
               const umswapsLength = (await umswapFactory.getUmswapsLength()).toNumber();
               var umswapsIndices = generateRange(0, umswapsLength - 1, 1);
