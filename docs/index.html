@@ -300,58 +300,29 @@
               </b-card-body>
             </b-card>
 
-            <b-card-group deck v-if="selectedCollection != null && selectedPool != null && !newPool" class="m-0 p-0">
+            <b-card-group deck v-if="selectedCollection != null && !newPool" class="m-0 p-0">
               <b-card class="mx-0 mt-1 mr-1" body-class="m-1 p-0">
                 <template #header>
-                  <h6 class="mb-0">Swap</h6>
+                  <h6 class="mb-0">Info And Messages</h6>
                 </template>
                 <b-card-text>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Into Pool:" class="mx-0 my-1 p-0">
-                    <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapIn.join(',')" rows="1" max-rows="5" class="w-100"></b-form-textarea>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Out Of Pool:" class="mx-0 my-1 p-0">
-                    <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapOut.join(',')" rows="1" max-rows="5" class="w-100"></b-form-textarea>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Change:" class="mx-0 my-1 p-0">
-                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapChange" class="w-50"></b-form-input>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="My Umswap Balance:" class="mx-0 my-1 p-0">
-                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapBalance" class="w-50"></b-form-input>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Approved:" class="mx-0 my-1 p-0">
-                    <b-input-group class="m-0 w-50">
-                      <b-form-input type="text" size="sm" readonly :value="umswapApproved ? 'Yes' : 'No'"></b-form-input>
-                      <b-input-group-append>
-                        <b-button v-if="!umswapApproved" size="sm" @click="approveTransfer(true)" variant="warning">Approve</b-button>
-                        <b-button v-if="umswapApproved" size="sm" @click="approveTransfer(false)" variant="warning">Revoke Approval</b-button>
-                      </b-input-group-append>
-                    </b-input-group>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label="" class="mx-0 my-1 p-0">
-                    <b-button size="sm" @click="swapIt" :disabled="!umswapApproved || (parseFloat(convertETH(umswapBalance)) + parseFloat(umswapChange) < 0) || (tokenIdsToSwapIn.length == 0 && tokenIdsToSwapOut.length == 0)" variant="warning">Swap</b-button>
-                  </b-form-group>
-                </b-card-text>
-              </b-card>
-            </b-col>
-            <b-col class="m-0 p-0 border-0">
-              <b-card v-if="true" class="mx-0 mt-1" body-class="m-1 p-0">
-                <template #header>
-                  <h6 class="mb-0">Info</h6>
-                </template>
-                <b-card-text>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Collection Address:" class="mx-0 my-1 p-0">
+                  <b-form-group v-if="getSelectedCollection" label-cols="3" label-size="sm" label-align="right" label="Collection Address:" class="mx-0 my-1 p-0">
                     <b-link :href="'https://etherscan.io/token/' + getSelectedCollection.address + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedCollection.address }}</b-link>
                   </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Collection Name:" class="mx-0 my-1 p-0">
+                  <b-form-group v-if="getSelectedCollection && getSelectedCollection.reservoirInfo" label-cols="3" label-size="sm" label-align="right" label="Collection Name:" class="mx-0 my-1 p-0">
                     <b-link :href="'https://opensea.io/collection/' + getSelectedCollection.reservoirInfo.slug" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedCollection.name }}</b-link>
                   </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Pool Balances:" class="mx-0 my-1 p-0">
+                  <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Pool Balances:" class="mx-0 my-1 p-0">
                     <b-link :href="'https://etherscan.io/token/' + getSelectedPoolRecord.address + '#balances'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
                   </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Pool NFTs:" class="mx-0 my-1 p-0">
+                  <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Pool NFTs:" class="mx-0 my-1 p-0">
                     <b-link :href="'https://opensea.io/' + getSelectedPoolRecord.address" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
                   </b-form-group>
 
+                  <font size="-1">
+                    <b-table small fixed striped responsive hover :fields="messagesFields" :items="pagedFilteredSortedMessages" head-variant="light" class="m-0">
+                    </b-table>
+                  </font>
                   <!--
                   <b-form-group label-cols="3" label-size="sm" label-align="right" label="Purchase Pool Tokens:" :description="'Manually paste in the Umswap address ' + getSelectedPoolRecord.address" class="mx-0 my-1 p-0">
                     <b-link :href="'https://app.uniswap.org/#/swap?exactField=output&exactAmount=1&inputCurrency=ETH&outputCurrency=' + getSelectedPoolRecord.address + '?use=v1'" v-b-popover.hover.bottom="'Purchase in Uniswap.org'" target="_blank">{{ getSelectedPoolRecord.symbol }}</b-link>
@@ -412,6 +383,38 @@
                     <b-button size="sm" @click="swapIt" :disabled="!umswapApproved || (parseFloat(convertETH(umswapBalance)) + parseFloat(umswapChange) < 0) || (tokenIdsToSwapIn.length == 0 && tokenIdsToSwapOut.length == 0)" variant="warning">Swap</b-button>
                   </b-form-group>
                 -->
+                </b-card-text>
+              </b-card>
+
+              <b-card v-if="selectedPool != null" class="mx-0 mt-1" body-class="m-1 p-0">
+                <template #header>
+                  <h6 class="mb-0">Swap</h6>
+                </template>
+                <b-card-text>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Into Pool:" class="mx-0 my-1 p-0">
+                    <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapIn.join(',')" rows="1" max-rows="5" class="w-100"></b-form-textarea>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Out Of Pool:" class="mx-0 my-1 p-0">
+                    <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapOut.join(',')" rows="1" max-rows="5" class="w-100"></b-form-textarea>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Change:" class="mx-0 my-1 p-0">
+                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapChange" class="w-50"></b-form-input>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="My Umswap Balance:" class="mx-0 my-1 p-0">
+                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapBalance" class="w-50"></b-form-input>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Approved:" class="mx-0 my-1 p-0">
+                    <b-input-group class="m-0 w-50">
+                      <b-form-input type="text" size="sm" readonly :value="umswapApproved ? 'Yes' : 'No'"></b-form-input>
+                      <b-input-group-append>
+                        <b-button v-if="!umswapApproved" size="sm" @click="approveTransfer(true)" variant="warning">Approve</b-button>
+                        <b-button v-if="umswapApproved" size="sm" @click="approveTransfer(false)" variant="warning">Revoke Approval</b-button>
+                      </b-input-group-append>
+                    </b-input-group>
+                  </b-form-group>
+                  <b-form-group label-cols="3" label-size="sm" label="" class="mx-0 my-1 p-0">
+                    <b-button size="sm" @click="swapIt" :disabled="!umswapApproved || (parseFloat(convertETH(umswapBalance)) + parseFloat(umswapChange) < 0) || (tokenIdsToSwapIn.length == 0 && tokenIdsToSwapOut.length == 0)" variant="warning">Swap</b-button>
+                  </b-form-group>
                 </b-card-text>
               </b-card>
             </b-card-group>
@@ -636,6 +639,7 @@
           searchCollections: null,
           searchCollection: null,
           collections: {},
+          umswapEvents: [],
           collection: {
             address: null,
             symbol: null,
@@ -727,6 +731,14 @@
             { key: 'select', label: '', thStyle: 'width: 10%;' },
             { key: 'attributeOption', label: 'Attribute' /*, sortable: true*/ },
             { key: 'attributeTotal', label: 'Count', /*sortable: true,*/ thStyle: 'width: 30%;', thClass: 'text-right', tdClass: 'text-right' },
+          ],
+          messagesFields: [
+            { key: 'type', label: 'Type', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
+            { key: 'timestamp', label: 'Timestamp', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
+            { key: 'account', label: 'Account', thStyle: 'width: 15%;', tdClass: 'text-truncate' },
+            { key: 'collection', label: 'Collection', thStyle: 'width: 15%;', tdClass: 'text-truncate' },
+            { key: 'umswap', label: 'Umswap Pool', thStyle: 'width: 15%;', tdClass: 'text-truncate' },
+            { key: 'message', label: 'Message', thStyle: 'width: 35%;' },
           ],
         },
 
@@ -879,6 +891,45 @@
               }
             }
             return false;
+          },
+          filteredMessages() {
+            const results = [];
+            const umswapToCollection = {};
+            for (const c of Object.values(this.collections)) {
+              for (const u of c.umswaps) {
+                umswapToCollection[u.address] = c.address;
+              }
+            }
+            for (const e of this.umswapEvents) {
+              let collection;
+              let account;
+              let message;
+              if (e.type == "NewUmswap") {
+                account = e.creator;
+                collection = e.collection;
+                if (e.tokenIds.length == 0) {
+                  message = "Created " + e.name + " valid for all tokens in the collection";
+                } else {
+                  message = "Created " + e.name + " valid only for tokenIds [" + e.tokenIds.join(",");
+                }
+              } else if (e.type == "Swapped") {
+                account = e.account;
+                collection = umswapToCollection[e.umswap] || null;
+                message = "Swapped in [" + e.inTokenIds.join(",") + "] and out [" + e.outTokenIds.join(",") + "]";
+              }
+              results.push({ txHash: e.txHash, type: e.type, timestamp: e.timestamp, account, collection, umswap: e.umswap, message });
+            }
+            return results;
+          },
+          filteredSortedMessages() {
+            // TODO:
+            let results = this.filteredMessages;
+            return results;
+          },
+          pagedFilteredSortedMessages() {
+            // TODO:
+            return this.filteredSortedMessages;
+            // return this.filteredSortedCollections.slice((this.collectionsCurrentPage - 1) * this.collectionsPageSize, this.collectionsCurrentPage * this.collectionsPageSize);
           },
         },
 
@@ -1259,7 +1310,7 @@
                 ],
               };
               const umswapFactoryEventLogs = await provider.getLogs(filter);
-              const umswapFactoryEvents = [];
+              const umswapEvents = [];
               for (const event of umswapFactoryEventLogs) {
                 const logData = umswapFactory.interface.parseLog(event);
                 if (logData.eventFragment.name == "NewUmswap") {
@@ -1271,11 +1322,9 @@
                   const collection = logData.args[3];
                   const name = logData.args[4];
                   const tokenIds = logData.args[5].map(i => i.toNumber());
-                  umswapFactoryEvents.push({ event: "NewUmswap", txHash, creator, blockNumber, timestamp, umswap, collection, name, tokenIds });
+                  umswapEvents.push({ type: "NewUmswap", txHash, creator, blockNumber, timestamp, umswap, collection, name, tokenIds });
                 }
               }
-              this.collection.umswapFactoryEvents = umswapFactoryEvents;
-              // console.log("umswapFactoryEvents: " + JSON.stringify(umswapFactoryEvents));
 
               // Get Umswap state
               const umswapsLength = (await umswapFactory.getUmswapsLength()).toNumber();
@@ -1317,12 +1366,12 @@
               }
 
               // Get UmswapFactory events
-              const umswapAddresses = [];
-              for (const c of Object.values(collections)) {
-                for (const u of c.umswaps) {
-                  umswapAddresses.push(u.address);
-                }
-              }
+              // const umswapAddresses = [];
+              // for (const c of Object.values(collections)) {
+              //   for (const u of c.umswaps) {
+              //     umswapAddresses.push(u.address);
+              //   }
+              // }
               // console.log(JSON.stringify(umswapAddresses));
               const umswapInterface = new ethers.utils.Interface(UMSWAPABI);
               const umswapFilter = {
@@ -1338,7 +1387,6 @@
                 ],
               };
               const umswapEventLogs = await provider.getLogs(umswapFilter);
-              const umswapEvents = [];
               for (const event of umswapEventLogs) {
                 const logData = umswapInterface.parseLog(event);
                 if (logData.eventFragment.name == "Swapped") {
@@ -1351,11 +1399,15 @@
                   const outTokenIds = logData.args[3].map(t => t.toNumber());
                   const stats = logData.args[4].map(s => s.toNumber());
                   // console.log("umswap: " + umswap + ", account: " + account + ", blockNumber: " + blockNumber + ", timestamp: " + timestamp + ", inTokenIds: " + inTokenIds + ", outTokenIds: " + outTokenIds + ", stats: " + stats);
-                  umswapEvents.push({ event: "Swapped", txHash, umswap, blockNumber, account, timestamp, inTokenIds, outTokenIds, stats });
+                  umswapEvents.push({ type: "Swapped", txHash, umswap, blockNumber, account, timestamp, inTokenIds, outTokenIds, stats });
                 }
               }
-              this.collection.umswapEvents = umswapEvents;
+              this.umswapEvents = umswapEvents;
               // console.log("umswapEvents: " + JSON.stringify(umswapEvents));
+              await db0.cache.put({ objectName: 'umswapEvents', object: umswapEvents }).then (function() {
+              }).catch(function(error) {
+                console.log("error: " + error);
+              });
 
               // Get collection metadata
               this.sync.section = null;
@@ -1829,9 +1881,13 @@
           (async() => {
             const db0 = new Dexie(this.db.name);
             db0.version(this.db.version).stores(this.db.schemaDefinition);
-            const records = await db0.cache.where("objectName").equals('collections').toArray();
-            if (records.length == 1) {
-              this.collections = records[0].object;
+            const collections = await db0.cache.where("objectName").equals('collections').toArray();
+            if (collections.length == 1) {
+              this.collections = collections[0].object;
+            }
+            const umswapEvents = await db0.cache.where("objectName").equals('umswapEvents').toArray();
+            if (umswapEvents.length == 1) {
+              this.umswapEvents = umswapEvents[0].object;
             }
             if (window.location.href.indexOf("0x") >= 0) {
               this.selectedCollection = window.location.href.replace(/^.*0x/, "0x");
