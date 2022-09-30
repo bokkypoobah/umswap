@@ -326,10 +326,10 @@
                       <b-link :href="'https://opensea.io/' + data.item.account" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ ensOrAddress(data.item.account) }}</b-link>
                     </template>
                     <template #cell(collection)="data">
-                      <b-link :href="'https://opensea.io/collection/' + (collections[data.item.collection] && collections[data.item.collection].reservoirInfo.slug || '')" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ collections[data.item.collection] && collections[data.item.collection].name || '' }}</b-link>
+                      <b-link :href="'https://opensea.io/collection/' + (collections[data.item.collection] && collections[data.item.collection].reservoirInfo.slug || '')" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ ensOrAddress(data.item.collection) }}</b-link>
                     </template>
                     <template #cell(umswap)="data">
-                      <b-link :href="'https://opensea.io/' + (getUmswap(data.item.umswap) && getUmswap(data.item.umswap).address || '')" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getUmswap(data.item.umswap) && getUmswap(data.item.umswap).name || '' }}</b-link>
+                      <b-link :href="'https://opensea.io/' + data.item.umswap" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ data.item.umswap && ensOrAddress(data.item.umswap) || '' }}</b-link>
                     </template>
                   </b-table>
                 </font>
@@ -591,6 +591,7 @@
           searchCollection: null,
           collections: {},
           umswapEvents: [],
+          globalENSMap: {},
           collection: {
             address: null,
             symbol: null,
@@ -1252,6 +1253,11 @@
             })();
           },
           ensOrAddress(address, length = 24) {
+            if (this.globalENSMap) {
+              if (address in this.globalENSMap) {
+                return this.globalENSMap[address].substring(0, length);
+              }
+            }
             if (this.collection && this.collection.ensMap) {
               if (address in this.collection.ensMap) {
                 return this.collection.ensMap[address].substring(0, length);
@@ -1298,8 +1304,13 @@
               const blockNumber = block.number;
               const timestamp = block.timestamp;
 
+              const ENSOWNERBATCHSIZE = 200; // 500 fails occassionally
+
               const db0 = new Dexie(this.db.name);
               db0.version(this.db.version).stores(this.db.schemaDefinition);
+
+              const globalENSMap = {};
+              globalENSMap[this.coinbase] = this.coinbase;
 
               // Get UmswapFactory events
               const startBlock = UMSWAPFACTORYDEPLOYMENTBLOCK;
@@ -1325,6 +1336,9 @@
                 const blockNumber = event.blockNumber;
                 if (logData.eventFragment.name == "NewUmswap") {
                   const creator = logData.args[0] || null;
+                  if (!globalENSMap[creator]) {
+                    globalENSMap[creator] = creator;
+                  }
                   const timestamp = logData.args[1].toNumber();
                   const umswap = logData.args[2];
                   const collection = logData.args[3];
@@ -1332,9 +1346,15 @@
                   const tokenIds = logData.args[5].map(i => i.toNumber());
                   umswapEvents.push({ type: "New", txHash, creator, blockNumber, timestamp, umswap, collection, name, tokenIds });
                 } else if (logData.eventFragment.name == "Message") {
-                  const from = logData.args[0] || null;
+                  const from = logData.args[0];
+                  if (!globalENSMap[from]) {
+                    globalENSMap[from] = from;
+                  }
                   const timestamp = logData.args[1].toNumber();
-                  const to = logData.args[2] || null;
+                  const to = logData.args[2];
+                  if (to != ADDRESS0 && !globalENSMap[to]) {
+                    globalENSMap[to] = to;
+                  }
                   const umswapOrCollection = logData.args[3];
                   const topic = logData.args[4];
                   const message = logData.args[5];
@@ -1370,8 +1390,6 @@
                   const totalSupply = stats[4].toString();
                   const raters = stats[5].toString();
                   const isApprovedForAll = stats[6].toString();
-                  // const umswapContract = new ethers.Contract(address, UMSWAPABI, provider);
-                  // const balance = ethers.utils.formatEther(await umswapContract.balanceOf(this.coinbase)).toString();
                   if (!(collection in collections)) {
                     collections[collection] = { address: collection, type: null, symbol: null, name: null, balance: null, totalSupply: null, reservoirInfo: null, allTokens: [], umswaps: [] };
                   }
@@ -1411,6 +1429,9 @@
                 const blockNumber = event.blockNumber;
                 if (logData.eventFragment.name == "Swapped") {
                   const account = logData.args[0];
+                  if (!globalENSMap[account]) {
+                    globalENSMap[account] = account;
+                  }
                   const timestamp = logData.args[1].toNumber();
                   const inTokenIds = logData.args[2].map(t => t.toNumber());
                   const outTokenIds = logData.args[3].map(t => t.toNumber());
@@ -1418,6 +1439,9 @@
                   umswapEvents.push({ type: "Swap", txHash, umswap, blockNumber, account, timestamp, inTokenIds, outTokenIds, stats });
                 } else if (logData.eventFragment.name == "Rated") {
                   const account = logData.args[0];
+                  if (!globalENSMap[account]) {
+                    globalENSMap[account] = account;
+                  }
                   const timestamp = logData.args[1].toNumber();
                   const score = logData.args[2].toNumber();
                   const text = logData.args[3];
@@ -1454,9 +1478,37 @@
                 collection.reservoirInfo = reservoirInfo && reservoirInfo.collection || null;
                 this.sync.completed++;
               }
-
               this.collections = collections;
               await db0.cache.put({ objectName: 'collections', object: this.collections }).then (function() {
+              }).catch(function(error) {
+                console.log("error: " + error);
+              });
+
+              // Global ENS map
+              this.sync.section = null;
+              this.sync.completed = 0;
+              const globalAddresses = Object.keys(globalENSMap);
+              this.sync.total = globalAddresses.length;
+              this.sync.section = "Global ENS Names";
+              for (let i = 0; i < globalAddresses.length; i += ENSOWNERBATCHSIZE) {
+                const batch = globalAddresses.slice(i, parseInt(i) + ENSOWNERBATCHSIZE);
+                const allnames = await ensReverseRecordsContract.getNames(batch);
+                for (let j = 0; j < batch.length; j++) {
+                  const address = batch[j];
+                  const name = allnames[j];
+                  globalENSMap[address] = name != null && name.length > 0 ? name : address;
+                  // const normalized = normalize(address);
+                }
+                this.sync.completed = parseInt(this.sync.completed) + batch.length;
+              }
+              for (const c of Object.values(collections)) {
+                globalENSMap[c.address] = c.name;
+                for (const u of c.umswaps) {
+                  globalENSMap[u.address] = u.name;
+                }
+              }
+              this.globalENSMap = globalENSMap;
+              await db0.cache.put({ objectName: 'globalENSMap', object: globalENSMap }).then (function() {
               }).catch(function(error) {
                 console.log("error: " + error);
               });
@@ -1553,25 +1605,16 @@
 
                 // Get specific collection owner reverse ENS names
                 this.sync.section = null;
+                this.sync.completed = 0;
                 const ensMap = {};
-                ensMap[this.coinbase] = this.coinbase;
-                for (const c of Object.values(collections)) {
-                  for (const u of c.umswaps) {
-                    if (!ensMap[u.creator]) {
-                      ensMap[u.creator] = u.creator;
-                    }
-                  }
-                }
                 for (const [tokenId, token] of Object.entries(tokens)) {
                   if (!ensMap[token.owner]) {
                     ensMap[token.owner] = token.owner;
                   }
                 }
-                this.sync.completed = 0;
-                let addresses = Object.keys(ensMap);
+                const addresses = Object.keys(ensMap);
                 this.sync.total = addresses.length;
                 this.sync.section = "ENS Names";
-                const ENSOWNERBATCHSIZE = 200; // 500 fails occassionally
                 for (let i = 0; i < addresses.length; i += ENSOWNERBATCHSIZE) {
                   const batch = addresses.slice(i, parseInt(i) + ENSOWNERBATCHSIZE);
                   const allnames = await ensReverseRecordsContract.getNames(batch);
@@ -1917,6 +1960,10 @@
             const umswapEvents = await db0.cache.where("objectName").equals('umswapEvents').toArray();
             if (umswapEvents.length == 1) {
               this.umswapEvents = umswapEvents[0].object;
+            }
+            const globalENSMap = await db0.cache.where("objectName").equals('globalENSMap').toArray();
+            if (globalENSMap.length == 1) {
+              this.globalENSMap = globalENSMap[0].object;
             }
             if (window.location.href.indexOf("0x") >= 0) {
               this.selectedCollection = window.location.href.replace(/^.*0x/, "0x");
