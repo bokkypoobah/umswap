@@ -317,7 +317,6 @@
                 <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Pool NFTs:" class="mx-0 my-1 p-0">
                   <b-link :href="'https://opensea.io/' + getSelectedPoolRecord.address" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
                 </b-form-group>
-
                 <font size="-1">
                   <b-table small fixed striped responsive hover :fields="messagesFields" :items="pagedFilteredSortedMessages" head-variant="light" class="m-0">
                     <template #cell(timestamp)="data">
@@ -334,66 +333,6 @@
                     </template>
                   </b-table>
                 </font>
-                <!--
-                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Purchase Pool Tokens:" :description="'Manually paste in the Umswap address ' + getSelectedPoolRecord.address" class="mx-0 my-1 p-0">
-                  <b-link :href="'https://app.uniswap.org/#/swap?exactField=output&exactAmount=1&inputCurrency=ETH&outputCurrency=' + getSelectedPoolRecord.address + '?use=v1'" v-b-popover.hover.bottom="'Purchase in Uniswap.org'" target="_blank">{{ getSelectedPoolRecord.symbol }}</b-link>
-                </b-form-group>
-                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Sell Pool Tokens:" :description="'Manually paste in the Umswap address ' + getSelectedPoolRecord.address" class="mx-0 my-1 p-0">
-                  <b-link :href="'https://app.uniswap.org/#/swap?exactField=input&exactAmount=1&outputCurrency=ETH&inputCurrency=' + getSelectedPoolRecord.address + '&use=v1'" v-b-popover.hover.bottom="'Sell in Uniswap.org'" target="_blank">{{ getSelectedPoolRecord.symbol }}</b-link>
-                </b-form-group>
-                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Create Pool Exchange:" :description="'Manually paste in the Umswap address ' + getSelectedPoolRecord.address" class="mx-0 my-1 p-0">
-                  <b-link :href="'https://app.uniswap.org/#/swap?use=v1&create-exchange?tokenAddress=' + getSelectedPoolRecord.address + '&use=v1'" v-b-popover.hover.bottom="'Create Pool Exchange in Uniswap.org'" target="_blank">{{ getSelectedPoolRecord.symbol }}</b-link>
-                </b-form-group>
-                -->
-
-                <!--
-
-                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Add Liquidity To Pool:" :description="'Manually paste in the Umswap address ' + getSelectedPoolRecord.address" class="mx-0 my-1 p-0">
-                  <b-link :href="'https://app.uniswap.org/#/add-liquidity?ethAmount=1.23&token=' + getSelectedPoolRecord.address + '&tokenAmount=300' + '&use=v1'" v-b-popover.hover.bottom="'Purchase in Uniswap.org'" target="_blank">{{ getSelectedPoolRecord.symbol }}</b-link>
-                </b-form-group>
-
-                getSelectedPoolRecord: {{ JSON.stringify(getSelectedPoolRecord) }}
-                getSelectedCollection: {{ JSON.stringify(getSelectedCollection) }}
-                <b-form-group label-cols="3" label-size="sm" label-align="right" label="ERC-721 NFT Collection:" class="mx-0 my-1 p-0">
-                  <b-link :href="'https://etherscan.io/token/' + getSelectedCollection.address + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedCollection.address }}</b-link>
-                </b-form-group>
-
-                <b-form-group label-cols="2" label-size="sm" label-align="right" label="UmswapFactory:" class="mx-0 my-1 p-0">
-                  <b-link :href="'https://etherscan.io/address/' + umswapFactoryAddress + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ umswapFactoryAddress }}</b-link>
-                </b-form-group>
-                <b-form-group label-cols="2" label-size="sm" label-align="right" label="UmswapFactory:" class="mx-0 my-1 p-0">
-                  <b-link :href="'https://etherscan.io/address/' + umswapFactoryAddress + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ umswapFactoryAddress }}</b-link>
-                </b-form-group>
-                <b-form-group label-cols="2" label-size="sm" label-align="right" label="UmswapFactory:" class="mx-0 my-1 p-0">
-                  <b-link :href="'https://etherscan.io/address/' + umswapFactoryAddress + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ umswapFactoryAddress }}</b-link>
-                </b-form-group>
-
-
-                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Into Pool:" class="mx-0 my-1 p-0">
-                  <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapIn.join(',')" rows="1" max-rows="5" class="w-50"></b-form-textarea>
-                </b-form-group>
-                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Out Of Pool:" class="mx-0 my-1 p-0">
-                  <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapOut.join(',')" rows="1" max-rows="5" class="w-50"></b-form-textarea>
-                </b-form-group>
-                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Change:" class="mx-0 my-1 p-0">
-                  <b-form-input type="text" size="sm" readonly v-model.trim="umswapChange" class="w-25"></b-form-input>
-                </b-form-group>
-                <b-form-group label-cols="3" label-size="sm" label-align="right" label="My Umswap Balance:" class="mx-0 my-1 p-0">
-                  <b-form-input type="text" size="sm" readonly v-model.trim="umswapBalance" class="w-25"></b-form-input>
-                </b-form-group>
-                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Approved:" class="mx-0 my-1 p-0">
-                  <b-input-group class="m-0 w-25">
-                    <b-form-input type="text" size="sm" readonly :value="umswapApproved ? 'Yes' : 'No'"></b-form-input>
-                    <b-input-group-append>
-                      <b-button v-if="!umswapApproved" size="sm" @click="approveTransfer(true)" variant="warning">Approve</b-button>
-                      <b-button v-if="umswapApproved" size="sm" @click="approveTransfer(false)" variant="warning">Revoke Approval</b-button>
-                    </b-input-group-append>
-                  </b-input-group>
-                </b-form-group>
-                <b-form-group label-cols="3" label-size="sm" label="" class="mx-0 my-1 p-0">
-                  <b-button size="sm" @click="swapIt" :disabled="!umswapApproved || (parseFloat(convertETH(umswapBalance)) + parseFloat(umswapChange) < 0) || (tokenIdsToSwapIn.length == 0 && tokenIdsToSwapOut.length == 0)" variant="warning">Swap</b-button>
-                </b-form-group>
-              -->
               </b-card-text>
             </b-card>
 
@@ -735,7 +674,7 @@
             { key: 'validTokenIds', label: 'Valid Token Ids', thStyle: 'width: 15%;', tdClass: 'text-truncate' },
             { key: 'swappedIn', label: '# In', thStyle: 'width: 5%;', thClass: 'text-right', tdClass: 'text-right' },
             { key: 'swappedOut', label: '# Out', thStyle: 'width: 5%;', thClass: 'text-right', tdClass: 'text-right' },
-            { key: 'balance', label: 'Balance', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
+            { key: 'balance', label: 'My Balance', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
             { key: 'totalSupply', label: 'Total Supply', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
             { key: 'isApprovedForAll', label: 'Apprv', thStyle: 'width: 5%;', thClass: 'text-right', tdClass: 'text-right' },
           ],
