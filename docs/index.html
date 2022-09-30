@@ -302,7 +302,17 @@
 
             <b-card v-if="!newPool" class="mx-0 mt-1 mr-1" body-class="m-1 p-0">
               <template #header>
-                <h6 class="mb-0">Info And History</h6>
+                <div v-if="selectedCollection != null">
+                  <div v-if="selectedPool == null">
+                    <h6 class="mb-0">Collection: {{ ensOrAddress(selectedCollection) }}</h6>
+                  </div>
+                  <div v-else>
+                    <h6 class="mb-0">Pool: {{ ensOrAddress(selectedPool) }}, Collection: {{ ensOrAddress(selectedCollection) }}</h6>
+                  </div>
+                </div>
+                <div v-else>
+                  <h6 class="mb-0">All Collections</h6>
+                </div>
               </template>
               <b-card-text>
                 <b-form-group v-if="getSelectedCollection" label-cols="3" label-size="sm" label-align="right" label="Collection Address:" class="mx-0 my-1 p-0">
@@ -316,6 +326,18 @@
                 </b-form-group>
                 <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Pool NFTs:" class="mx-0 my-1 p-0">
                   <b-link :href="'https://opensea.io/' + getSelectedPoolRecord.address" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
+                </b-form-group>
+                <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Pool Score:" :description="getSelectedPoolRecord.raters > 0 ? ('Number of ratings: ' + getSelectedPoolRecord.raters) : 'No ratings'" class="mx-0 my-1 p-0">
+                  <b-form-rating size="sm" :value="getSelectedPoolRecord.raters > 0 ? (getSelectedPoolRecord.totalScores / getSelectedPoolRecord.raters) : null" :stars="10" show-value color="#ff8800" class="w-50"></b-form-rating>
+                </b-form-group>
+                <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Rate This Pool:" description="1 to 10 stars" class="mx-0 my-1 p-0">
+                  <b-form-rating size="sm" v-model="poolRating.score" stars="10" show-value color="#ff8800" class="w-50"></b-form-rating>
+                </b-form-group>
+                <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="" class="mx-0 my-1 p-0">
+                  <b-form-input type="text" size="sm" v-model.trim="poolRating.text" placeholder="text" class="w-50"></b-form-input>
+                </b-form-group>
+                <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="" class="mx-0 my-1 p-0">
+                  <b-button size="sm" @click="ratePool()" variant="warning">Rate Pool</b-button>
                 </b-form-group>
                 <font size="-1">
                   <b-table small fixed striped responsive hover :fields="messagesFields" :items="pagedFilteredSortedMessages" head-variant="light" class="m-0">
@@ -533,6 +555,10 @@
           newPool: false,
           selectedCollection: null,
           selectedPool: null,
+          poolRating: {
+            score: null,
+            text: null,
+          },
           tokenAttributesFilter: {},
           collectionsCurrentPage: 1,
           collectionsPageSize: 100,
@@ -1756,6 +1782,92 @@
             }).catch(err => {
               // this.newUmswap.error = err.message.toString();
               console.log("approveTransfer error: " + JSON.stringify(e));
+            });
+          },
+          async ratePool() {
+            console.log("ratePool: " + this.poolRating.score + " " + this.poolRating.text);
+            // this.newUmswap.txHash = null;
+            // this.newUmswap.error = null;
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const umswapContract = new ethers.Contract(this.selectedPool, UMSWAPABI, provider);
+            const umswapContractWithSigner = umswapContract.connect(provider.getSigner());
+            const from = await provider.getSigner().getAddress();
+            const h = this.$createElement;
+            const messageVNode = h('div', { class: ['confirm-modal'] }, [
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'From:'),
+                  h('b-col',
+                    [
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + from, 'target': '_blank' } }, this.ensOrAddress(from)),
+                    ]
+                  ),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'To Umswap Pool Contract:'),
+                  h('b-col',
+                    [
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + this.selectedPool + '#code', 'target': '_blank' } }, this.ensOrAddress(this.selectedPool)),
+                    ]
+                  ),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'rate('),
+                  h('b-col', ''),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'score:'),
+                  h('b-col', this.poolRating.score),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'text:'),
+                  h('b-col', this.poolRating.text),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, ')'),
+                  h('b-col', ''),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'Note:'),
+                  h('b-col', 'Please resync a few minutes after your transaction has successfully been mined'),
+                ]
+              ),
+            ])
+            this.$bvModal.msgBoxConfirm([messageVNode], {
+              title: 'Rate This Pool',
+              size: 'lg',
+              buttonSize: 'sm',
+              centered: true,
+              okVariant: 'danger',
+              okTitle: 'Confirm',
+              cancelTitle: 'Cancel',
+            }).then( async value1 => {
+              if (value1) {
+                event.preventDefault();
+                try {
+                  const tx = await umswapContractWithSigner.rate(this.poolRating.score || 0, this.poolRating.text || '');
+            //       this.newUmswap.txHash = tx.hash;
+                  console.log("tx: " + JSON.stringify(tx));
+                } catch (e) {
+            //       this.newUmswap.error = e.message.toString();
+                  console.log("ratePool error: " + JSON.stringify(e));
+                }
+              }
+            }).catch(err => {
+              // this.newUmswap.error = err.message.toString();
+              console.log("ratePool error: " + JSON.stringify(e));
             });
           },
           async createNewUmswap() {
