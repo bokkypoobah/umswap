@@ -1243,7 +1243,7 @@
               const db0 = new Dexie(this.db.name);
               db0.version(this.db.version).stores(this.db.schemaDefinition);
 
-              // Get Umswap events
+              // Get UmswapFactory events
               const startBlock = UMSWAPFACTORYDEPLOYMENTBLOCK;
               const endBlock = blockNumber;
               const filter = {
@@ -1258,20 +1258,24 @@
                   null,
                 ],
               };
-              const events = await provider.getLogs(filter);
-              for (const event of events) {
+              const umswapFactoryEventLogs = await provider.getLogs(filter);
+              const umswapFactoryEvents = [];
+              for (const event of umswapFactoryEventLogs) {
                 const logData = umswapFactory.interface.parseLog(event);
                 if (logData.eventFragment.name == "NewUmswap") {
+                  const txHash = event.hash;
                   const creator = logData.args[0] || null;
                   const blockNumber = event.blockNumber;
                   const timestamp = logData.args[1].toNumber();
                   const umswap = logData.args[2];
                   const collection = logData.args[3];
                   const name = logData.args[4];
-                  const tokenIds = logData.args[5];
-                  console.log("creator: " + creator + ", blockNumber: " + blockNumber + ", timestamp: " + timestamp + ", umswap: " + umswap + ", collection: " + collection + ", name: " + name + ", tokenIds: " + JSON.stringify(tokenIds.map(e => e.toNumber())));
+                  const tokenIds = logData.args[5].map(i => i.toNumber());
+                  umswapFactoryEvents.push({ event: "NewUmswap", txHash, creator, blockNumber, timestamp, umswap, collection, name, tokenIds });
                 }
               }
+              this.collection.umswapFactoryEvents = umswapFactoryEvents;
+              // console.log("umswapFactoryEvents: " + JSON.stringify(umswapFactoryEvents));
 
               // Get Umswap state
               const umswapsLength = (await umswapFactory.getUmswapsLength()).toNumber();
@@ -1311,6 +1315,47 @@
                 }
                 this.sync.completed = i + 1;
               }
+
+              // Get UmswapFactory events
+              const umswapAddresses = [];
+              for (const c of Object.values(collections)) {
+                for (const u of c.umswaps) {
+                  umswapAddresses.push(u.address);
+                }
+              }
+              // console.log(JSON.stringify(umswapAddresses));
+              const umswapInterface = new ethers.utils.Interface(UMSWAPABI);
+              const umswapFilter = {
+                address: null,
+                fromBlock: startBlock,
+                toBlock: endBlock,
+                topics: [
+                  [
+                    '0xd03d7fc2b11276326661de98a5f2efeeb83b095eb821f2f282e5f589c2d4a59f', // event Swapped(address indexed account, uint indexed timestamp, uint[] inTokenIds, uint[] outTokenIds, uint64[3] stats);
+                  ],
+                  null,
+                  null,
+                ],
+              };
+              const umswapEventLogs = await provider.getLogs(umswapFilter);
+              const umswapEvents = [];
+              for (const event of umswapEventLogs) {
+                const logData = umswapInterface.parseLog(event);
+                if (logData.eventFragment.name == "Swapped") {
+                  const txHash = event.hash;
+                  const umswap = event.address;
+                  const blockNumber = event.blockNumber;
+                  const account = logData.args[0];
+                  const timestamp = logData.args[1].toNumber();
+                  const inTokenIds = logData.args[2].map(t => t.toNumber());
+                  const outTokenIds = logData.args[3].map(t => t.toNumber());
+                  const stats = logData.args[4].map(s => s.toNumber());
+                  // console.log("umswap: " + umswap + ", account: " + account + ", blockNumber: " + blockNumber + ", timestamp: " + timestamp + ", inTokenIds: " + inTokenIds + ", outTokenIds: " + outTokenIds + ", stats: " + stats);
+                  umswapEvents.push({ event: "Swapped", txHash, umswap, blockNumber, account, timestamp, inTokenIds, outTokenIds, stats });
+                }
+              }
+              this.collection.umswapEvents = umswapEvents;
+              // console.log("umswapEvents: " + JSON.stringify(umswapEvents));
 
               // Get collection metadata
               this.sync.section = null;
