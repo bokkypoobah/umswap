@@ -912,10 +912,7 @@
                     break;
                   }
                 }
-                console.log(JSON.stringify(e.stats.map(e => e.toString())));
                 message = "Rated \"" + e.score + "\", text \"" + e.text + "\"";
-                // umswapEvents.push({ type: "Rated", txHash, umswap, blockNumber, account, timestamp, score, text, stats });
-
               }
               if ((this.selectedCollection == null || this.selectedCollection == collection) && (this.selectedPool == null || this.selectedPool == e.umswap)) {
                 results.push({ txHash: e.txHash, type: e.type, timestamp: e.timestamp, account, collection, umswap: umswap, message });
@@ -1418,7 +1415,6 @@
                   const inTokenIds = logData.args[2].map(t => t.toNumber());
                   const outTokenIds = logData.args[3].map(t => t.toNumber());
                   const stats = logData.args[4].map(s => s.toNumber());
-                  // console.log("umswap: " + umswap + ", account: " + account + ", blockNumber: " + blockNumber + ", timestamp: " + timestamp + ", inTokenIds: " + inTokenIds + ", outTokenIds: " + outTokenIds + ", stats: " + stats);
                   umswapEvents.push({ type: "Swap", txHash, umswap, blockNumber, account, timestamp, inTokenIds, outTokenIds, stats });
                 } else if (logData.eventFragment.name == "Rated") {
                   const account = logData.args[0];
@@ -1426,12 +1422,10 @@
                   const score = logData.args[2].toNumber();
                   const text = logData.args[3];
                   const stats = logData.args[4];
-                  // console.log(JSON.stringify(stats, null, 2));
                   umswapEvents.push({ type: "Rated", txHash, umswap, blockNumber, account, timestamp, score, text, stats });
                 }
               }
               this.umswapEvents = umswapEvents;
-              // console.log("umswapEvents: " + JSON.stringify(umswapEvents));
               await db0.cache.put({ objectName: 'umswapEvents', object: umswapEvents }).then (function() {
               }).catch(function(error) {
                 console.log("error: " + error);
