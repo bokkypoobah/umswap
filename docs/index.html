@@ -142,14 +142,8 @@
             <b-card v-if="!newPool" no-header no-body class="m-0 mt-1 p-0 border-0">
               <b-card-body class="m-0 p-0">
                 <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='collectionsRowSelected' :fields="collectionsFields" :items="selectedCollection ? (collections[selectedCollection] ? [collections[selectedCollection]] : []) : pagedFilteredSortedCollections" head-variant="light" class="m-0">
-                  <template #head(address)="data">
-                    <span v-b-popover.hover="'ERC-721 NFT collection contract address. Always check this against a separate source'">{{ data.label }}</span>
-                  </template>
-                  <template #head(symbol)="data">
-                    <span v-b-popover.hover="'ERC-721 NFT collection symbol'">{{ data.label }}</span>
-                  </template>
-                  <template #head(name)="data">
-                    <span v-b-popover.hover="'ERC-721 NFT collection name'">{{ data.label }}</span>
+                  <template #head(image)="data">
+                    <span v-b-popover.hover="'ERC-721 NFT collection contract address, symbol and name. Always check this against a separate source'">{{ data.label }}</span>
                   </template>
                   <template #head(pools)="data">
                     <span v-b-popover.hover="'Number of Umswap pools for this collection'">{{ data.label }}</span>
@@ -157,18 +151,19 @@
                   <template #head(nftsInPool)="data">
                     <span v-b-popover.hover="'Number of NFTs across all Umswap pools for this collection'">{{ data.label }}</span>
                   </template>
-                  <template #cell(address)="data">
-                    <b-link :href="'https://etherscan.io/token/' + data.item.address + '#balances'" v-b-popover.hover.bottom="'View contract in Etherscan.io'" target="_blank">
-                      {{ data.item.address }}
-                    </b-link>
+                  <template #cell(image)="data">
+                    <b-avatar rounded variant="light" size="5.0rem" :src="data.item.reservoirInfo.metadata.imageUrl" v-b-popover.hover.bottom="'gm'" class="ml-0"></b-avatar>
                   </template>
-                  <template #cell(symbol)="data">
+                  <template #cell(collection)="data">
+                    <span v-b-popover.hover="selectedCollection ? 'View all collections' : 'View pools for the \'' + data.item.name + '\' collection'">{{ data.item.name }}</span>
+                    <br />
                     <b-link :href="'https://opensea.io/collection/' + data.item.slug" v-b-popover.hover.bottom="'View collection in Opensea.io'" target="_blank">
                       {{ data.item.symbol }}
                     </b-link>
-                  </template>
-                  <template #cell(name)="data">
-                    <span v-b-popover.hover="selectedCollection ? 'Click row to view all collections with pools' : 'Click row to view Umswap pools for the \'' + data.item.name + '\' collection'">{{ data.item.name }}</span>
+                    <br />
+                    <b-link :href="'https://etherscan.io/token/' + data.item.address + '#balances'" v-b-popover.hover.bottom="'View contract in Etherscan.io'" target="_blank">
+                      {{ data.item.address.substring(0, 10) + '...' }}
+                    </b-link>
                   </template>
                   <template #cell(pools)="data">
                     {{ data.item.umswaps.length }}
@@ -309,7 +304,7 @@
                   </div>
                 </div>
                 <div v-else>
-                  <h6 class="m-0 p-0">All Collections With Pools</h6>
+                  <h6 class="m-0 p-0">All Collections</h6>
                 </div>
               </template>
               <b-card-text class="m-0 p-0">
@@ -389,7 +384,7 @@
                   <b-card-body class="m-1 p-1">
                     <b-form-group label-cols-lg="2" label="Rate Pool" label-size="md" label-class="font-weight-bold pt-0" class="mb-0">
                       <b-form-group label="Current:" label-for="ratepool-current" label-size="sm" label-cols-sm="2" label-align-sm="right" :description="getSelectedPoolRecord.raters > 0 ? ('Number of ratings: ' + getSelectedPoolRecord.raters) : 'No ratings'" class="mx-0 my-1 p-0">
-                        <b-form-rating size="sm" id="ratepool-current" :value="getSelectedPoolRecord.raters > 0 ? (getSelectedPoolRecord.totalScores / getSelectedPoolRecord.raters) : null" :stars="10" show-value color="#ff8800" class="w-50"></b-form-rating>
+                        <b-form-rating size="sm" readonly id="ratepool-current" :value="getSelectedPoolRecord.raters > 0 ? (getSelectedPoolRecord.totalScores / getSelectedPoolRecord.raters) : null" :stars="10" show-value color="#ff8800" class="w-50"></b-form-rating>
                       </b-form-group>
                       <b-form-group label="Score:" label-for="ratepool-score" label-size="sm" label-cols-sm="2" label-align-sm="right" description="Select from 1 to 10 stars" class="mx-0 my-1 p-0">
                         <b-form-rating size="sm" id="ratepool-score" v-model="poolRating.score" stars="10" show-value color="#ff8800" class="w-50"></b-form-rating>
@@ -773,9 +768,8 @@
             { value: 10000, text: '10k' },
           ],
           collectionsFields: [
-            { key: 'address', label: 'Collection', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            { key: 'symbol', label: 'Symbol', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            { key: 'name', label: 'Name', thStyle: 'width: 35%;', tdClass: 'text-truncate' },
+            { key: 'image', label: 'Collections', thStyle: 'width: 8%;' },
+            { key: 'collection', label: '', thStyle: 'width: 52%;', tdClass: 'text-truncate' },
             { key: 'pools', label: '# Pools', thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
             { key: 'balance', label: '∑ Balance', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
             { key: 'nftsInPool', label: '∑ NFTs', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
