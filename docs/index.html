@@ -308,7 +308,7 @@
                   </div>
                 </div>
                 <div v-else>
-                  <h6 class="m-0 p-0">All Collections</h6>
+                  <h6 class="m-0 p-0">All Collections With Pools</h6>
                 </div>
               </template>
               <b-card-text>
@@ -330,30 +330,45 @@
                 <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Pool Name:" class="mx-0 my-1 p-0">
                   <b-form-input type="text" size="sm" disabled :value="getSelectedPoolRecord.name" class="w-25"></b-form-input>
                 </b-form-group>
-                <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Pool Score:" :description="getSelectedPoolRecord.raters > 0 ? ('Number of ratings: ' + getSelectedPoolRecord.raters) : 'No ratings'" class="mx-0 my-1 p-0">
-                  <b-form-rating size="sm" :value="getSelectedPoolRecord.raters > 0 ? (getSelectedPoolRecord.totalScores / getSelectedPoolRecord.raters) : null" :stars="10" show-value color="#ff8800" class="w-25"></b-form-rating>
-                </b-form-group>
-                <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Rate This Pool:" description="1 to 10 stars" class="mx-0 my-1 p-0">
-                  <b-form-rating size="sm" v-model="poolRating.score" stars="10" show-value color="#ff8800" class="w-25"></b-form-rating>
-                </b-form-group>
-                <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="" class="mx-0 my-1 p-0">
-                  <b-form-input type="text" size="sm" v-model.trim="poolRating.text" placeholder="text" class="w-25"></b-form-input>
-                </b-form-group>
-                <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="" class="mx-0 my-1 p-0">
-                  <b-button size="sm" @click="ratePool()" variant="warning">Rate Pool</b-button>
-                </b-form-group>
-                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Message To:" class="mx-0 my-1 p-0">
-                  <b-form-input type="text" size="sm" v-model.trim="message.to" placeholder="0x1234... (optional)" class="w-25"></b-form-input>
-                </b-form-group>
-                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Topic:" class="mx-0 my-1 p-0">
-                  <b-form-input type="text" size="sm" v-model.trim="message.topic" placeholder="{topic}" class="w-50"></b-form-input>
-                </b-form-group>
-                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Text:" class="mx-0 my-1 p-0">
-                  <b-form-input type="text" size="sm" v-model.trim="message.text" placeholder="{text}" class="w-75"></b-form-input>
-                </b-form-group>
-                <b-form-group label-cols="3" label-size="sm" label-align="right" label="" class="mx-0 my-1 p-0">
-                  <b-button size="sm" @click="sendMessage()" variant="warning">Send Message</b-button>
-                </b-form-group>
+
+                <b-card v-if="selectedPool" no-body no-header bg-variant="light" class="m-1 p-1 w-75">
+                  <b-card-body class="m-1 p-1">
+                    <b-form-group label-cols-lg="2" label="Rate Pool" label-size="md" label-class="font-weight-bold pt-0" class="mb-0">
+                      <b-form-group label="Current:" label-for="ratepool-current" label-size="sm" label-cols-sm="2" label-align-sm="right" :description="getSelectedPoolRecord.raters > 0 ? ('Number of ratings: ' + getSelectedPoolRecord.raters) : 'No ratings'" class="mx-0 my-1 p-0">
+                        <b-form-rating size="sm" id="ratepool-current" :value="getSelectedPoolRecord.raters > 0 ? (getSelectedPoolRecord.totalScores / getSelectedPoolRecord.raters) : null" :stars="10" show-value color="#ff8800" class="w-50"></b-form-rating>
+                      </b-form-group>
+                      <b-form-group label="Score:" label-for="ratepool-score" label-size="sm" label-cols-sm="2" label-align-sm="right" description="Select from 1 to 10 stars" class="mx-0 my-1 p-0">
+                        <b-form-rating size="sm" id="ratepool-score" v-model="poolRating.score" stars="10" show-value color="#ff8800" class="w-50"></b-form-rating>
+                      </b-form-group>
+                      <b-form-group label="Text:" label-for="ratepool-text" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                        <b-form-input type="text" size="sm" id="ratepool-text" v-model.trim="poolRating.text" placeholder="{text}" class="w-50"></b-form-input>
+                      </b-form-group>
+                      <b-form-group label="" label-for="ratepool-submit" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                        <b-button size="sm" :disabled="poolRating.score == null" id="ratepool-submit" @click="ratePool()" variant="warning">Rate Pool</b-button>
+                      </b-form-group>
+                    </b-form-group>
+                  </b-card-body>
+                </b-card>
+
+                <b-card no-body no-header bg-variant="light" class="m-1 p-1 w-75">
+                  <b-card-body class="m-1 p-1">
+                    <b-form-group label-cols-lg="2" label="Send Message" label-size="md" label-class="font-weight-bold pt-0" class="mb-0">
+                      <b-form-group label="To:" label-for="message-to" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                        <b-form-input type="text" size="sm" id="message-to" v-model.trim="message.to" placeholder="0x1234... (optional)" class="w-50"></b-form-input>
+                      </b-form-group>
+                      <b-form-group label="Topic:" label-for="message-topic" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                        <b-form-input type="text" size="sm" id="message-topic" v-model.trim="message.topic" placeholder="{topic}" class="w-50"></b-form-input>
+                      </b-form-group>
+                      <b-form-group label="Text:" label-for="message-text" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                        <b-form-input type="text" size="sm" id="message-text" v-model.trim="message.text" placeholder="{text}" class="w-75"></b-form-input>
+                      </b-form-group>
+                      <b-form-group label="" label-for="message-submit" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                        <b-button size="sm" :disabled="message.topic == null && message.text == null" id="message-submit" @click="sendMessage()" variant="warning">Send Message</b-button>
+                      </b-form-group>
+                    </b-form-group>
+                  </b-card-body>
+                </b-card>
+
                 <font size="-1">
                   <b-table small fixed striped responsive hover :fields="messagesFields" :items="pagedFilteredSortedMessages" head-variant="light" class="m-0">
                     <template #cell(timestamp)="data">
@@ -489,7 +504,7 @@
                         </div>
                       </div>
                       <div v-else>
-                        <h6 class="m-0 p-0">All Collections</h6>
+                        <h6 class="m-0 p-0">All Collections With Pools</h6>
                       </div>
                     </template>
                     <b-card-text v-if="set.tokens.length == 0">
