@@ -421,7 +421,7 @@
                     </b-form-group>
                   </b-card-body>
                 </b-card>
-                <font v-if="!newMessage && !showRating && !showCollectionOrPoolInfo && !showSwap" size="-1" class="mt-1">
+                <font v-if="!newMessage && !showRating && !showCollectionOrPoolInfo && (!showSwap || selectedPool == null)" size="-1" class="mt-1">
                   <b-table small fixed striped responsive hover :fields="messagesFields" :items="pagedFilteredSortedMessages" head-variant="light" class="m-0">
                     <template #cell(timestamp)="data">
                       <b-link :href="'https://etherscan.io/tx/' + data.item.txHash" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ formatTimestamp(data.item.timestamp) }}</b-link>
@@ -559,7 +559,7 @@
                     <b-card-group v-if="set.tokens.length > 0" deck class="m-0 p-0">
                       <div v-for="(token, tokenIndex) in pagedFilteredTokens(selectedCollection, selectedPool, set.name)" :key="tokenIndex">
                         <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 12rem;">
-                          <b-avatar v-if="['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" button @click="toggleToken(set.name, token.tokenId)" rounded size="12rem" :src="token.image" style="background-color: #fafafa">
+                          <b-avatar v-if="['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" button @click="toggleToken(set.name, token.tokenId)" rounded size="12rem" :src="token.image" style="background-color: #fafafa" v-b-popover.hover.top="'Click to select/deselect'">
                             <template v-if="selectedTokens[set.name] && selectedTokens[set.name][token.tokenId]" #badge><b-icon icon="check"></b-icon></template>
                           </b-avatar>
                           <b-avatar v-else-if="['tokenIdsSelected'].includes(set.name)" button @click="selectTokenId(token.tokenId, false)" rounded size="12rem" :src="token.image" style="background-color: #fafafa">
