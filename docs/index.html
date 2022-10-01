@@ -162,7 +162,7 @@
                     </b-link>
                     <br />
                     <b-link :href="'https://etherscan.io/token/' + data.item.address + '#balances'" v-b-popover.hover.bottom="'View contract in Etherscan.io'" target="_blank">
-                      {{ data.item.address.substring(0, 10) + '...' }}
+                      {{ data.item.address.substring(0, 10) }}
                     </b-link>
                   </template>
                   <template #cell(pools)="data">
