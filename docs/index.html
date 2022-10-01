@@ -263,7 +263,7 @@
                       </b-link>
                     </template>
                     <template #cell(name)="data">
-                      <span v-b-popover.hover="selectedPool ? 'Click row to view Umswap pools for the same collection' : ('Click row to view Umswap pool \'' + data.item.name + '\'')">{{ data.item.name }}</span>
+                      <span v-b-popover.hover="selectedPool ? 'View pools for the same collection' : ('View pool \'' + data.item.name + '\'')">{{ data.item.name }}</span>
                     </template>
                     <template #cell(validTokenIds)="data">
                       <div v-if="data.item.validTokenIds.length == 0">
