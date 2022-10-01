@@ -304,10 +304,10 @@
               <template #header>
                 <div v-if="selectedCollection != null">
                   <div v-if="selectedPool == null">
-                    <h6 class="m-0 p-0">Collection: {{ ensOrAddress(selectedCollection) }}</h6>
+                    <h6 class="m-0 p-0">{{ ensOrAddress(selectedCollection) }}</h6>
                   </div>
                   <div v-else>
-                    <h6 class="m-0 p-0">Pool: {{ ensOrAddress(selectedPool) }}, Collection: {{ ensOrAddress(selectedCollection) }}</h6>
+                    <h6 class="m-0 p-0">{{ ensOrAddress(selectedCollection) }} - {{ ensOrAddress(selectedPool) }}</h6>
                   </div>
                 </div>
                 <div v-else>
@@ -467,10 +467,10 @@
                     <template #header>
                       <div v-if="selectedCollection != null">
                         <div v-if="selectedPool == null">
-                          <h6 class="m-0 p-0">Collection: {{ ensOrAddress(selectedCollection) }} - {{ set.description }}</h6>
+                          <h6 class="m-0 p-0">{{ ensOrAddress(selectedCollection) }} - {{ set.description }}</h6>
                         </div>
                         <div v-else>
-                          <h6 class="m-0 p-0">Pool: {{ ensOrAddress(selectedPool) }}, Collection: {{ ensOrAddress(selectedCollection) }} - {{ set.description }}</h6>
+                          <h6 class="m-0 p-0">{{ ensOrAddress(selectedCollection) }} - {{ ensOrAddress(selectedPool) }} - {{ set.description }}</h6>
                         </div>
                       </div>
                       <div v-else>
@@ -1543,6 +1543,7 @@
                   globalENSMap[u.address] = u.name;
                 }
               }
+              globalENSMap[this.umswapFactoryAddress] = "UmswapFactory";
               this.globalENSMap = globalENSMap;
               await db0.cache.put({ objectName: 'globalENSMap', object: globalENSMap }).then (function() {
               }).catch(function(error) {
@@ -1719,7 +1720,7 @@
                   h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'From:'),
                   h('b-col',
                     [
-                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + from, 'target': '_blank' } }, from),
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + from, 'target': '_blank' } }, this.ensOrAddress(from)),
                     ]
                   ),
                 ]
@@ -1729,7 +1730,7 @@
                   h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'To ERC-721 Contract:'),
                   h('b-col',
                     [
-                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + this.selectedCollection + '#code', 'target': '_blank' } }, this.selectedCollection),
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + this.selectedCollection + '#code', 'target': '_blank' } }, this.ensOrAddress(this.selectedCollection)),
                     ]
                   ),
                 ]
@@ -1745,7 +1746,7 @@
                   h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'operator:'),
                   h('b-col',
                     [
-                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + this.selectedPool + '#code', 'target': '_blank' } }, this.selectedPool),
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + this.selectedPool + '#code', 'target': '_blank' } }, this.ensOrAddress(this.selectedPool)),
                     ]
                   ),
                 ]
@@ -1896,7 +1897,17 @@
                   h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'From:'),
                   h('b-col',
                     [
-                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + from, 'target': '_blank' } }, from),
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + from, 'target': '_blank' } }, this.ensOrAddress(from)),
+                    ]
+                  ),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'To:'),
+                  h('b-col',
+                    [
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + this.umswapFactoryAddress + '#code', 'target': '_blank' } }, this.ensOrAddress(this.umswapFactoryAddress)),
                     ]
                   ),
                 ]
@@ -1912,7 +1923,7 @@
                   h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'collection:'),
                   h('b-col',
                     [
-                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/token/' + collectionAddress + '#code', 'target': '_blank' } }, collectionAddress),
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/token/' + collectionAddress + '#code', 'target': '_blank' } }, this.ensOrAddress(collectionAddress)),
                     ]
                   ),
                 ]
@@ -1982,17 +1993,17 @@
                   h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'From:'),
                   h('b-col',
                     [
-                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + from, 'target': '_blank' } }, from),
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + from, 'target': '_blank' } }, this.ensOrAddress(from)),
                     ]
                   ),
                 ]
               ),
               h('b-row', {
                 }, [
-                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'To Contract:'),
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'To Umswap Pool:'),
                   h('b-col',
                     [
-                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + this.selectedPool + '#code', 'target': '_blank' } }, this.selectedPool),
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + this.selectedPool + '#code', 'target': '_blank' } }, this.ensOrAddress(this.selectedPool)),
                     ]
                   ),
                 ]
