@@ -159,7 +159,7 @@
                     </b-link>
                   </template>
                   <template #cell(name)="data">
-                    {{ data.item.name }}
+                    <span v-b-popover.hover="selectedCollection ? 'Click row to view all collections with pools' : 'Click row to view Umswap pools for the \'' + data.item.name + '\' collection'">{{ data.item.name }}</span>
                   </template>
                   <template #cell(pools)="data">
                     {{ data.item.umswaps.length }}
@@ -259,7 +259,7 @@
                       </b-link>
                     </template>
                     <template #cell(name)="data">
-                      {{ data.item.name }}
+                      <span v-b-popover.hover="selectedPool ? 'Click row to view Umswap pools for the same collection' : ('Click row to view Umswap pool \'' + data.item.name + '\'')">{{ data.item.name }}</span>
                     </template>
                     <template #cell(validTokenIds)="data">
                       <div v-if="data.item.validTokenIds.length == 0">
