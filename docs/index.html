@@ -342,6 +342,18 @@
                 <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="" class="mx-0 my-1 p-0">
                   <b-button size="sm" @click="ratePool()" variant="warning">Rate Pool</b-button>
                 </b-form-group>
+                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Message To:" class="mx-0 my-1 p-0">
+                  <b-form-input type="text" size="sm" v-model.trim="message.to" placeholder="0x1234... (optional)" class="w-25"></b-form-input>
+                </b-form-group>
+                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Topic:" class="mx-0 my-1 p-0">
+                  <b-form-input type="text" size="sm" v-model.trim="message.topic" placeholder="{topic}" class="w-50"></b-form-input>
+                </b-form-group>
+                <b-form-group label-cols="3" label-size="sm" label-align="right" label="Text:" class="mx-0 my-1 p-0">
+                  <b-form-input type="text" size="sm" v-model.trim="message.text" placeholder="{text}" class="w-75"></b-form-input>
+                </b-form-group>
+                <b-form-group label-cols="3" label-size="sm" label-align="right" label="" class="mx-0 my-1 p-0">
+                  <b-button size="sm" @click="sendMessage()" variant="warning">Send Message</b-button>
+                </b-form-group>
                 <font size="-1">
                   <b-table small fixed striped responsive hover :fields="messagesFields" :items="pagedFilteredSortedMessages" head-variant="light" class="m-0">
                     <template #cell(timestamp)="data">
@@ -573,6 +585,11 @@
           selectedPool: null,
           poolRating: {
             score: null,
+            text: null,
+          },
+          message: {
+            to: null,
+            topic: null,
             text: null,
           },
           tokenAttributesFilter: {},
@@ -1885,6 +1902,113 @@
             }).catch(err => {
               // this.newUmswap.error = err.message.toString();
               console.log("ratePool error: " + JSON.stringify(e));
+            });
+          },
+          async sendMessage() {
+            console.log("sendMessage: " + JSON.stringify(this.message));
+            // this.newUmswap.txHash = null;
+            // this.newUmswap.error = null;
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const umswapFactoryContract = new ethers.Contract(UMSWAPFACTORYADDRESS, UMSWAPFACTORYABI, provider);
+            const umswapFactoryContractWithSigner = umswapFactoryContract.connect(provider.getSigner());
+            const from = await provider.getSigner().getAddress();
+            const re = this.selectedCollection == null ? ADDRESS0 : (this.selectedPool == null ? this.selectedCollection : this.selectedPool);
+            const h = this.$createElement;
+            const messageVNode = h('div', { class: ['confirm-modal'] }, [
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'From:'),
+                  h('b-col',
+                    [
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + from, 'target': '_blank' } }, this.ensOrAddress(from)),
+                    ]
+                  ),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'To Umswap Factory Contract:'),
+                  h('b-col',
+                    [
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + this.umswapFactoryAddress + '#code', 'target': '_blank' } }, this.ensOrAddress(this.umswapFactoryAddress)),
+                    ]
+                  ),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'sendMessage('),
+                  h('b-col', ''),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'to:'),
+                  h('b-col',
+                    [
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + this.message.to, 'target': '_blank' } }, this.ensOrAddress(this.message.to)),
+                    ]
+                  ),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 're:'),
+                  h('b-col',
+                    [
+                      h('a', { class: ['blah'], attrs: { 'href': 'https://etherscan.io/address/' + re, 'target': '_blank' } }, re == ADDRESS0 ? '(general)' : this.ensOrAddress(re)),
+                    ]
+                  ),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'topic:'),
+                  h('b-col', this.message.topic),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'text:'),
+                  h('b-col', this.message.text),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, ')'),
+                  h('b-col', ''),
+                ]
+              ),
+              h('b-row', {
+                }, [
+                  h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'Note:'),
+                  h('b-col', 'Please resync a few minutes after your transaction has successfully been mined'),
+                ]
+              ),
+            ])
+            this.$bvModal.msgBoxConfirm([messageVNode], {
+              title: 'Send Message',
+              size: 'lg',
+              buttonSize: 'sm',
+              centered: true,
+              okVariant: 'danger',
+              okTitle: 'Confirm',
+              cancelTitle: 'Cancel',
+            }).then( async value1 => {
+              if (value1) {
+                event.preventDefault();
+                try {
+                  const tx = await umswapFactoryContractWithSigner.sendMessage(this.message.to || ADDRESS0, this.selectedCollection == null ? ADDRESS0 : (this.selectedPool == null ? this.selectedCollection : this.selectedPool == null), this.message.topic || '', this.message.text || '');
+            //       this.newUmswap.txHash = tx.hash;
+                  console.log("tx: " + JSON.stringify(tx));
+                } catch (e) {
+            //       this.newUmswap.error = e.message.toString();
+                  console.log("sendMessage error: " + JSON.stringify(e));
+                }
+              }
+            }).catch(err => {
+              // this.newUmswap.error = err.message.toString();
+              console.log("sendMessage error: " + JSON.stringify(e));
             });
           },
           async createNewUmswap() {
