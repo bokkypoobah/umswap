@@ -312,24 +312,31 @@
                 </div>
               </template>
               <b-card-text>
-                <b-form-group v-if="getSelectedCollection" label-cols="3" label-size="sm" label-align="right" label="Collection Address:" class="mx-0 my-1 p-0">
-                  <b-link :href="'https://etherscan.io/token/' + getSelectedCollection.address + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedCollection.address }}</b-link>
-                </b-form-group>
-                <b-form-group v-if="getSelectedCollection && getSelectedCollection.reservoirInfo" label-cols="3" label-size="sm" label-align="right" label="Collection Name:" class="mx-0 my-1 p-0">
-                  <b-link :href="'https://opensea.io/collection/' + getSelectedCollection.reservoirInfo.slug" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedCollection.name }}</b-link>
-                </b-form-group>
-                <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Pool Balances:" class="mx-0 my-1 p-0">
-                  <b-link :href="'https://etherscan.io/token/' + getSelectedPoolRecord.address + '#balances'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
-                </b-form-group>
-                <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Pool NFTs:" class="mx-0 my-1 p-0">
-                  <b-link :href="'https://opensea.io/' + getSelectedPoolRecord.address" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
-                </b-form-group>
-                <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Pool Symbol:" class="mx-0 my-1 p-0">
-                  <b-form-input type="text" size="sm" disabled :value="getSelectedPoolRecord.symbol" class="w-25"></b-form-input>
-                </b-form-group>
-                <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Pool Name:" class="mx-0 my-1 p-0">
-                  <b-form-input type="text" size="sm" disabled :value="getSelectedPoolRecord.name" class="w-25"></b-form-input>
-                </b-form-group>
+
+                <b-card no-body no-header bg-variant="light" class="m-1 p-1 w-75">
+                  <b-card-body class="m-1 p-1">
+                    <b-form-group label-cols-lg="2" label="Info" label-size="md" label-class="font-weight-bold pt-0" class="mb-0">
+                      <b-form-group v-if="getSelectedCollection && getSelectedCollection.reservoirInfo" label="Collection Name:" label-for="info-collectionname" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                        <b-link id="info-collectionname" :href="'https://opensea.io/collection/' + getSelectedCollection.reservoirInfo.slug" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedCollection.name }}</b-link>
+                      </b-form-group>
+                      <b-form-group v-if="getSelectedCollection" label="Collection Address:" label-for="info-collectionaddress" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                        <b-link id="info-collectionaddress" :href="'https://etherscan.io/token/' + getSelectedCollection.address + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedCollection.address }}</b-link>
+                      </b-form-group>
+                      <b-form-group v-if="getSelectedPoolRecord" label="Pool Name:" label-for="info-poolname" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                        <b-input-group>
+                          <b-form-input type="text" size="sm" disabled :value="getSelectedPoolRecord.symbol" class="w-25"></b-form-input>
+                          <b-form-input type="text" size="sm" id="info-poolname" disabled :value="getSelectedPoolRecord.name" class="w-50"></b-form-input>
+                        </b-input-group>
+                      </b-form-group>
+                      <b-form-group v-if="getSelectedPoolRecord" label="Pool Balance:" label-for="info-poolbalance" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                        <b-link id="info-poolbalance" :href="'https://etherscan.io/token/' + getSelectedPoolRecord.address + '#balances'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
+                      </b-form-group>
+                      <b-form-group v-if="getSelectedPoolRecord" label="Pool NFTs:" label-for="info-poolnfts" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                        <b-link id="info-poolnfts" :href="'https://opensea.io/' + getSelectedPoolRecord.address" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
+                      </b-form-group>
+                    </b-form-group>
+                  </b-card-body>
+                </b-card>
 
                 <b-card v-if="selectedPool" no-body no-header bg-variant="light" class="m-1 p-1 w-75">
                   <b-card-body class="m-1 p-1">
