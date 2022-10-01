@@ -143,7 +143,7 @@
               <b-card-body class="m-0 p-0">
                 <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='collectionsRowSelected' :fields="collectionsFields" :items="selectedCollection ? (collections[selectedCollection] ? [collections[selectedCollection]] : []) : pagedFilteredSortedCollections" head-variant="light" class="m-0">
                   <template #head(image)="data">
-                    <span v-b-popover.hover="'ERC-721 NFT collection contract address, symbol and name. Always check this against a separate source'">{{ data.label }}</span>
+                    <span v-b-popover.hover="'ERC-721 NFT collection contract address, symbol and name. Always check this against a separate source'">{{ selectedCollection ? 'Collection' : 'Collections' }}</span>
                   </template>
                   <template #head(pools)="data">
                     <span v-b-popover.hover="'Number of Umswap pools for this collection'">{{ data.label }}</span>
