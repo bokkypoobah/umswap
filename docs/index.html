@@ -59,7 +59,7 @@
             </b-card-body>
           </b-card> -->
 
-          <!-- COLLECTION TOOLBAR -->
+          <!-- ALL COLLECTIONS TOOLBAR -->
           <b-card-body class="m-0 p-1">
             <div class="d-flex flex-wrap m-0 p-0">
               <div class="mt-0 pr-1">
@@ -326,6 +326,12 @@
                 </b-form-group>
                 <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Pool NFTs:" class="mx-0 my-1 p-0">
                   <b-link :href="'https://opensea.io/' + getSelectedPoolRecord.address" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
+                </b-form-group>
+                <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Pool Symbol:" class="mx-0 my-1 p-0">
+                  <b-form-input type="text" size="sm" disabled :value="getSelectedPoolRecord.symbol" class="w-25"></b-form-input>
+                </b-form-group>
+                <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Pool Name:" class="mx-0 my-1 p-0">
+                  <b-form-input type="text" size="sm" disabled :value="getSelectedPoolRecord.name" class="w-25"></b-form-input>
                 </b-form-group>
                 <b-form-group v-if="getSelectedPoolRecord" label-cols="3" label-size="sm" label-align="right" label="Pool Score:" :description="getSelectedPoolRecord.raters > 0 ? ('Number of ratings: ' + getSelectedPoolRecord.raters) : 'No ratings'" class="mx-0 my-1 p-0">
                   <b-form-rating size="sm" :value="getSelectedPoolRecord.raters > 0 ? (getSelectedPoolRecord.totalScores / getSelectedPoolRecord.raters) : null" :stars="10" show-value color="#ff8800" class="w-25"></b-form-rating>
