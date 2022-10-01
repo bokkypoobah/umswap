@@ -304,7 +304,7 @@
                     <h6 class="m-0 p-0">{{ ensOrAddress(selectedCollection) }}</h6>
                   </div>
                   <div v-else>
-                    <h6 class="m-0 p-0">{{ ensOrAddress(selectedCollection) }}: {{ ensOrAddress(selectedPool) }}</h6>
+                    <h6 class="m-0 p-0"><font size="-1">{{ ensOrAddress(selectedCollection) }}:</font> {{ ensOrAddress(selectedPool) }}</h6>
                   </div>
                 </div>
                 <div v-else>
@@ -322,17 +322,29 @@
                       <b-form-group v-if="getSelectedCollection" label="Collection Address:" label-for="info-collectionaddress" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
                         <b-link id="info-collectionaddress" :href="'https://etherscan.io/token/' + getSelectedCollection.address + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedCollection.address }}</b-link>
                       </b-form-group>
-                      <b-form-group v-if="getSelectedPoolRecord" label="Pool Name:" label-for="info-poolname" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                      <b-form-group v-if="getSelectedPoolRecord" label="Pool:" label-for="info-poolname" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
                         <b-input-group>
                           <b-form-input type="text" size="sm" disabled :value="getSelectedPoolRecord.symbol" class="w-25"></b-form-input>
                           <b-form-input type="text" size="sm" id="info-poolname" disabled :value="getSelectedPoolRecord.name" class="w-50"></b-form-input>
                         </b-input-group>
                       </b-form-group>
-                      <b-form-group v-if="getSelectedPoolRecord" label="Pool Balance:" label-for="info-poolbalance" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
-                        <b-link id="info-poolbalance" :href="'https://etherscan.io/token/' + getSelectedPoolRecord.address + '#balances'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
+                      <b-form-group v-if="getSelectedPoolRecord" label="My Pool Balance:" label-for="info-mypoolbalance" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                        <b-form-input type="text" size="sm" id="info-mypoolbalance" readonly v-model.trim="umswapBalance" class="w-50"></b-form-input>
+                      </b-form-group>
+                      <b-form-group v-if="getSelectedPoolRecord" label="Pool Balances:" label-for="info-poolbalances" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                        <b-link id="info-poolbalances" :href="'https://etherscan.io/token/' + getSelectedPoolRecord.address + '#balances'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
                       </b-form-group>
                       <b-form-group v-if="getSelectedPoolRecord" label="Pool NFTs:" label-for="info-poolnfts" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
                         <b-link id="info-poolnfts" :href="'https://opensea.io/' + getSelectedPoolRecord.address" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
+                      </b-form-group>
+                      <b-form-group v-if="getSelectedPoolRecord" label="Pool Approval:" label-for="info-poolapproved" label-size="sm" label-cols-sm="2" label-align-sm="right" description="Approval is required to swap your NFTs into the pool. Revoke when not transferring into the pool" class="mx-0 my-1 p-0">
+                        <b-input-group class="m-0 w-50">
+                          <b-form-input type="text" size="sm" id="info-poolapproved" readonly :value="umswapApproved ? 'Yes' : 'No'"></b-form-input>
+                          <b-input-group-append>
+                            <b-button v-if="!umswapApproved" size="sm" @click="approveTransfer(true)" variant="warning">Approve</b-button>
+                            <b-button v-if="umswapApproved" size="sm" @click="approveTransfer(false)" variant="warning">Revoke Approval</b-button>
+                          </b-input-group-append>
+                        </b-input-group>
                       </b-form-group>
                     </b-form-group>
                   </b-card-body>
@@ -392,42 +404,25 @@
                     </template>
                   </b-table>
                 </font>
+
+                <b-card v-if="selectedPool != null" no-body no-header bg-variant="light" class="m-1 p-1 w-75">
+                  <b-card-body class="m-1 p-1">
+                    <b-form-group label-cols-lg="2" label="Swap" label-size="md" label-class="font-weight-bold pt-0" class="mb-0">
+                      <b-form-group label="Into Pool:" label-for="swap-in" label-size="sm" label-cols-sm="2" label-align-sm="right" description="Select tokens to swap in below" class="mx-0 my-1 p-0">
+                        <b-form-textarea size="sm" id="swap-in" readonly v-model.trim="tokenIdsToSwapIn.join(',')" rows="1" max-rows="5" class="w-100"></b-form-textarea>
+                      </b-form-group>
+                      <b-form-group label="Out Of Pool:" label-for="swap-out" label-size="sm" label-cols-sm="2" label-align-sm="right" description="Select tokens to swap out below" class="mx-0 my-1 p-0">
+                        <b-form-textarea size="sm" id="swap-out" readonly v-model.trim="tokenIdsToSwapOut.join(',')" rows="1" max-rows="5" class="w-100"></b-form-textarea>
+                      </b-form-group>
+                      <b-form-group label="" label-for="swap-submit" label-size="sm" label-cols-sm="2" label-align-sm="right" description="Pool balance must be sufficient to cover any net NFTs swapped out, and approval is required" class="mx-0 my-1 p-0">
+                        <b-button size="sm" id="swap-submit" :disabled="!umswapApproved || (parseFloat(convertETH(umswapBalance)) + parseFloat(umswapChange) < 0) || (tokenIdsToSwapIn.length == 0 && tokenIdsToSwapOut.length == 0)" @click="swapIt" variant="warning">Swap</b-button>
+                      </b-form-group>
+                    </b-form-group>
+                  </b-card-body>
+                </b-card>
+
               </b-card-text>
             </b-card>
-
-            <b-card-group deck v-if="selectedCollection != null && !newPool" class="m-0 p-0">
-              <b-card v-if="selectedPool != null" class="mx-0 mt-1" body-class="m-1 p-0" header-class="m-0 p-2">
-                <template #header>
-                  <h6 class="mb-0">Swap</h6>
-                </template>
-                <b-card-text>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Into Pool:" class="mx-0 my-1 p-0">
-                    <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapIn.join(',')" rows="1" max-rows="5" class="w-100"></b-form-textarea>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Swap Out Of Pool:" class="mx-0 my-1 p-0">
-                    <b-form-textarea size="sm" readonly v-model.trim="tokenIdsToSwapOut.join(',')" rows="1" max-rows="5" class="w-100"></b-form-textarea>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Change:" class="mx-0 my-1 p-0">
-                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapChange" class="w-50"></b-form-input>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="My Umswap Balance:" class="mx-0 my-1 p-0">
-                    <b-form-input type="text" size="sm" readonly v-model.trim="umswapBalance" class="w-50"></b-form-input>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label-align="right" label="Umswap Approved:" class="mx-0 my-1 p-0">
-                    <b-input-group class="m-0 w-50">
-                      <b-form-input type="text" size="sm" readonly :value="umswapApproved ? 'Yes' : 'No'"></b-form-input>
-                      <b-input-group-append>
-                        <b-button v-if="!umswapApproved" size="sm" @click="approveTransfer(true)" variant="warning">Approve</b-button>
-                        <b-button v-if="umswapApproved" size="sm" @click="approveTransfer(false)" variant="warning">Revoke Approval</b-button>
-                      </b-input-group-append>
-                    </b-input-group>
-                  </b-form-group>
-                  <b-form-group label-cols="3" label-size="sm" label="" class="mx-0 my-1 p-0">
-                    <b-button size="sm" @click="swapIt" :disabled="!umswapApproved || (parseFloat(convertETH(umswapBalance)) + parseFloat(umswapChange) < 0) || (tokenIdsToSwapIn.length == 0 && tokenIdsToSwapOut.length == 0)" variant="warning">Swap</b-button>
-                  </b-form-group>
-                </b-card-text>
-              </b-card>
-            </b-card-group>
 
             <!-- NEW POOL -->
             <div v-if="newPool">
@@ -504,10 +499,10 @@
                     <template #header>
                       <div v-if="selectedCollection != null">
                         <div v-if="selectedPool == null">
-                          <h6 class="m-0 p-0">{{ ensOrAddress(selectedCollection) }}: {{ set.description }}</h6>
+                          <h6 class="m-0 p-0"><font size="-1">{{ ensOrAddress(selectedCollection) }}</font>: {{ set.description }}</h6>
                         </div>
                         <div v-else>
-                          <h6 class="m-0 p-0">{{ ensOrAddress(selectedCollection) }}: {{ ensOrAddress(selectedPool) }}: {{ set.description }}</h6>
+                          <h6 class="m-0 p-0"><font size="-2">{{ ensOrAddress(selectedCollection) }}:</font> <font size="-1">{{ ensOrAddress(selectedPool) }}:</font> {{ set.description }}</h6>
                         </div>
                       </div>
                       <div v-else>
