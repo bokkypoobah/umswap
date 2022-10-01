@@ -296,7 +296,7 @@
                     <h6 class="m-0 p-0">{{ ensOrAddress(selectedCollection) }}</h6>
                   </div>
                   <div v-else>
-                    <h6 class="m-0 p-0"><font size="-1">{{ ensOrAddress(selectedCollection) }}:</font> {{ ensOrAddress(selectedPool) }}</h6>
+                    <h6 class="m-0 p-0"><font size="-1">{{ ensOrAddress(selectedCollection) }}:</font> {{ ensOrAddress(selectedPool, 48) }}</h6>
                   </div>
                 </div>
                 <div v-else>
@@ -360,27 +360,13 @@
                   </b-card-body>
                 </b-card>
 
-                <b-card no-body no-header bg-variant="light" class="m-1 p-1 w-75">
-                  <b-card-body class="m-1 p-1">
-                    <b-form-group label-cols-lg="2" label="Send Message" label-size="md" label-class="font-weight-bold pt-0" class="mb-0">
-                      <b-form-group label="To:" label-for="message-to" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
-                        <b-form-input type="text" size="sm" id="message-to" v-model.trim="message.to" placeholder="0x1234... (optional)" class="w-50"></b-form-input>
-                      </b-form-group>
-                      <b-form-group label="Topic:" label-for="message-topic" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
-                        <b-form-input type="text" size="sm" id="message-topic" v-model.trim="message.topic" placeholder="{topic}" class="w-50"></b-form-input>
-                      </b-form-group>
-                      <b-form-group label="Text:" label-for="message-text" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
-                        <b-form-input type="text" size="sm" id="message-text" v-model.trim="message.text" placeholder="{text}" class="w-75"></b-form-input>
-                      </b-form-group>
-                      <b-form-group label="" label-for="message-submit" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
-                        <b-button size="sm" :disabled="message.topic == null && message.text == null" id="message-submit" @click="sendMessage()" variant="warning">Send Message</b-button>
-                      </b-form-group>
-                    </b-form-group>
-                  </b-card-body>
-                </b-card>
-
                 <b-card no-body no-header bg-variant="light" class="m-1 p-1">
                   <div class="d-flex flex-wrap m-0 p-0">
+                    <div class="mt-0 flex-grow-1">
+                    </div>
+                    <div class="mt-0">
+                      <b-button size="sm" :pressed.sync="newMessage" variant="link" v-b-popover.hover.top="'Send message'"><span v-if="newPool"><b-icon-pencil-square shift-v="+1" font-scale="1.0"></b-icon-pencil-square></span><span v-else><b-icon-pencil-square shift-v="+1" font-scale="1.0"></b-icon-pencil-square></span></b-button>
+                    </div>
                     <div class="mt-0 flex-grow-1">
                     </div>
                     <div class="mt-0 pr-1">
@@ -396,7 +382,25 @@
                       <b-form-select size="sm" v-model="messagesPageSize" :options="pageSizes" v-b-popover.hover.top="'Messages Page size'"></b-form-select>
                     </div>
                   </div>
-                  <font size="-1" class="mt-1">
+                  <b-card v-if="newMessage" no-body no-header bg-variant="light" class="m-1 p-1 w-75">
+                    <b-card-body class="m-1 p-1">
+                      <b-form-group label-cols-lg="2" label="Send Message" label-size="md" label-class="font-weight-bold pt-0" class="mb-0">
+                        <b-form-group label="To:" label-for="message-to" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                          <b-form-input type="text" size="sm" id="message-to" v-model.trim="message.to" placeholder="0x1234... (optional)" class="w-50"></b-form-input>
+                        </b-form-group>
+                        <b-form-group label="Topic:" label-for="message-topic" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                          <b-form-input type="text" size="sm" id="message-topic" v-model.trim="message.topic" placeholder="{topic}" class="w-50"></b-form-input>
+                        </b-form-group>
+                        <b-form-group label="Text:" label-for="message-text" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                          <b-form-input type="text" size="sm" id="message-text" v-model.trim="message.text" placeholder="{text}" class="w-75"></b-form-input>
+                        </b-form-group>
+                        <b-form-group label="" label-for="message-submit" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                          <b-button size="sm" :disabled="message.topic == null && message.text == null" id="message-submit" @click="sendMessage()" variant="warning">Send Message</b-button>
+                        </b-form-group>
+                      </b-form-group>
+                    </b-card-body>
+                  </b-card>
+                  <font v-if="!newMessage" size="-1" class="mt-1">
                     <b-table small fixed striped responsive hover :fields="messagesFields" :items="pagedFilteredSortedMessages" head-variant="light" class="m-0">
                       <template #cell(timestamp)="data">
                         <b-link :href="'https://etherscan.io/tx/' + data.item.txHash" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ formatTimestamp(data.item.timestamp) }}</b-link>
@@ -511,7 +515,7 @@
                           <h6 class="m-0 p-0"><font size="-1">{{ ensOrAddress(selectedCollection) }}</font>: {{ set.description }}</h6>
                         </div>
                         <div v-else>
-                          <h6 class="m-0 p-0"><font size="-2">{{ ensOrAddress(selectedCollection) }}:</font> <font size="-1">{{ ensOrAddress(selectedPool) }}:</font> {{ set.description }}</h6>
+                          <h6 class="m-0 p-0"><font size="-2">{{ ensOrAddress(selectedCollection) }}:</font> <font size="-1">{{ ensOrAddress(selectedPool, 48) }}:</font> {{ set.description }}</h6>
                         </div>
                       </div>
                       <div v-else>
@@ -607,6 +611,7 @@
           showInfo: false,
           showFilter: false,
           newPool: false,
+          newMessage: false,
           selectedCollection: null,
           selectedPool: null,
           poolRating: {
