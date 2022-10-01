@@ -51,7 +51,7 @@
           <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
         </b-navbar>
 
-        <b-card no-body class="p-0 mt-0" style="min-height: 666px;">
+        <b-card no-body class="p-0 mt-0 pb-1" style="min-height: 666px;">
           <b-alert size="sm" dismissible variant="warning" show class="m-1 my-0">
             Warning: This is experimental unaudited software. Revoke permissions when not required, at this early stage.
           </b-alert>
@@ -289,7 +289,7 @@
               </b-card-body>
             </b-card>
 
-            <b-card v-if="!newPool" class="mx-0 mt-1 mr-1" body-class="m-1 p-0" header-class="m-0 p-2">
+            <b-card v-if="!newPool" class="mx-0 mt-1" body-class="m-1 p-0" header-class="m-0 p-2">
               <template #header>
                 <div v-if="selectedCollection != null">
                   <div v-if="selectedPool == null">
@@ -303,71 +303,24 @@
                   <h6 class="m-0 p-0">All Collections With Pools</h6>
                 </div>
               </template>
-              <b-card-text>
-                <b-card v-if="selectedCollection" no-body no-header bg-variant="light" class="m-1 p-1 w-75">
-                  <b-card-body class="m-1 p-1">
-                    <b-form-group label-cols-lg="2" label="Info" label-size="md" label-class="font-weight-bold pt-0" class="mb-0">
-                      <b-form-group v-if="getSelectedCollection && getSelectedCollection.reservoirInfo" label="Collection Name:" label-for="info-collectionname" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
-                        <b-link id="info-collectionname" :href="'https://opensea.io/collection/' + getSelectedCollection.reservoirInfo.slug" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedCollection.name }}</b-link>
-                      </b-form-group>
-                      <b-form-group v-if="getSelectedCollection" label="Collection Address:" label-for="info-collectionaddress" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
-                        <b-link id="info-collectionaddress" :href="'https://etherscan.io/token/' + getSelectedCollection.address + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedCollection.address }}</b-link>
-                      </b-form-group>
-                      <b-form-group v-if="getSelectedPoolRecord" label="Pool:" label-for="info-poolname" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
-                        <b-input-group>
-                          <b-form-input type="text" size="sm" disabled :value="getSelectedPoolRecord.symbol" class="w-25"></b-form-input>
-                          <b-form-input type="text" size="sm" id="info-poolname" disabled :value="getSelectedPoolRecord.name" class="w-50"></b-form-input>
-                        </b-input-group>
-                      </b-form-group>
-                      <b-form-group v-if="getSelectedPoolRecord" label="My Pool Balance:" label-for="info-mypoolbalance" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
-                        <b-form-input type="text" size="sm" id="info-mypoolbalance" readonly v-model.trim="umswapBalance" class="w-50"></b-form-input>
-                      </b-form-group>
-                      <b-form-group v-if="getSelectedPoolRecord" label="Pool Balances:" label-for="info-poolbalances" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
-                        <b-link id="info-poolbalances" :href="'https://etherscan.io/token/' + getSelectedPoolRecord.address + '#balances'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
-                      </b-form-group>
-                      <b-form-group v-if="getSelectedPoolRecord" label="Pool NFTs:" label-for="info-poolnfts" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
-                        <b-link id="info-poolnfts" :href="'https://opensea.io/' + getSelectedPoolRecord.address" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
-                      </b-form-group>
-                      <b-form-group v-if="getSelectedPoolRecord" label="Pool Approval:" label-for="info-poolapproved" label-size="sm" label-cols-sm="2" label-align-sm="right" description="Approval is required to swap your NFTs into the pool. Revoke when not transferring into the pool" class="mx-0 my-1 p-0">
-                        <b-input-group class="m-0 w-50">
-                          <b-form-input type="text" size="sm" id="info-poolapproved" readonly :value="umswapApproved ? 'Yes' : 'No'"></b-form-input>
-                          <b-input-group-append>
-                            <b-button v-if="!umswapApproved" size="sm" @click="approveTransfer(true)" variant="warning">Approve</b-button>
-                            <b-button v-if="umswapApproved" size="sm" @click="approveTransfer(false)" variant="warning">Revoke Approval</b-button>
-                          </b-input-group-append>
-                        </b-input-group>
-                      </b-form-group>
-                    </b-form-group>
-                  </b-card-body>
-                </b-card>
-
-                <b-card v-if="selectedPool" no-body no-header bg-variant="light" class="m-1 p-1 w-75">
-                  <b-card-body class="m-1 p-1">
-                    <b-form-group label-cols-lg="2" label="Rate Pool" label-size="md" label-class="font-weight-bold pt-0" class="mb-0">
-                      <b-form-group label="Current:" label-for="ratepool-current" label-size="sm" label-cols-sm="2" label-align-sm="right" :description="getSelectedPoolRecord.raters > 0 ? ('Number of ratings: ' + getSelectedPoolRecord.raters) : 'No ratings'" class="mx-0 my-1 p-0">
-                        <b-form-rating size="sm" id="ratepool-current" :value="getSelectedPoolRecord.raters > 0 ? (getSelectedPoolRecord.totalScores / getSelectedPoolRecord.raters) : null" :stars="10" show-value color="#ff8800" class="w-50"></b-form-rating>
-                      </b-form-group>
-                      <b-form-group label="Score:" label-for="ratepool-score" label-size="sm" label-cols-sm="2" label-align-sm="right" description="Select from 1 to 10 stars" class="mx-0 my-1 p-0">
-                        <b-form-rating size="sm" id="ratepool-score" v-model="poolRating.score" stars="10" show-value color="#ff8800" class="w-50"></b-form-rating>
-                      </b-form-group>
-                      <b-form-group label="Text:" label-for="ratepool-text" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
-                        <b-form-input type="text" size="sm" id="ratepool-text" v-model.trim="poolRating.text" placeholder="{text}" class="w-50"></b-form-input>
-                      </b-form-group>
-                      <b-form-group label="" label-for="ratepool-submit" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
-                        <b-button size="sm" :disabled="poolRating.score == null" id="ratepool-submit" @click="ratePool()" variant="warning">Rate Pool</b-button>
-                      </b-form-group>
-                    </b-form-group>
-                  </b-card-body>
-                </b-card>
-
-                <b-card no-body no-header bg-variant="light" class="m-1 p-1">
-                  <div class="d-flex flex-wrap m-0 p-0">
+              <!-- <b-card-text> -->
+                <!-- <b-card no-body no-header bg-variant="light" class="m-1 p-1"> -->
+                  <div class="d-flex flex-wrap m-0 p-0 pb-1">
+                    <div class="mt-0">
+                      <b-button v-if="selectedPool" size="sm" :pressed.sync="showSwap" variant="link" v-b-popover.hover.top="'Swap tokens'"><span v-if="showSwap"><b-icon-check-circle-fill shift-v="+1" font-scale="1.0"></b-icon-check-circle-fill></span><span v-else><b-icon-check-circle shift-v="+1" font-scale="1.0"></b-icon-check-circle></span></b-button>
+                    </div>
                     <div class="mt-0 flex-grow-1">
                     </div>
                     <div class="mt-0">
                       <b-button size="sm" :pressed.sync="newMessage" variant="link" v-b-popover.hover.top="'Send message'"><span v-if="newPool"><b-icon-pencil-square shift-v="+1" font-scale="1.0"></b-icon-pencil-square></span><span v-else><b-icon-pencil-square shift-v="+1" font-scale="1.0"></b-icon-pencil-square></span></b-button>
                     </div>
+                    <div class="mt-0">
+                      <b-button v-if="selectedPool" size="sm" :pressed.sync="showRating" variant="link" v-b-popover.hover.top="'Rate pool'"><span v-if="showRating"><b-icon-star-fill shift-v="+1" font-scale="1.0"></b-icon-star-fill></span><span v-else><b-icon-star shift-v="+1" font-scale="1.0"></b-icon-star></span></b-button>
+                    </div>
                     <div class="mt-0 flex-grow-1">
+                    </div>
+                    <div class="mt-0 pr-1">
+                      <b-button v-if="selectedCollection" size="sm" :pressed.sync="showCollectionOrPoolInfo" variant="link" v-b-popover.hover.top="'Show collection or pool info'"><span v-if="showCollectionOrPoolInfo"><b-icon-info-circle-fill shift-v="+1" font-scale="1.0"></b-icon-info-circle-fill></span><span v-else><b-icon-info-circle shift-v="+1" font-scale="1.0"></b-icon-info-circle></span></b-button>
                     </div>
                     <div class="mt-0 pr-1">
                       <b-form-select size="sm" v-model="messagesSortOption" :options="messagesSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
@@ -400,7 +353,76 @@
                       </b-form-group>
                     </b-card-body>
                   </b-card>
-                  <font v-if="!newMessage" size="-1" class="mt-1">
+                  <b-card v-if="selectedCollection && showCollectionOrPoolInfo" no-body no-header bg-variant="light" class="m-1 p-1 w-75">
+                    <b-card-body class="m-1 p-1">
+                      <b-form-group label-cols-lg="2" label="Info" label-size="md" label-class="font-weight-bold pt-0" class="mb-0">
+                        <b-form-group v-if="getSelectedCollection && getSelectedCollection.reservoirInfo" label="Collection Name:" label-for="info-collectionname" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                          <b-link id="info-collectionname" :href="'https://opensea.io/collection/' + getSelectedCollection.reservoirInfo.slug" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedCollection.name }}</b-link>
+                        </b-form-group>
+                        <b-form-group v-if="getSelectedCollection" label="Collection Address:" label-for="info-collectionaddress" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                          <b-link id="info-collectionaddress" :href="'https://etherscan.io/token/' + getSelectedCollection.address + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedCollection.address }}</b-link>
+                        </b-form-group>
+                        <b-form-group v-if="getSelectedPoolRecord" label="Pool:" label-for="info-poolname" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                          <b-input-group>
+                            <b-form-input type="text" size="sm" disabled :value="getSelectedPoolRecord.symbol" class="w-25"></b-form-input>
+                            <b-form-input type="text" size="sm" id="info-poolname" disabled :value="getSelectedPoolRecord.name" class="w-50"></b-form-input>
+                          </b-input-group>
+                        </b-form-group>
+                        <b-form-group v-if="getSelectedPoolRecord" label="My Pool Balance:" label-for="info-mypoolbalance" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                          <b-form-input type="text" size="sm" id="info-mypoolbalance" readonly v-model.trim="umswapBalance" class="w-50"></b-form-input>
+                        </b-form-group>
+                        <b-form-group v-if="getSelectedPoolRecord" label="Pool Balances:" label-for="info-poolbalances" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                          <b-link id="info-poolbalances" :href="'https://etherscan.io/token/' + getSelectedPoolRecord.address + '#balances'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
+                        </b-form-group>
+                        <b-form-group v-if="getSelectedPoolRecord" label="Pool NFTs:" label-for="info-poolnfts" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                          <b-link id="info-poolnfts" :href="'https://opensea.io/' + getSelectedPoolRecord.address" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
+                        </b-form-group>
+                        <b-form-group v-if="getSelectedPoolRecord" label="Pool Approval:" label-for="info-poolapproved" label-size="sm" label-cols-sm="2" label-align-sm="right" description="Approval is required to swap your NFTs into the pool. Revoke when not transferring into the pool" class="mx-0 my-1 p-0">
+                          <b-input-group class="m-0 w-50">
+                            <b-form-input type="text" size="sm" id="info-poolapproved" readonly :value="umswapApproved ? 'Yes' : 'No'"></b-form-input>
+                            <b-input-group-append>
+                              <b-button v-if="!umswapApproved" size="sm" @click="approveTransfer(true)" variant="warning">Approve</b-button>
+                              <b-button v-if="umswapApproved" size="sm" @click="approveTransfer(false)" variant="warning">Revoke Approval</b-button>
+                            </b-input-group-append>
+                          </b-input-group>
+                        </b-form-group>
+                      </b-form-group>
+                    </b-card-body>
+                  </b-card>
+                  <b-card v-if="selectedPool && showRating" no-body no-header bg-variant="light" class="m-1 p-1 w-75">
+                    <b-card-body class="m-1 p-1">
+                      <b-form-group label-cols-lg="2" label="Rate Pool" label-size="md" label-class="font-weight-bold pt-0" class="mb-0">
+                        <b-form-group label="Current:" label-for="ratepool-current" label-size="sm" label-cols-sm="2" label-align-sm="right" :description="getSelectedPoolRecord.raters > 0 ? ('Number of ratings: ' + getSelectedPoolRecord.raters) : 'No ratings'" class="mx-0 my-1 p-0">
+                          <b-form-rating size="sm" id="ratepool-current" :value="getSelectedPoolRecord.raters > 0 ? (getSelectedPoolRecord.totalScores / getSelectedPoolRecord.raters) : null" :stars="10" show-value color="#ff8800" class="w-50"></b-form-rating>
+                        </b-form-group>
+                        <b-form-group label="Score:" label-for="ratepool-score" label-size="sm" label-cols-sm="2" label-align-sm="right" description="Select from 1 to 10 stars" class="mx-0 my-1 p-0">
+                          <b-form-rating size="sm" id="ratepool-score" v-model="poolRating.score" stars="10" show-value color="#ff8800" class="w-50"></b-form-rating>
+                        </b-form-group>
+                        <b-form-group label="Text:" label-for="ratepool-text" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                          <b-form-input type="text" size="sm" id="ratepool-text" v-model.trim="poolRating.text" placeholder="{text}" class="w-50"></b-form-input>
+                        </b-form-group>
+                        <b-form-group label="" label-for="ratepool-submit" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
+                          <b-button size="sm" :disabled="poolRating.score == null" id="ratepool-submit" @click="ratePool()" variant="warning">Rate Pool</b-button>
+                        </b-form-group>
+                      </b-form-group>
+                    </b-card-body>
+                  </b-card>
+                  <b-card v-if="selectedPool && showSwap" no-body no-header bg-variant="light" class="m-1 p-1 w-75">
+                    <b-card-body class="m-1 p-1">
+                      <b-form-group label-cols-lg="2" label="Swap" label-size="md" label-class="font-weight-bold pt-0" class="mb-0">
+                        <b-form-group label="Into Pool:" label-for="swap-in" label-size="sm" label-cols-sm="2" label-align-sm="right" description="Select tokens to swap in below" class="mx-0 my-1 p-0">
+                          <b-form-textarea size="sm" id="swap-in" readonly v-model.trim="tokenIdsToSwapIn.join(',')" rows="1" max-rows="5" class="w-100"></b-form-textarea>
+                        </b-form-group>
+                        <b-form-group label="Out Of Pool:" label-for="swap-out" label-size="sm" label-cols-sm="2" label-align-sm="right" description="Select tokens to swap out below" class="mx-0 my-1 p-0">
+                          <b-form-textarea size="sm" id="swap-out" readonly v-model.trim="tokenIdsToSwapOut.join(',')" rows="1" max-rows="5" class="w-100"></b-form-textarea>
+                        </b-form-group>
+                        <b-form-group label="" label-for="swap-submit" label-size="sm" label-cols-sm="2" label-align-sm="right" description="Pool balance must be sufficient to cover any net NFTs swapped out, and approval is required" class="mx-0 my-1 p-0">
+                          <b-button size="sm" id="swap-submit" :disabled="!umswapApproved || (parseFloat(convertETH(umswapBalance)) + parseFloat(umswapChange) < 0) || (tokenIdsToSwapIn.length == 0 && tokenIdsToSwapOut.length == 0)" @click="swapIt" variant="warning">Swap</b-button>
+                        </b-form-group>
+                      </b-form-group>
+                    </b-card-body>
+                  </b-card>
+                  <font v-if="!newMessage && !showRating && !showCollectionOrPoolInfo && !showSwap" size="-1" class="mt-1">
                     <b-table small fixed striped responsive hover :fields="messagesFields" :items="pagedFilteredSortedMessages" head-variant="light" class="m-0">
                       <template #cell(timestamp)="data">
                         <b-link :href="'https://etherscan.io/tx/' + data.item.txHash" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ formatTimestamp(data.item.timestamp) }}</b-link>
@@ -416,25 +438,8 @@
                       </template>
                     </b-table>
                   </font>
-                </b-card>
-
-                <b-card v-if="selectedPool != null" no-body no-header bg-variant="light" class="m-1 p-1 w-75">
-                  <b-card-body class="m-1 p-1">
-                    <b-form-group label-cols-lg="2" label="Swap" label-size="md" label-class="font-weight-bold pt-0" class="mb-0">
-                      <b-form-group label="Into Pool:" label-for="swap-in" label-size="sm" label-cols-sm="2" label-align-sm="right" description="Select tokens to swap in below" class="mx-0 my-1 p-0">
-                        <b-form-textarea size="sm" id="swap-in" readonly v-model.trim="tokenIdsToSwapIn.join(',')" rows="1" max-rows="5" class="w-100"></b-form-textarea>
-                      </b-form-group>
-                      <b-form-group label="Out Of Pool:" label-for="swap-out" label-size="sm" label-cols-sm="2" label-align-sm="right" description="Select tokens to swap out below" class="mx-0 my-1 p-0">
-                        <b-form-textarea size="sm" id="swap-out" readonly v-model.trim="tokenIdsToSwapOut.join(',')" rows="1" max-rows="5" class="w-100"></b-form-textarea>
-                      </b-form-group>
-                      <b-form-group label="" label-for="swap-submit" label-size="sm" label-cols-sm="2" label-align-sm="right" description="Pool balance must be sufficient to cover any net NFTs swapped out, and approval is required" class="mx-0 my-1 p-0">
-                        <b-button size="sm" id="swap-submit" :disabled="!umswapApproved || (parseFloat(convertETH(umswapBalance)) + parseFloat(umswapChange) < 0) || (tokenIdsToSwapIn.length == 0 && tokenIdsToSwapOut.length == 0)" @click="swapIt" variant="warning">Swap</b-button>
-                      </b-form-group>
-                    </b-form-group>
-                  </b-card-body>
-                </b-card>
-
-              </b-card-text>
+                <!-- </b-card> -->
+              <!-- </b-card-text> -->
             </b-card>
 
             <!-- NEW POOL -->
@@ -506,9 +511,8 @@
               </b-col>
               <b-col class="m-0 p-0">
                 <!-- TOKENS BY GROUPS -->
-                <!-- {{ getPoolTokens(selectedCollection, selectedPool) }} -->
                 <div v-if="collectionLoaded != null" v-for="(set, setIndex) in getPoolTokens(selectedCollection, selectedPool)" :key="setIndex">
-                  <b-card class="mx-0 my-1" body-class="m-1 p-0" header-class="m-0 p-2">
+                  <b-card class="mx-0 mt-1 mb-0" body-class="m-1 p-0" header-class="m-0 p-2">
                     <template #header>
                       <div v-if="selectedCollection != null">
                         <div v-if="selectedPool == null">
@@ -591,7 +595,6 @@
                 </b-card>
               </b-col>
             </b-row>
-
           </b-card-body>
         </b-card>
         <b-card no-header body-class="m-0 p-0" class="m-0 p-0 border-0">
@@ -612,6 +615,9 @@
           showFilter: false,
           newPool: false,
           newMessage: false,
+          showCollectionOrPoolInfo: false,
+          showRating: false,
+          showSwap: false,
           selectedCollection: null,
           selectedPool: null,
           poolRating: {
@@ -1317,6 +1323,7 @@
             } else {
               Vue.set(this.selectedTokens[setName], tokenId, true);
             }
+            this.showSwap = true;
           },
           selectTokenId(tokenId, offOrOn) {
             if (offOrOn) {
