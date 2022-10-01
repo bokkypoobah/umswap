@@ -304,7 +304,7 @@
                     <h6 class="m-0 p-0">{{ ensOrAddress(selectedCollection) }}</h6>
                   </div>
                   <div v-else>
-                    <h6 class="m-0 p-0">{{ ensOrAddress(selectedCollection) }} - {{ ensOrAddress(selectedPool) }}</h6>
+                    <h6 class="m-0 p-0">{{ ensOrAddress(selectedCollection) }}: {{ ensOrAddress(selectedPool) }}</h6>
                   </div>
                 </div>
                 <div v-else>
@@ -470,10 +470,10 @@
                     <template #header>
                       <div v-if="selectedCollection != null">
                         <div v-if="selectedPool == null">
-                          <h6 class="m-0 p-0">{{ ensOrAddress(selectedCollection) }} - {{ set.description }}</h6>
+                          <h6 class="m-0 p-0">{{ ensOrAddress(selectedCollection) }}: {{ set.description }}</h6>
                         </div>
                         <div v-else>
-                          <h6 class="m-0 p-0">{{ ensOrAddress(selectedCollection) }} - {{ ensOrAddress(selectedPool) }} - {{ set.description }}</h6>
+                          <h6 class="m-0 p-0">{{ ensOrAddress(selectedCollection) }}: {{ ensOrAddress(selectedPool) }}: {{ set.description }}</h6>
                         </div>
                       </div>
                       <div v-else>
