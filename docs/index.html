@@ -52,15 +52,11 @@
         </b-navbar>
 
         <b-card no-body class="p-0 mt-0" style="min-height: 666px;">
-          <!-- <b-card no-body sub-title="Debug" class="m-1 p-1 border-1">
-            <b-card-body class="m-1 p-1">
-              collectionLoaded: {{ collectionLoaded || '(null)' }}
-              collection.address: {{ collection && collection.address || '(null)' }}
-            </b-card-body>
-          </b-card> -->
-
-          <!-- ALL COLLECTIONS TOOLBAR -->
-          <b-card-body class="m-0 p-1">
+          <b-alert size="sm" dismissible variant="warning" show class="m-1 my-0">
+            Warning: This is experimental unaudited software. Revoke permissions when not required, at this early stage.
+          </b-alert>
+          <b-card-body class="m-0 px-1 py-0">
+            <!-- ALL COLLECTIONS TOOLBAR -->
             <div class="d-flex flex-wrap m-0 p-0">
               <div class="mt-0 pr-1">
                 <b-button :disabled="selectedCollection != null || sync.section != null" size="sm" @click="doIt('syncUmswaps')" variant="primary" style="min-width: 40px;" v-b-popover.hover.top="'Sync Umswaps'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download></b-button>
@@ -132,10 +128,6 @@
                 </b-card-body>
               </b-card>
             </div>
-
-            <b-alert size="sm" dismissible variant="warning" show class="m-0 mt-1">
-              Sep 29 2022 - v0.9.0 contract deployed
-            </b-alert>
 
             <!-- TABLE OF COLLECTIONS -->
             <b-card v-if="!newPool" no-header no-body class="m-0 mt-1 p-0 border-0">
@@ -312,7 +304,6 @@
                 </div>
               </template>
               <b-card-text>
-
                 <b-card no-body no-header bg-variant="light" class="m-1 p-1 w-75">
                   <b-card-body class="m-1 p-1">
                     <b-form-group label-cols-lg="2" label="Info" label-size="md" label-class="font-weight-bold pt-0" class="mb-0">
