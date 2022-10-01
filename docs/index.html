@@ -226,7 +226,7 @@
                 <font size="-1">
                   <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='poolsRowSelected' :fields="poolsFields" :items="selectedPool != null ? [getSelectedPoolRecord] : pagedFilteredSortedPools" head-variant="light" class="m-0">
                     <template #head(address)="data">
-                      <span v-b-popover.hover="'ERC-20 Umswap pool contract address'">{{ data.label }}</span>
+                      <span v-b-popover.hover="'ERC-20 Umswap pool contract address'">{{ selectedPool ? 'Pool' : 'Pools' }}</span>
                     </template>
                     <template #head(symbol)="data">
                       <span v-b-popover.hover="'ERC-20 Umswap pool symbol'">{{ data.label }}</span>
