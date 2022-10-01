@@ -388,22 +388,24 @@
                   </b-card-body>
                 </b-card>
 
-                <font size="-1">
-                  <b-table small fixed striped responsive hover :fields="messagesFields" :items="pagedFilteredSortedMessages" head-variant="light" class="m-0">
-                    <template #cell(timestamp)="data">
-                      <b-link :href="'https://etherscan.io/tx/' + data.item.txHash" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ formatTimestamp(data.item.timestamp) }}</b-link>
-                    </template>
-                    <template #cell(account)="data">
-                      <b-link :href="'https://opensea.io/' + data.item.account" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ ensOrAddress(data.item.account) }}</b-link>
-                    </template>
-                    <template #cell(collection)="data">
-                      <b-link :href="'https://opensea.io/collection/' + (collections[data.item.collection] && collections[data.item.collection].reservoirInfo.slug || '')" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ ensOrAddress(data.item.collection) }}</b-link>
-                    </template>
-                    <template #cell(umswap)="data">
-                      <b-link :href="'https://opensea.io/' + data.item.umswap" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ data.item.umswap && ensOrAddress(data.item.umswap) || '' }}</b-link>
-                    </template>
-                  </b-table>
-                </font>
+                <b-card no-body no-header bg-variant="light" class="m-1 p-1">
+                  <font size="-1">
+                    <b-table small fixed striped responsive hover :fields="messagesFields" :items="pagedFilteredSortedMessages" head-variant="light" class="m-0">
+                      <template #cell(timestamp)="data">
+                        <b-link :href="'https://etherscan.io/tx/' + data.item.txHash" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ formatTimestamp(data.item.timestamp) }}</b-link>
+                      </template>
+                      <template #cell(account)="data">
+                        <b-link :href="'https://opensea.io/' + data.item.account" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ ensOrAddress(data.item.account) }}</b-link>
+                      </template>
+                      <template #cell(collection)="data">
+                        <b-link :href="'https://opensea.io/collection/' + (collections[data.item.collection] && collections[data.item.collection].reservoirInfo.slug || '')" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ ensOrAddress(data.item.collection) }}</b-link>
+                      </template>
+                      <template #cell(umswap)="data">
+                        <b-link :href="'https://opensea.io/' + data.item.umswap" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ data.item.umswap && ensOrAddress(data.item.umswap) || '' }}</b-link>
+                      </template>
+                    </b-table>
+                  </font>
+                </b-card>
 
                 <b-card v-if="selectedPool != null" no-body no-header bg-variant="light" class="m-1 p-1 w-75">
                   <b-card-body class="m-1 p-1">
