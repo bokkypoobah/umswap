@@ -389,7 +389,23 @@
                 </b-card>
 
                 <b-card no-body no-header bg-variant="light" class="m-1 p-1">
-                  <font size="-1">
+                  <div class="d-flex flex-wrap m-0 p-0">
+                    <div class="mt-0 flex-grow-1">
+                    </div>
+                    <div class="mt-0 pr-1">
+                      <b-form-select size="sm" v-model="messagesSortOption" :options="messagesSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
+                    </div>
+                    <div class="mt-0 pr-1">
+                      <font size="-2" v-b-popover.hover.top="'# tokens'">{{ filteredSortedMessages.length }}</font>
+                    </div>
+                    <div class="mt-0 pr-1">
+                      <b-pagination size="sm" v-model="messagesCurrentPage" :total-rows="filteredSortedMessages.length" :per-page="messagesPageSize" style="height: 0;"></b-pagination>
+                    </div>
+                    <div class="mt-0 pl-1">
+                      <b-form-select size="sm" v-model="messagesPageSize" :options="pageSizes" v-b-popover.hover.top="'Messages Page size'"></b-form-select>
+                    </div>
+                  </div>
+                  <font size="-1" class="mt-1">
                     <b-table small fixed striped responsive hover :fields="messagesFields" :items="pagedFilteredSortedMessages" head-variant="light" class="m-0">
                       <template #cell(timestamp)="data">
                         <b-link :href="'https://etherscan.io/tx/' + data.item.txHash" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ formatTimestamp(data.item.timestamp) }}</b-link>
@@ -613,11 +629,14 @@
           },
           tokenAttributesFilter: {},
           collectionsCurrentPage: 1,
-          collectionsPageSize: 100,
+          collectionsPageSize: 25,
           collectionsSortOption: 'nameasc',
           poolsCurrentPage: 1,
-          poolsPageSize: 100,
+          poolsPageSize: 25,
           poolsSortOption: 'nameasc',
+          messagesCurrentPage: 1,
+          messagesPageSize: 10,
+          messagesSortOption: 'timedsc',
           tokens: {
             'tokenIdsSelected': {
               currentPage: 1,
@@ -727,6 +746,10 @@
             // { value: 'rarityrankasc', text: '▲ RarityRank' },
             // { value: 'rarityrankdsc', text: '▼ RarityRank' },
             { value: 'random', text: 'Random' },
+          ],
+          messagesSortOptions: [
+            { value: 'timeasc', text: '▲ Time' },
+            { value: 'timedsc', text: '▼ Time' },
           ],
           pageSizes: [
             { value: 10, text: '10' },
@@ -1001,13 +1024,15 @@
           },
           filteredSortedMessages() {
             let results = this.filteredMessages;
-            results.sort((a, b) => b.timestamp - a.timestamp);
+            if (this.messagesSortOption == 'timeasc') {
+              results.sort((a, b) => a.timestamp - b.timestamp);
+            } else {
+              results.sort((a, b) => b.timestamp - a.timestamp);
+            }
             return results;
           },
           pagedFilteredSortedMessages() {
-            // TODO:
-            return this.filteredSortedMessages;
-            // return this.filteredSortedCollections.slice((this.collectionsCurrentPage - 1) * this.collectionsPageSize, this.collectionsCurrentPage * this.collectionsPageSize);
+            return this.filteredSortedMessages.slice((this.messagesCurrentPage - 1) * this.messagesPageSize, this.messagesCurrentPage * this.messagesPageSize);
           },
         },
 
