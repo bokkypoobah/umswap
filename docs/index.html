@@ -50,7 +50,7 @@
           </b-navbar-brand>
           <b-navbar-nav class="ml-auto">
             <!-- <b-avatar v-if="coinbase && coinbase != ensOrAddress(coinbase)" rounded variant="light" size="2.5rem" :src="ensOrAddress(coinbase)"></b-avatar> -->
-            <b-button size="sm" variant="outline-primary" class="ml-1" @click="doIt('syncUmswaps')" v-b-popover.hover.bottom="'Click to update wallet'">{{ coinbase ? ensOrAddress(coinbase) : 'Connect' }}</b-button>
+            <b-button size="sm" :disabled="sync.section != null" variant="outline-primary" class="ml-1" @click="doIt('syncUmswaps')" v-b-popover.hover.bottom="'Click to update wallet, and sync Umswaps including your Approval status'">{{ coinbase ? ensOrAddress(coinbase) : 'Connect' }}</b-button>
           </b-navbar-nav>
         </b-navbar>
 
@@ -68,7 +68,7 @@
             <!-- ALL COLLECTIONS TOOLBAR -->
             <div class="d-flex flex-wrap m-0 p-0">
               <div class="mt-0 pr-1">
-                <b-button :disabled="selectedCollection != null || sync.section != null" size="sm" @click="doIt('syncUmswaps')" variant="primary" style="min-width: 40px;" v-b-popover.hover.top="'Sync Umswaps'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download></b-button>
+                <b-button :disabled="sync.section != null" size="sm" @click="doIt('syncUmswaps')" variant="link" v-b-popover.hover.top="'Sync Umswaps, including your Approval status'"><b-icon-arrow-clockwise shift-v="+1" font-scale="1.2"></b-icon-arrow-clockwise></b-button>
               </div>
               <div class="mt-0 pr-1">
                 <b-form-input :disabled="newPool" type="text" size="sm" v-model.trim="searchCollections" debounce="600" v-b-popover.hover.top="'Filter by partial ERC-721 NFT collection address, symbol or name'" placeholder="🔍 collection"></b-form-input>
@@ -182,7 +182,7 @@
               <!-- UMSWAPS TOOLBAR -->
               <div class="d-flex flex-wrap m-0 p-0">
                 <div class="mt-0 pr-1">
-                  <b-button :disabled="sync.section != null" size="sm" @click="doIt('syncUmswapsAndCollection')" variant="primary" style="min-width: 40px;" v-b-popover.hover.top="'Sync Umswaps and collection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download></b-button>
+                  <b-button :disabled="sync.section != null" size="sm" @click="doIt('syncUmswapsAndCollection')" variant="link" v-b-popover.hover.top="'Sync Umswaps and collection'"><b-icon-arrow-clockwise shift-v="+1" font-scale="1.2"></b-icon-arrow-clockwise></b-button>
                 </div>
                 <!-- TODO
                 <div class="mt-0 pr-1">
@@ -413,6 +413,7 @@
                           <b-input-group-append>
                             <b-button v-if="!umswapApproved" size="sm" @click="approveTransfer(true)" variant="warning">Approve</b-button>
                             <b-button v-if="umswapApproved" size="sm" @click="approveTransfer(false)" variant="warning">Revoke Approval</b-button>
+                            <b-button :disabled="sync.section != null" size="sm" @click="doIt('syncUmswaps')" variant="link" v-b-popover.hover.top="'Sync Umswaps, including your Approval status'"><b-icon-arrow-clockwise shift-v="+1" font-scale="1.3"></b-icon-arrow-clockwise></b-button>
                           </b-input-group-append>
                         </b-input-group>
                       </b-form-group>
@@ -1412,6 +1413,7 @@
               const block = await provider.getBlock("latest");
               const blockNumber = block.number;
               const timestamp = block.timestamp;
+              const currentSelectedCollection = this.selectedCollection;
 
               const ENSOWNERBATCHSIZE = 200; // 500 fails occassionally
 
@@ -1627,9 +1629,9 @@
               let collectionAddress = null;
               if (action == 'newUmswapRetrieveCollection') {
                 collectionAddress = this.newUmswap.collectionAddress == null ? null : ethers.utils.getAddress(this.newUmswap.collectionAddress);
-              } else {
-                if (this.selectedCollection != null) {
-                  collectionAddress = this.selectedCollection == null ? null : ethers.utils.getAddress(this.selectedCollection);
+              } else if (action == 'syncUmswapsAndCollection'){
+                if (currentSelectedCollection != null) {
+                  collectionAddress = currentSelectedCollection == null ? null : ethers.utils.getAddress(currentSelectedCollection);
                 }
               }
               if (collectionAddress != null) {
