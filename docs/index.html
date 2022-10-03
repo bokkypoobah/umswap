@@ -49,8 +49,8 @@
             <em v-b-popover.hover.bottom="'gm gm gm'">Umswap</em>
           </b-navbar-brand>
           <b-navbar-nav class="ml-auto">
-            <!-- <b-avatar v-if="coinbase && coinbase != ensOrAddress(coinbase)" rounded variant="light" size="2.5rem" :src="ensOrAddress(coinbase)"></b-avatar> -->
-            <b-button size="sm" :disabled="sync.section != null" variant="outline-primary" class="ml-1" @click="doIt('syncUmswaps')" v-b-popover.hover.bottom="'Click to update wallet, and sync Umswaps including your Approval status'">{{ coinbase ? ensOrAddress(coinbase) : 'Connect' }}</b-button>
+            <b-avatar v-if="coinbase && coinbase != ensOrAddress(coinbase)" rounded variant="light" size="2.0rem" :src="'https://metadata.ens.domains/mainnet/avatar/' + ensOrAddress(coinbase)"></b-avatar>
+            <b-button size="sm" :disabled="sync.section != null" variant="link" class="ml-1" @click="doIt('syncUmswaps')" v-b-popover.hover.bottom="'Update wallet and Sync Umswaps including Approval status'">{{ coinbase ? ensOrAddress(coinbase) : 'Connect' }}</b-button>
           </b-navbar-nav>
         </b-navbar>
 
@@ -68,7 +68,7 @@
             <!-- ALL COLLECTIONS TOOLBAR -->
             <div class="d-flex flex-wrap m-0 p-0">
               <div class="mt-0 pr-1">
-                <b-button :disabled="sync.section != null" size="sm" @click="doIt('syncUmswaps')" variant="link" v-b-popover.hover.top="'Sync Umswaps, including your Approval status'"><b-icon-arrow-clockwise shift-v="+1" font-scale="1.2"></b-icon-arrow-clockwise></b-button>
+                <b-button :disabled="sync.section != null" size="sm" @click="doIt('syncUmswaps')" variant="link" v-b-popover.hover.top="'Sync Umswaps including Approval status'"><b-icon-arrow-clockwise shift-v="+1" font-scale="1.2"></b-icon-arrow-clockwise></b-button>
               </div>
               <div class="mt-0 pr-1">
                 <b-form-input :disabled="newPool" type="text" size="sm" v-model.trim="searchCollections" debounce="600" v-b-popover.hover.top="'Filter by partial ERC-721 NFT collection address, symbol or name'" placeholder="🔍 collection"></b-form-input>
@@ -205,7 +205,7 @@
               <!-- UMSWAPS TOOLBAR -->
               <div class="d-flex flex-wrap m-0 p-0">
                 <div class="mt-0 pr-1">
-                  <b-button :disabled="sync.section != null" size="sm" @click="doIt('syncUmswapsAndCollection')" variant="link" v-b-popover.hover.top="'Sync Umswaps and collection'"><b-icon-arrow-clockwise shift-v="+1" font-scale="1.2"></b-icon-arrow-clockwise></b-button>
+                  <b-button :disabled="sync.section != null" size="sm" @click="doIt('syncUmswapsAndCollection')" variant="link" v-b-popover.hover.top="'Sync Umswaps, Approval status, collection metadata and token ownership'"><b-icon-arrow-clockwise shift-v="+1" font-scale="1.2"></b-icon-arrow-clockwise></b-button>
                 </div>
                 <!-- TODO
                 <div class="mt-0 pr-1">
@@ -1425,6 +1425,10 @@
             if (!connected) {
               alert("Please use the https://metamask.io addon with Firefox, Chromium, Opera or Chrome, or any other other web3 browser, for web3 data retrieval. And refresh!");
             } else {
+              this.sync.completed = 0;
+              this.sync.total = 1;
+              this.sync.section = "Working";
+
               const provider = new ethers.providers.Web3Provider(window.ethereum);
               const signer = provider.getSigner();
               this.coinbase = await signer.getAddress();
@@ -1447,6 +1451,10 @@
               globalENSMap[this.coinbase] = this.coinbase;
 
               // Get UmswapFactory events
+              this.sync.section = null;
+              this.sync.completed = 0;
+              this.sync.total = 0;
+              this.sync.section = "Umswap Events";
               const startBlock = UMSWAPFACTORYDEPLOYMENTBLOCK;
               const endBlock = blockNumber;
               const filter = {
@@ -1495,6 +1503,7 @@
                   umswapEvents.push({ type: "Message", txHash, from, blockNumber, timestamp, to, umswapOrCollection, topic, message });
                 }
               }
+              this.sync.completed = umswapEvents.length;
 
               // Get Umswap state
               const umswapsLength = (await umswapFactory.getUmswapsLength()).toNumber();
