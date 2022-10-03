@@ -49,7 +49,7 @@
             <em v-b-popover.hover.bottom="'gm gm gm'">Umswap</em>
           </b-navbar-brand>
           <b-navbar-nav class="ml-auto">
-            <b-avatar v-if="coinbase && coinbase != ensOrAddress(coinbase)" rounded variant="light" size="2.0rem" :src="'https://metadata.ens.domains/mainnet/avatar/' + ensOrAddress(coinbase)"></b-avatar>
+            <b-avatar v-if="coinbase && coinbase != ensOrAddress(coinbase)" rounded variant="light" size="2.0rem" :src="'https://metadata.ens.domains/mainnet/avatar/' + ensOrAddress(coinbase)" v-b-popover.hover="'Your ENS avatar if set'"></b-avatar>
             <b-button size="sm" :disabled="sync.section != null" variant="link" class="ml-1" @click="doIt('syncUmswaps')" v-b-popover.hover.bottom="'Update wallet and Sync Umswaps including Approval status'">{{ coinbase ? ensOrAddress(coinbase) : 'Connect' }}</b-button>
           </b-navbar-nav>
         </b-navbar>
