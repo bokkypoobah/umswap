@@ -157,9 +157,32 @@
                   <template #cell(collection)="data">
                     <span v-b-popover.hover="selectedCollection ? 'View all collections' : 'View pools for the \'' + data.item.name + '\' collection'">{{ data.item.name }}</span>
                     <br />
-                    <b-link :href="'https://opensea.io/collection/' + (data.item.reservoirInfo && data.item.reservoirInfo.slug || '')" v-b-popover.hover.bottom="'View collection in Opensea.io'" target="_blank">
+                    <b-button :id="'popover-target-name-' + data.item.symbol" variant="link" class="m-0 p-0">
                       {{ data.item.symbol }}
-                    </b-link>
+                    </b-button>
+                    <b-popover :target="'popover-target-name-' + data.item.symbol" placement="right">
+                      <template #title>View {{ data.item.symbol }} Collection:</template>
+                      <b-link :href="'https://opensea.io/collection/' + (data.item.reservoirInfo && data.item.reservoirInfo.slug || '')" target="_blank">
+                        &bull; opensea.io
+                      </b-link>
+                      <br />
+                      <b-link :href="'https://looksrare.org/collections/' + data.item.address" target="_blank">
+                        &bull; looksrare.org
+                      </b-link>
+                      <br />
+                      <b-link :href="'https://x2y2.io/collection/' + (data.item.reservoirInfo && data.item.reservoirInfo.slug || '') + '/items'" target="_blank">
+                        &bull; x2y2.io
+                      </b-link>
+                      <br />
+                      <b-link :href="'https://sudoswap.xyz/#/browse/pools/' + data.item.address" target="_blank">
+                        &bull; sudoswap.xyz
+                      </b-link>
+                      <br />
+                      <b-link :href="'https://www.gem.xyz/collection/' + (data.item.reservoirInfo && data.item.reservoirInfo.slug || '')" target="_blank">
+                        &bull; gem.xyz
+                      </b-link>
+                    </b-popover>
+
                     <br />
                     <b-link :href="'https://etherscan.io/token/' + data.item.address + '#balances'" v-b-popover.hover.bottom="'View contract in Etherscan.io'" target="_blank">
                       {{ data.item.address.substring(0, 10) }}
