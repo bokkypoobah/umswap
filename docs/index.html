@@ -152,12 +152,12 @@
                     <span v-b-popover.hover="'Number of NFTs across all Umswap pools for this collection'">{{ data.label }}</span>
                   </template>
                   <template #cell(image)="data">
-                    <b-avatar rounded variant="light" size="5.0rem" :src="data.item.reservoirInfo.metadata.imageUrl" v-b-popover.hover.bottom="'gm'" class="ml-0"></b-avatar>
+                    <b-avatar rounded variant="light" size="5.0rem" :src="data.item.reservoirInfo && data.item.reservoirInfo.metadata.imageUrl" v-b-popover.hover.bottom="'gm'" class="ml-0"></b-avatar>
                   </template>
                   <template #cell(collection)="data">
                     <span v-b-popover.hover="selectedCollection ? 'View all collections' : 'View pools for the \'' + data.item.name + '\' collection'">{{ data.item.name }}</span>
                     <br />
-                    <b-link :href="'https://opensea.io/collection/' + data.item.reservoirInfo.slug" v-b-popover.hover.bottom="'View collection in Opensea.io'" target="_blank">
+                    <b-link :href="'https://opensea.io/collection/' + (data.item.reservoirInfo && data.item.reservoirInfo.slug || '')" v-b-popover.hover.bottom="'View collection in Opensea.io'" target="_blank">
                       {{ data.item.symbol }}
                     </b-link>
                     <br />
@@ -360,7 +360,7 @@
                   <b-card-body class="m-1 p-1">
                     <b-form-group label-cols-lg="2" label="Info" label-size="md" label-class="font-weight-bold pt-0" class="mb-0">
                       <b-form-group v-if="getSelectedCollection && getSelectedCollection.reservoirInfo" label="Collection Name:" label-for="info-collectionname" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
-                        <b-link id="info-collectionname" :href="'https://opensea.io/collection/' + getSelectedCollection.reservoirInfo.slug" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedCollection.name }}</b-link>
+                        <b-link id="info-collectionname" :href="'https://opensea.io/collection/' + (getSelectedCollection.reservoirInfo && getSelectedCollection.reservoirInfo.slug || '')" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedCollection.name }}</b-link>
                       </b-form-group>
                       <b-form-group v-if="getSelectedCollection" label="Collection Address:" label-for="info-collectionaddress" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
                         <b-link id="info-collectionaddress" :href="'https://etherscan.io/token/' + getSelectedCollection.address + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedCollection.address }}</b-link>
@@ -435,7 +435,7 @@
                       <b-link :href="'https://opensea.io/' + data.item.account" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ ensOrAddress(data.item.account) }}</b-link>
                     </template>
                     <template #cell(collection)="data">
-                      <b-link :href="'https://opensea.io/collection/' + (collections[data.item.collection] && collections[data.item.collection].reservoirInfo.slug || '')" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ ensOrAddress(data.item.collection) }}</b-link>
+                      <b-link :href="'https://opensea.io/collection/' + (collections[data.item.collection] && collections[data.item.collection].reservoirInfo && collections[data.item.collection].reservoirInfo.slug || '')" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ ensOrAddress(data.item.collection) }}</b-link>
                     </template>
                     <template #cell(umswap)="data">
                       <b-link :href="'https://opensea.io/' + data.item.umswap" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ data.item.umswap && ensOrAddress(data.item.umswap) || '' }}</b-link>
