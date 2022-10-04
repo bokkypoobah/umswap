@@ -1777,16 +1777,16 @@
                 const tokenAttributes = {};
                 for (const [tokenId, token] of Object.entries(tokens)) {
                   for (let attribute of token.attributes) {
-                      const key = attribute.key;
-                      const value = attribute.value;
-                      if (!tokenAttributes[key]) {
-                        tokenAttributes[key] = {};
-                      }
-                      if (!tokenAttributes[key][value]) {
-                        tokenAttributes[key][value] = [token.tokenId];
-                      } else {
-                        tokenAttributes[key][value].push(token.tokenId);
-                      }
+                    const key = attribute.key;
+                    const value = attribute.value;
+                    if (!tokenAttributes[key]) {
+                      tokenAttributes[key] = {};
+                    }
+                    if (!tokenAttributes[key][value]) {
+                      tokenAttributes[key][value] = [token.tokenId];
+                    } else {
+                      tokenAttributes[key][value].push(token.tokenId);
+                    }
                   }
                 }
                 // console.log("tokenAttributes: " + JSON.stringify(tokenAttributes, null, 2));
