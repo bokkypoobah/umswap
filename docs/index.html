@@ -537,8 +537,7 @@
               </b-col>
               <b-col class="m-0 p-0">
                 <!-- TOKENS BY GROUPS -->
-                <!-- {{ getPoolTokens(selectedCollection, selectedPool) }} -->
-                <div v-if="collectionLoaded != null" v-for="(set, setIndex) in getPoolTokens(selectedCollection, selectedPool)" :key="setIndex">
+                <div v-if="collectionLoaded != null" v-for="(set, setIndex) in getPoolTokens()" :key="setIndex">
                   <b-card class="mx-0 my-1" body-class="m-1 p-0" header-class="m-0 p-2">
                     <template #header>
                       <div v-if="selectedCollection != null">
@@ -564,10 +563,10 @@
                         <b-button size="sm" @click="resetSelection" variant="link" v-b-popover.hover.top="'Reset selection'"><b-icon-trash shift-v="+1" font-scale="1.0"></b-icon-trash></b-button>
                       </div>
                       <div v-if="set.name == 'tokenIdsUnselected'" class="mt-0 pr-1">
-                        <b-button size="sm" @click="selectTokenIds(pagedFilteredTokens(selectedCollection, selectedPool, set.name))" variant="link" v-b-popover.hover.top="'Select all from current page'"><b-icon-check shift-v="+1" font-scale="1.0"></b-icon-check></b-button>
+                        <b-button size="sm" @click="selectTokenIds(pagedFilteredTokens(set.name))" variant="link" v-b-popover.hover.top="'Select all from current page'"><b-icon-check shift-v="+1" font-scale="1.0"></b-icon-check></b-button>
                       </div>
                       <div v-if="set.name == 'tokenIdsUnselected'" class="mt-0 pr-1">
-                        <b-button size="sm" @click="selectTokenIds(getPoolTokens(selectedCollection, selectedPool)[1].tokens)" variant="link" v-b-popover.hover.top="'Select all from all pages'"><b-icon-check-all shift-v="+1" font-scale="1.0"></b-icon-check-all></b-button>
+                        <b-button size="sm" @click="selectTokenIds(getPoolTokens()[1].tokens)" variant="link" v-b-popover.hover.top="'Select all from all pages'"><b-icon-check-all shift-v="+1" font-scale="1.0"></b-icon-check-all></b-button>
                       </div>
                       <div class="mt-0 flex-grow-1">
                       </div>
@@ -585,7 +584,7 @@
                       </div>
                     </div>
                     <b-card-group v-if="set.tokens.length > 0" deck class="m-0 p-0">
-                      <div v-for="(token, tokenIndex) in pagedFilteredTokens(selectedCollection, selectedPool, set.name)" :key="tokenIndex">
+                      <div v-for="(token, tokenIndex) in pagedFilteredTokens(set.name)" :key="tokenIndex">
                         <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 12rem;">
                           <b-avatar v-if="['validTokenIdsInPool', 'validTokenIdsOwned'].includes(set.name)" button @click="toggleToken(set.name, token.tokenId)" rounded size="12rem" :src="token.image" style="background-color: #fafafa" v-b-popover.hover.top="'Click to select/deselect'">
                             <template v-if="selectedTokens[set.name] && selectedTokens[set.name][token.tokenId]" #badge><b-icon icon="check"></b-icon></template>
@@ -1133,13 +1132,15 @@
               db0.close();
             })();
           },
-          getPoolTokens(collectionAddress, poolAddress) {
+          getPoolTokens() {
+            let collectionAddress = null;
+            let poolAddress = null;
             if (this.newPool) {
               collectionAddress = this.collection.address && ethers.utils.getAddress(this.collection.address) || null;
             } else {
               collectionAddress = this.selectedCollection && ethers.utils.getAddress(this.selectedCollection) || null;
+              poolAddress = this.selectedPool && ethers.utils.getAddress(this.selectedPool) || null;
             }
-            // console.log("getPoolTokens: " + collectionAddress + " " + poolAddress);
             if (collectionAddress != null && collectionAddress == this.collection.address) {
               let umswap = null;
               if (poolAddress != null && this.collections[collectionAddress]) {
@@ -1288,8 +1289,8 @@
             }
             return [];
           },
-          pagedFilteredTokens(collectionAddress, poolAddress, setName) {
-            const allTokens = this.getPoolTokens(collectionAddress, poolAddress);
+          pagedFilteredTokens(setName) {
+            const allTokens = this.getPoolTokens();
             if (allTokens) {
               let tokens;
               if (setName == 'tokenIdsSelected') {
