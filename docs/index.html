@@ -64,9 +64,9 @@
             </b-card-text>
           </b-card>
 
-          <b-card-body v-if="coinbase" class="m-0 px-1 py-0">
+          <b-card-body class="m-0 px-1 py-0">
             <!-- ALL COLLECTIONS TOOLBAR -->
-            <div class="d-flex flex-wrap m-0 p-0">
+            <div v-if="coinbase" class="d-flex flex-wrap m-0 p-0">
               <div class="mt-0 pr-1">
                 <b-button :disabled="sync.section != null" size="sm" @click="doIt('syncUmswaps')" variant="link" v-b-popover.hover.top="'Sync Umswaps including Approval status'"><b-icon-arrow-clockwise shift-v="+1" font-scale="1.2"></b-icon-arrow-clockwise></b-button>
               </div>
@@ -108,7 +108,7 @@
             </div>
 
             <!-- INFO -->
-            <div v-if="showInfo">
+            <div v-if="showInfo || coinbase == null">
               <b-card no-header no-body class="mx-0 my-1 p-0">
                 <b-card-body class="m-0 p-0">
                   <b-card-text class="m-1 p-1">
@@ -139,7 +139,7 @@
             </div>
 
             <!-- TABLE OF COLLECTIONS -->
-            <b-card v-if="!newPool" no-header no-body class="m-0 mt-1 p-0 border-0">
+            <b-card v-if="!newPool && coinbase" no-header no-body class="m-0 mt-1 p-0 border-0">
               <b-card-body class="m-0 p-0">
                 <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='collectionsRowSelected' :fields="collectionsFields" :items="selectedCollection ? (collections[selectedCollection] ? [collections[selectedCollection]] : []) : pagedFilteredSortedCollections" head-variant="light" class="m-0">
                   <template #head(collection)="data">
@@ -201,7 +201,7 @@
               </b-card-body>
             </b-card>
 
-            <b-card v-if="selectedCollection != null && !newPool" no-header no-body class="m-0 mt-1 p-1 border-1">
+            <b-card v-if="selectedCollection != null && !newPool && coinbase" no-header no-body class="m-0 mt-1 p-1 border-1">
               <!-- UMSWAPS TOOLBAR -->
               <div class="d-flex flex-wrap m-0 p-0">
                 <div class="mt-0 pr-1">
@@ -245,8 +245,7 @@
               </div>
 
               <!-- TABLE OF UMSWAPS -->
-              <b-card-body class="m-0 mt-1 p-0">
-
+              <b-card-body v-if="coinbase" class="m-0 mt-1 p-0">
                 <font size="-1">
                   <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='poolsRowSelected' :fields="poolsFields" :items="selectedPool != null ? [getSelectedPoolRecord] : pagedFilteredSortedPools" head-variant="light" class="m-0">
                     <template #head(pool)="data">
@@ -292,7 +291,7 @@
               </b-card-body>
             </b-card>
 
-            <b-card v-if="!newPool" class="mx-0 mt-1" body-class="m-1 p-0" header-class="m-0 p-2">
+            <b-card v-if="!newPool && coinbase" class="mx-0 mt-1" body-class="m-1 p-0" header-class="m-0 p-2">
               <template #header>
                 <div v-if="selectedCollection != null">
                   <div v-if="selectedPool == null">
@@ -445,7 +444,7 @@
             </b-card>
 
             <!-- NEW POOL -->
-            <div v-if="newPool">
+            <div v-if="newPool && coinbase">
               <b-card class="mx-1 my-1" body-class="m-1 p-0" header-class="m-0 p-2">
                 <template #header>
                   <h6 class="mb-0">New Pool</h6>
@@ -481,7 +480,7 @@
               </b-card>
             </div>
 
-            <b-row v-if="selectedCollection != null || newPool" class="m-0 p-0">
+            <b-row v-if="(selectedCollection != null || newPool) && coinbase" class="m-0 p-0">
               <!-- FILTER -->
               <b-col v-if="showFilter" cols="2" class="m-0 p-0 border-0">
                 <b-card no-header no-body class="m-0 p-0 border-0">
