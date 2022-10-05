@@ -142,60 +142,60 @@
             <b-card v-if="!newPool" no-header no-body class="m-0 mt-1 p-0 border-0">
               <b-card-body class="m-0 p-0">
                 <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='collectionsRowSelected' :fields="collectionsFields" :items="selectedCollection ? (collections[selectedCollection] ? [collections[selectedCollection]] : []) : pagedFilteredSortedCollections" head-variant="light" class="m-0">
-                  <template #head(image)="data">
+                  <template #head(collection)="data">
                     <span v-b-popover.hover="'ERC-721 NFT collection contract address, symbol and name. Always check this against a separate source'">{{ selectedCollection ? 'Collection' : 'Collections' }}</span>
                   </template>
-                  <template #head(pools)="data">
-                    <span v-b-popover.hover="'Number of Umswap pools for this collection'">{{ data.label }}</span>
-                  </template>
-                  <template #head(nftsInPool)="data">
-                    <span v-b-popover.hover="'Number of NFTs across all Umswap pools for this collection'">{{ data.label }}</span>
-                  </template>
-                  <template #cell(image)="data">
-                    <b-avatar rounded variant="light" size="5.0rem" :src="data.item.reservoirInfo && data.item.reservoirInfo.metadata.imageUrl" v-b-popover.hover.bottom="'gm'" class="ml-0"></b-avatar>
+                  <template #head(contents)="data">
+                    <span v-b-popover.hover="'First 10 tokens sorted by tokenId, in the various pools'">{{ data.label }}</span>
                   </template>
                   <template #cell(collection)="data">
-                    <span v-b-popover.hover="selectedCollection ? 'View all collections' : 'View pools for the \'' + data.item.name + '\' collection'">{{ data.item.name }}</span>
-                    <br />
-                    <b-button :id="'popover-target-name-' + data.item.symbol" variant="link" class="m-0 p-0">
-                      {{ data.item.symbol }}
-                    </b-button>
-                    <b-popover :target="'popover-target-name-' + data.item.symbol" placement="right">
-                      <template #title>View {{ data.item.symbol }} Collection:</template>
-                      <b-link :href="'https://opensea.io/collection/' + (data.item.reservoirInfo && data.item.reservoirInfo.slug || '')" target="_blank">
-                        &bull; opensea.io
-                      </b-link>
-                      <br />
-                      <b-link :href="'https://looksrare.org/collections/' + data.item.address" target="_blank">
-                        &bull; looksrare.org
-                      </b-link>
-                      <br />
-                      <b-link :href="'https://x2y2.io/collection/' + (data.item.reservoirInfo && data.item.reservoirInfo.slug || '') + '/items'" target="_blank">
-                        &bull; x2y2.io
-                      </b-link>
-                      <br />
-                      <b-link :href="'https://sudoswap.xyz/#/browse/pools/' + data.item.address" target="_blank">
-                        &bull; sudoswap.xyz
-                      </b-link>
-                      <br />
-                      <b-link :href="'https://www.gem.xyz/collection/' + (data.item.reservoirInfo && data.item.reservoirInfo.slug || '')" target="_blank">
-                        &bull; gem.xyz
-                      </b-link>
-                    </b-popover>
-
-                    <br />
-                    <b-link :href="'https://etherscan.io/token/' + data.item.address + '#balances'" v-b-popover.hover.bottom="'View contract in Etherscan.io'" target="_blank">
-                      {{ data.item.address.substring(0, 10) }}
-                    </b-link>
+                    <b-row no-gutters>
+                      <b-col md="3" class="m-0 p-0">
+                        <b-avatar rounded variant="light" size="5.0rem" :src="data.item.reservoirInfo && data.item.reservoirInfo.metadata.imageUrl" v-b-popover.hover.bottom="'gm'" class="ml-0"></b-avatar>
+                      </b-col>
+                      <b-col md="9" class="m-0 p-0">
+                        <span v-b-popover.hover="selectedCollection ? 'View all collections' : 'View pools for the \'' + data.item.name + '\' collection'">{{ data.item.name }}</span>
+                        <br />
+                        <b-button :id="'popover-target-name-' + data.item.symbol" variant="link" class="m-0 p-0">
+                          {{ data.item.symbol }}
+                        </b-button>
+                        <b-popover :target="'popover-target-name-' + data.item.symbol" placement="right">
+                          <template #title>View {{ data.item.symbol }} Collection:</template>
+                          <b-link :href="'https://opensea.io/collection/' + (data.item.reservoirInfo && data.item.reservoirInfo.slug || '')" target="_blank">
+                            &bull; opensea.io
+                          </b-link>
+                          <br />
+                          <b-link :href="'https://looksrare.org/collections/' + data.item.address" target="_blank">
+                            &bull; looksrare.org
+                          </b-link>
+                          <br />
+                          <b-link :href="'https://x2y2.io/collection/' + (data.item.reservoirInfo && data.item.reservoirInfo.slug || '') + '/items'" target="_blank">
+                            &bull; x2y2.io
+                          </b-link>
+                          <br />
+                          <b-link :href="'https://sudoswap.xyz/#/browse/pools/' + data.item.address" target="_blank">
+                            &bull; sudoswap.xyz
+                          </b-link>
+                          <br />
+                          <b-link :href="'https://www.gem.xyz/collection/' + (data.item.reservoirInfo && data.item.reservoirInfo.slug || '')" target="_blank">
+                            &bull; gem.xyz
+                          </b-link>
+                        </b-popover>
+                        @
+                        <b-link :href="'https://etherscan.io/token/' + data.item.address + '#balances'" v-b-popover.hover.bottom="'View contract in Etherscan.io'" target="_blank">
+                          {{ data.item.address.substring(0, 10) }}
+                        </b-link>
+                        <br />
+                        Pools: {{ data.item.umswaps.length }},
+                        NFTs: {{ data.item.umswaps.map(e => e.tokenIds.length).reduce((r, n) => parseFloat(r) + parseFloat(n)) }},
+                        My Balance: {{ parseFloat(data.item.umswaps.map(e => e.balance).reduce((r, n) => parseFloat(r) + parseFloat(n))).toFixed(3) }}
+                      </b-col>
+                    </b-row>
                   </template>
-                  <template #cell(pools)="data">
-                    {{ data.item.umswaps.length }}
-                  </template>
-                  <template #cell(balance)="data">
-                    {{ parseFloat(data.item.umswaps.map(e => e.balance).reduce((r, n) => parseFloat(r) + parseFloat(n))).toFixed(9) }}
-                  </template>
-                  <template #cell(nftsInPool)="data">
-                    {{ data.item.umswaps.map(e => e.tokenIds.length).reduce((r, n) => parseFloat(r) + parseFloat(n)) }}
+                  <template #cell(contents)="data">
+                    <span v-for="token of data.item.umswaps.map(e => e.tokens).flat().sort((a, b) => a.tokenId - b.tokenId).slice(0, 10)">
+                      <b-avatar rounded variant="light" size="5rem" :src="token.image" v-b-popover.hover.bottom="token.tokenId" class="mr-1 mb-1"></b-avatar>
+                    </span>
                   </template>
                 </b-table>
               </b-card-body>
@@ -791,11 +791,8 @@
             { value: 10000, text: '10k' },
           ],
           collectionsFields: [
-            { key: 'image', label: 'Collections', thStyle: 'width: 8%;' },
-            { key: 'collection', label: '', thStyle: 'width: 52%;', tdClass: 'text-truncate' },
-            { key: 'pools', label: '# Pools', thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
-            { key: 'balance', label: '∑ Balance', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
-            { key: 'nftsInPool', label: '∑ NFTs', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
+            { key: 'collection', label: 'Collection', thStyle: 'width: 30%;', tdClass: 'text-truncate' },
+            { key: 'contents', label: 'Contents in Pools', thStyle: 'width: 70%;' },
           ],
           poolsFields: [
             { key: 'address', label: 'Pool', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
@@ -1549,7 +1546,7 @@
                   if (!(collection in collections)) {
                     collections[collection] = { address: collection, type: null, symbol: null, name: null, balance: null, totalSupply: null, reservoirInfo: null, allTokens: [], umswaps: [] };
                   }
-                  const umswap = { index, address, symbol, name, collection, validTokenIds, tokenIds, creator, swappedIn, swappedOut, totalScores, balance, totalSupply, raters, isApprovedForAll };
+                  const umswap = { index, address, symbol, name, collection, validTokenIds, tokenIds, creator, swappedIn, swappedOut, totalScores, balance, totalSupply, raters, isApprovedForAll, tokens: [] };
                   collections[collection].umswaps.push(umswap);
                 }
                 this.sync.completed = i + 1;
@@ -1632,9 +1629,47 @@
                      return [];
                   });
                 collection.reservoirInfo = reservoirInfo && reservoirInfo.collection || null;
+
+                // TODO
+                for (const [umswapAddress, umswap] of Object.entries(collection.umswaps)) {
+                  // console.log(umswapAddress + " " + collection.address + " => " + JSON.stringify(umswap.tokenIds));
+                  const TOKENIDBATCHSIZE = 3; // 500 OK
+                  for (let i = 0; i < umswap.tokenIds.length; i += TOKENIDBATCHSIZE) {
+                    const batch = umswap.tokenIds.slice(i, parseInt(i) + TOKENIDBATCHSIZE);
+                    // console.log("Processing: " + JSON.stringify(batch));
+                    const items = batch.map(e => collection.address + ':' + e);
+                    // console.log("items: " + JSON.stringify(items));
+                    let url = "https://api.reservoir.tools/tokens/v5?";
+                    let separator = "";
+                    for (let tokenId of batch) {
+                      url = url + separator + "tokens=" + collection.address + ":" + tokenId;
+                      separator = "&";
+                    }
+                    url = url + "&includeAttributes=false";
+                    // console.log("url: " + url);
+                    const reservoirTokens = await fetch(url)
+                      .then(handleErrors)
+                      .then(response => response.json())
+                      .catch(function(error) {
+                         console.log("ERROR - doIt: " + error);
+                         // Want to work around API data unavailablity - state.sync.error = true;
+                         return [];
+                      });
+                    // console.log("reservoirTokens: " + JSON.stringify(reservoirTokens, null, 2));
+
+                    if (reservoirTokens && reservoirTokens.tokens) {
+                      for (const token of reservoirTokens.tokens) {
+                        // console.log("token: " + JSON.stringify(token, null, 2));
+                        umswap.tokens.push({ tokenId: token.token.tokenId, image: token.token.image });
+                      }
+                    }
+                    // console.log(umswapAddress + " " + collection.address + " => " + JSON.stringify(umswap.tokens));
+                  }
+                }
                 this.sync.completed++;
               }
               this.collections = collections;
+              // console.log("collections: " + JSON.stringify(collections, null, 2));
               await db0.cache.put({ objectName: 'collections', object: this.collections }).then (function() {
               }).catch(function(error) {
                 console.log("error: " + error);
