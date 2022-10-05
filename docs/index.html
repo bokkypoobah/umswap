@@ -1128,6 +1128,7 @@
               collectionAddress = this.selectedCollection && ethers.utils.getAddress(this.selectedCollection) || null;
               poolAddress = this.selectedPool && ethers.utils.getAddress(this.selectedPool) || null;
             }
+            console.log("getPoolTokens - collectionAddress: " + collectionAddress + ", poolAddress: " + poolAddress);
             if (collectionAddress != null && collectionAddress == this.collection.address) {
               let umswap = null;
               if (poolAddress != null && this.collections[collectionAddress]) {
@@ -1805,21 +1806,18 @@
                     }
                   }
                 }
-                // console.log("tokenAttributes: " + JSON.stringify(tokenAttributes, null, 2));
                 this.collection.tokenAttributes = tokenAttributes;
 
                 // Saving metadata
-                if (reservoirInfo && reservoirInfo.collection) {
-                  // console.log(JSON.stringify(reservoirInfo.collection, null, 2));
+                if (reservoirInfo && reservoirInfo.collections && reservoirInfo.collections.length > 0) {
                   this.collection.address = collectionAddress;
-                  this.collection.symbol = reservoirInfo.collection.symbol || null;
-                  this.collection.name = reservoirInfo.collection.name || null;
-                  this.collection.slug = reservoirInfo.collection.slug || null;
-                  this.collection.imageUrl = reservoirInfo.collection.image || null;
+                  this.collection.symbol = reservoirInfo.collections[0].symbol || null;
+                  this.collection.name = reservoirInfo.collections[0].name || null;
+                  this.collection.slug = reservoirInfo.collections[0].slug || null;
+                  this.collection.imageUrl = reservoirInfo.collections[0].image || null;
                   this.collection.blockNumber = blockNumber;
                   this.collection.timestamp = timestamp;
                 }
-                // TODO console.log(JSON.stringify(this.collection, null, 2));
                 await db0.collection.put(this.collection).then (function() {
                 }).catch(function(error) {
                   console.log("error: " + error);
