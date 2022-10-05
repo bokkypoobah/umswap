@@ -63,6 +63,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //solhint-disable max-line-length
 //solhint-disable no-inline-assembly
 
+// BK CHECKED - Against first section of https://github.com/optionality/clone-factory/blob/ffa4dedcec53b68b11450b07685b4df80c33edcc/contracts/CloneFactory.sol
 contract CloneFactory {
   function createClone(address target) internal returns (address result) {
     bytes20 targetBytes = bytes20(target);
@@ -214,6 +215,7 @@ library TokenIdList {
 
 
 /// @notice ERC20 https://eips.ethereum.org/EIPS/eip-20 with optional symbol, name and decimals
+// BK CHECKED - Against https://eips.ethereum.org/EIPS/eip-20
 interface IERC20 {
     function totalSupply() external view returns (uint);
     function balanceOf(address tokenOwner) external view returns (uint balance);
@@ -230,10 +232,12 @@ interface IERC20 {
     event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
 }
 
+// BK CHECKED - Against https://eips.ethereum.org/EIPS/eip-165
 interface IERC165 {
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }
 
+// BK CHECKED - Against https://eips.ethereum.org/EIPS/eip-721
 interface IERC721Partial is IERC165 {
     function ownerOf(uint tokenId) external view returns (address);
     function balanceOf(address owner) external view returns (uint balance);
