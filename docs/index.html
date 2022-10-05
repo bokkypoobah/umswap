@@ -110,27 +110,32 @@
             <!-- INFO -->
             <div v-if="showInfo || coinbase == null">
               <b-card no-body no-header bg-variant="light" class="m-1 p-1">
-                <b-form-group label-cols-lg="2" label="Info" label-size="md" label-class="font-weight-bold pt-0" class="mb-0">
-                  Welcome!
-                  <br />
-                  <br />
-                  Umswaps enable pools to be created from subsets of NFT collections, or for a whole NFT collections.
+                <b-form-group label-cols-lg="2" label="Welcome" label-size="md" label-class="font-weight-bold pt-0" class="m-1 p-1">
+                  <ul>
+                    <li>Umswaps are pools of ERC-721 NFT tokens</li>
+                    <li><b>1 NFT = 1 Umswap = 1 NFT</b>: Umswaps are frictionless - there are no fees apart from the Ethereum network transaction fees</li>
+                    <li>Create new Umswap pools by executing <b>UmswapFactory.newUmswap(erc721CollectionAddress, umswapName, eligibleTokenIds)</b></li>
+                    <li>An empty <b>eligibleTokenIds</b> list permits all tokenIds within the collection into the pool</li>
+                    <li><b>1 NFT = 1 Umswap</b>: Eligible NFTs can be swapped into the pool in exchange for 1 pool token each</li>
+                    <li><b>1 Umswap = 1 NFT</b>: NFTs in the pool can be swapped out of the pool in exchange for 1 pool token each</li>
+                    <li>Swapping in and out of the pool is done by executing <b>UmswapPool.swap(inTokenIds, outTokenIds)</b></li>
+                    <li>The net amount of pool tokens is credited to/debited from the swapper's account</li>
+                    <li>Both smart contract and user interface source code can be found at <b-link :href="'https://github.com/bokkypoobah/umswap'" v-b-popover.hover.bottom="'View in github.com. Feel free to clone and improve'" target="_blank">https://github.com/bokkypoobah/umswap</b-link></li>
+                  </ul>
+                </b-form-group>
+                <b-form-group label-cols-lg="2" label="Smart Contract" label-size="md" label-class="font-weight-bold pt-0" class="m-1 p-1">
+                  <ul>
+                    <li><b-link :href="'https://github.com/bokkypoobah/umswap/blob/main/deployed/UmswapFactory_0.9.0_0x8f093895cD4C54eaB897C6377e1Bf85Fe5B4E948.sol'" v-b-popover.hover.bottom="'View in github.com'" target="_blank">UmswapFactory</b-link> deployed to <b-link :href="'https://etherscan.io/address/' + umswapFactoryAddress + '#code'" v-b-popover.hover.bottom="'View in etherscan.io'" target="_blank">{{ umswapFactoryAddress }}</b-link></li>
+                  </ul>
+                </b-form-group>
+                <b-form-group label-cols-lg="2" label="User Interface" label-size="md" label-class="font-weight-bold pt-0" class="m-1 p-1">
+                  <ul>
+                    <li>Most of the code is in <b-link :href="'https://github.com/bokkypoobah/umswap/blob/main/docs/index.html'" v-b-popover.hover.bottom="'View in github.com'" target="_blank">https://github.com/bokkypoobah/umswap/blob/main/docs/index.html</b-link></li>
+                    <li>Written using the <b-link :href="'https://bootstrap-vue.org/'" v-b-popover.hover.bottom="'View in bootstrap-vue.org'" target="_blank">Bootstrap-Vue</b-link> framework and uses the <b-link :href="'https://docs.ethers.io/'" v-b-popover.hover.bottom="'View in https://docs.ethers.io/'" target="_blank">ethers.js</b-link> library to access web3 data and to execute transactions</li>
 
-                  Once an Unswap pool is created, valid NFTs in the pool can be swapped into the pool in exchange for 1 pool token. NFTs within the pool can be swapped out in exchange for 1 pool token.
-
-                  <br />
-                  <br />
-
-                  Anyone can create new Umswap pools using the UmswapFactory deployed to <b-link :href="'https://etherscan.io/address/' + umswapFactoryAddress + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ umswapFactoryAddress }}</b-link>.
-
-                  <br />
-                  <br />
-
-                  The Ethereum smart contract and Bootstrap-Vue + ethers.js (& a few more libraries) UI can be found at <b-link :href="'https://github.com/bokkypoobah/umswap'" v-b-popover.hover.bottom="'View in GitHub.com. Feel free to clone and improve'" target="_blank">https://github.com/bokkypoobah/umswap</b-link>.
-
-                  <br />
-                  <br />
-
+                  </ul>
+                </b-form-group>
+                <b-form-group label-cols-lg="1" label="" label-size="md" label-class="font-weight-bold pt-0" class="m-1 p-1">
                   Enjoy. And hello, from the past.
                   <br />
                   (c) BokkyPooBah / Bok Consulting Pty Ltd 2022. The MIT Licence.
@@ -182,7 +187,7 @@
                           </b-link>
                         </b-popover>
                         @
-                        <b-link :href="'https://etherscan.io/token/' + data.item.address + '#balances'" v-b-popover.hover.bottom="'View contract in Etherscan.io'" target="_blank">
+                        <b-link :href="'https://etherscan.io/token/' + data.item.address + '#balances'" v-b-popover.hover.bottom="'View contract in etherscan.io'" target="_blank">
                           {{ data.item.address.substring(0, 10) }}
                         </b-link>
                         <br />
@@ -261,7 +266,7 @@
                         {{ data.item.symbol }}
                       </b-link>
                       @
-                      <b-link :href="'https://etherscan.io/token/' + data.item.address + '#balances'" v-b-popover.hover.bottom="'View Umswap pool contract in Etherscan.io'" target="_blank">
+                      <b-link :href="'https://etherscan.io/token/' + data.item.address + '#balances'" v-b-popover.hover.bottom="'View Umswap pool contract in etherscan.io'" target="_blank">
                         {{ data.item.address.substring(0, 10) }}
                       </b-link>
                       <br />
@@ -361,7 +366,7 @@
                         <b-link id="info-collectionname" :href="'https://opensea.io/collection/' + (getSelectedCollection.reservoirInfo && getSelectedCollection.reservoirInfo.slug || '')" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedCollection.name }}</b-link>
                       </b-form-group>
                       <b-form-group v-if="getSelectedCollection" label="Collection Address:" label-for="info-collectionaddress" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
-                        <b-link id="info-collectionaddress" :href="'https://etherscan.io/token/' + getSelectedCollection.address + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedCollection.address }}</b-link>
+                        <b-link id="info-collectionaddress" :href="'https://etherscan.io/token/' + getSelectedCollection.address + '#code'" v-b-popover.hover.bottom="'View in etherscan.io'" target="_blank">{{ getSelectedCollection.address }}</b-link>
                       </b-form-group>
                       <b-form-group v-if="getSelectedPoolRecord" label="Pool:" label-for="info-poolname" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
                         <b-input-group>
@@ -370,7 +375,7 @@
                         </b-input-group>
                       </b-form-group>
                       <b-form-group v-if="getSelectedPoolRecord" label="Pool Balances:" label-for="info-poolbalances" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
-                        <b-link id="info-poolbalances" :href="'https://etherscan.io/token/' + getSelectedPoolRecord.address + '#balances'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
+                        <b-link id="info-poolbalances" :href="'https://etherscan.io/token/' + getSelectedPoolRecord.address + '#balances'" v-b-popover.hover.bottom="'View in etherscan.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
                       </b-form-group>
                       <b-form-group v-if="getSelectedPoolRecord" label="Pool NFTs:" label-for="info-poolnfts" label-size="sm" label-cols-sm="2" label-align-sm="right" class="mx-0 my-1 p-0">
                         <b-link id="info-poolnfts" :href="'https://opensea.io/' + getSelectedPoolRecord.address" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ getSelectedPoolRecord.address }}</b-link>
@@ -427,7 +432,7 @@
                 <font v-if="!newMessage && !showRating && !showCollectionOrPoolInfo && (!showSwap || selectedPool == null)" size="-1" class="mt-1">
                   <b-table small fixed striped responsive hover :fields="messagesFields" :items="pagedFilteredSortedMessages" head-variant="light" class="m-0">
                     <template #cell(timestamp)="data">
-                      <b-link :href="'https://etherscan.io/tx/' + data.item.txHash" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ formatTimestamp(data.item.timestamp) }}</b-link>
+                      <b-link :href="'https://etherscan.io/tx/' + data.item.txHash" v-b-popover.hover.bottom="'View in etherscan.io'" target="_blank">{{ formatTimestamp(data.item.timestamp) }}</b-link>
                     </template>
                     <template #cell(account)="data">
                       <b-link :href="'https://opensea.io/' + data.item.account" v-b-popover.hover.bottom="'View in Opensea.io'" target="_blank">{{ ensOrAddress(data.item.account) }}</b-link>
