@@ -247,11 +247,13 @@ interface IERC721Partial is IERC165 {
 }
 
 
+// BK OK - Only used in for loops with range limits
 function onePlus(uint x) pure returns (uint) {
     unchecked { return 1 + x; }
 }
 
 
+// BK OK - Not really required, as there are no external calls in the swap(...) function
 contract ReentrancyGuard {
     uint private _executing;
 
