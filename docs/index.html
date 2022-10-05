@@ -252,7 +252,7 @@
                       <span v-b-popover.hover="'ERC-20 Umswap pool contract address'">{{ selectedPool ? 'Pool' : 'Pools' }}</span>
                     </template>
                     <template #head(contents)="data">
-                      <span v-b-popover.hover="'First 10 tokens sorted by tokenId'">{{ data.label }}</span>
+                      <span v-b-popover.hover="'First 10 tokens in the pool'">{{ data.label }}</span>
                     </template>
                     <template #cell(pool)="data">
                       <span v-b-popover.hover="selectedPool ? 'View pools for the same collection' : ('View pool \'' + data.item.name + '\'')">{{ data.item.name }}</span>
@@ -1087,7 +1087,6 @@
                 // console.log("collectionsRowSelected - records: " + JSON.stringify(records, null, 2));
                 if (records.length == 1) {
                   this.collection = records[0];
-                  // console.log("collectionsRowSelected - Loaded collection: " + JSON.stringify(this.collection, null, 2));
                   // console.log("collectionsRowSelected - Loaded collection " + this.selectedCollection);
                 }
                 db0.close();
