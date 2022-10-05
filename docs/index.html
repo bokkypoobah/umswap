@@ -333,7 +333,7 @@
               <b-card-text class="m-0 p-0">
                 <div class="d-flex flex-wrap mx-0 mt-0 mb-1 p-0">
                   <div class="mt-0">
-                    <b-button v-if="selectedPool" size="sm" :pressed.sync="showSwap" variant="link" v-b-popover.hover.top="'Swap tokens'"><span v-if="showSwap"><b-icon-check-circle-fill shift-v="+1" font-scale="1.0"></b-icon-check-circle-fill></span><span v-else><b-icon-check-circle shift-v="+1" font-scale="1.0"></b-icon-check-circle></span></b-button>
+                    <b-button v-if="selectedPool" size="sm" :disabled="sync.section != null" :pressed.sync="showSwap" variant="link" v-b-popover.hover.top="'Swap tokens'"><span v-if="showSwap"><b-icon-check-circle-fill shift-v="+1" font-scale="1.0"></b-icon-check-circle-fill></span><span v-else><b-icon-check-circle shift-v="+1" font-scale="1.0"></b-icon-check-circle></span></b-button>
                   </div>
                   <div class="mt-0 flex-grow-1">
                   </div>
@@ -510,23 +510,23 @@
               <b-col v-if="showFilter" cols="2" class="m-0 p-0 border-0">
                 <b-card no-header no-body class="m-0 p-0 border-0">
                   <b-card-body class="m-0 p-1" style="flex-grow: 1; max-height: 1500px; overflow-y: auto;">
-                    <div v-for="(attributeKey, attributeIndex) in Object.keys(tokenAttributes).sort()" v-bind:key="attributeIndex">
+                    <div v-for="attributeType of traitFilterData">
                       <b-card header-class="m-0 px-2 pt-2 pb-0" body-class="p-0" class="m-0 p-0 border-0">
                         <template #header>
                           <span variant="secondary" class="small truncate">
-                            {{ attributeKey }}
+                            {{ attributeType.attributeType }}
                           </span>
                         </template>
                         <font size="-2">
-                          <b-table small fixed striped sticky-header="200px" :fields="tokenAttributesFields" :items="getSortedTraitsForTokenAttributes(attributeKey)" head-variant="light">
+                          <b-table small fixed striped sticky-header="200px" :fields="tokenAttributesFields" :items="attributeType.attributeList" head-variant="light">
                             <template #cell(select)="data">
-                              <b-form-checkbox size="sm" :checked="(tokenAttributesFilter[attributeKey] && tokenAttributesFilter[attributeKey].attributeOption) ? 1 : 0" value="1" @change="collectionFilterChange(attributeKey, data.item.attributeOption)"></b-form-checkbox>
+                              <b-form-checkbox size="sm" :checked="(tokenAttributesFilter[attributeType.attributeType] && tokenAttributesFilter[attributeType.attributeType].attributeOption) ? 1 : 0" value="1" @change="collectionFilterChange(attributeType.attributeType, data.item.attribute)"></b-form-checkbox>
                             </template>
                             <template #cell(attributeOption)="data">
-                              {{ data.item.attributeOption }}
+                              {{ data.item.attribute }}
                             </template>
                             <template #cell(attributeTotal)="data">
-                              {{ data.item.attributeTotal.length }}
+                              {{ data.item.tokens.length }}
                             </template>
                           </b-table>
                         </font>
@@ -844,6 +844,27 @@
                 results.push({ value: umswap.address, text: umswap.symbol + ': ' + umswap.name });
               }
             }
+            return results;
+          },
+          traitFilterData() {
+            const results = [];
+            let collectionAddress = null;
+            if (this.newPool) {
+              collectionAddress = this.collection.address && ethers.utils.getAddress(this.collection.address) || null;
+            } else {
+              collectionAddress = this.selectedCollection && ethers.utils.getAddress(this.selectedCollection) || null;
+            }
+            if (collectionAddress != null && collectionAddress == this.collection.address) {
+              for (const [attributeType, attributes] of Object.entries(this.tokenAttributes)) {
+                const attributeList = [];
+                for (const [attribute, tokens] of Object.entries(this.tokenAttributes[attributeType])) {
+                  attributeList.push({ attribute, tokens });
+                }
+                attributeList.sort((a, b) => b.tokens.length - a.tokens.length);
+                results.push({ attributeType, attributeList });
+              }
+            }
+            results.sort((a, b) => ('' + a.attributeType).localeCompare(b.attributeType))
             return results;
           },
           filteredCollections() {
@@ -1316,15 +1337,6 @@
             } else {
               return [];
             }
-          },
-          getSortedTraitsForTokenAttributes(category) {
-            const results = [];
-            for (let attributeKey in this.tokenAttributes[category]) {
-              const c = this.tokenAttributes[category][attributeKey];
-              results.push({ attributeOption: attributeKey, attributeTotal: c })
-            }
-            results.sort((a, b) => b.attributeTotal.length - a.attributeTotal.length);
-            return results;
           },
           collectionFilterChange(attribute, option) {
             if (!this.tokenAttributesFilter[attribute]) {
