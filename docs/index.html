@@ -58,7 +58,7 @@
           <b-alert size="sm" dismissible variant="warning" show class="m-1 my-0">
             Warning: This is experimental unaudited software. Revoke permissions when not required, at this early stage.
           </b-alert>
-          <b-card class="m-2 p-1" header-class="warningheader" header="Welcome" v-if="!coinbase">
+          <b-card class="m-2 p-1" header-class="warningheader" header="Web3 Connection Required" v-if="!coinbase">
             <b-card-text>
               Please install the MetaMask extension, connect to the Ethereum mainnet and refresh this page. Then click the [Connect] button on the top right.
             </b-card-text>
@@ -109,33 +109,33 @@
 
             <!-- INFO -->
             <div v-if="showInfo || coinbase == null">
-              <b-card no-header no-body class="mx-0 my-1 p-0">
-                <b-card-body class="m-0 p-0">
-                  <b-card-text class="m-1 p-1">
-                    <b-form-group label-cols="2" label-size="sm" label-align="right" label="" class="mx-0 mt-3 p-0">
-                      Umswaps are subsets of ERC-721 NFT collections pooled into ERC-20 tokens.
-                      <br />
-                      Umswaps are created by UmswapFactory.
-                      <br />
-                      "Like WETH, but for ERC-721s"
-                      <br />
-                      <br />
-                      WARNING: Experimental un-audited software!
-                    </b-form-group>
-                    <b-form-group label-cols="2" label-size="sm" label-align="right" label="UmswapFactory:" class="mx-0 my-1 p-0">
-                      <b-link :href="'https://etherscan.io/address/' + umswapFactoryAddress + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ umswapFactoryAddress }}</b-link>
-                    </b-form-group>
-                    <b-form-group label-cols="2" label-size="sm" label-align="right" label="This Dapp GitHub:" class="mx-0 my-1 p-0">
-                      <b-link :href="'https://github.com/bokkypoobah/umswap'" v-b-popover.hover.bottom="'View in GitHub.com. Feel free to clone and improve'" target="_blank">https://github.com/bokkypoobah/umswap</b-link>
-                    </b-form-group>
-                    <b-form-group label-cols="2" label-size="sm" label-align="right" label="" class="mx-0 mt-3 p-0">
-                      Enjoy. And hello, from the past.
-                      <br />
-                      (c) BokkyPooBah / Bok Consulting Pty Ltd 2022. The MIT Licence.
-                    </b-form-group>
-                  </b-card-text>
-                </b-card-body>
-              </b-card>
+              <b-card no-body no-header bg-variant="light" class="m-1 p-1">
+                <b-form-group label-cols-lg="2" label="Info" label-size="md" label-class="font-weight-bold pt-0" class="mb-0">
+                  Welcome!
+                  <br />
+                  <br />
+                  Umswaps enable pools to be created from subsets of NFT collections, or for a whole NFT collections.
+
+                  Once an Unswap pool is created, valid NFTs in the pool can be swapped into the pool in exchange for 1 pool token. NFTs within the pool can be swapped out in exchange for 1 pool token.
+
+                  <br />
+                  <br />
+
+                  Anyone can create new Umswap pools using the UmswapFactory deployed to <b-link :href="'https://etherscan.io/address/' + umswapFactoryAddress + '#code'" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ umswapFactoryAddress }}</b-link>.
+
+                  <br />
+                  <br />
+
+                  The Ethereum smart contract and Bootstrap-Vue + ethers.js (& a few more libraries) UI can be found at <b-link :href="'https://github.com/bokkypoobah/umswap'" v-b-popover.hover.bottom="'View in GitHub.com. Feel free to clone and improve'" target="_blank">https://github.com/bokkypoobah/umswap</b-link>.
+
+                  <br />
+                  <br />
+
+                  Enjoy. And hello, from the past.
+                  <br />
+                  (c) BokkyPooBah / Bok Consulting Pty Ltd 2022. The MIT Licence.
+                </b-form-group>
+              </b-card-body>
             </div>
 
             <!-- TABLE OF COLLECTIONS -->
