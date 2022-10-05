@@ -1685,7 +1685,7 @@
                 this.sync.completed = 0;
                 this.sync.total = 1;
                 this.sync.section = "Collection Metadata";
-                let infoUrl = "https://api.reservoir.tools/collection/v2?id=" + collectionAddress;
+                let infoUrl = "https://api.reservoir.tools/collections/v5?contract=" + collectionAddress + "&includeTopBid=false&sortBy=allTimeVolume&limit=20";
                 const reservoirInfo = await fetch(infoUrl)
                   .then(handleErrors)
                   .then(response => response.json())
@@ -1701,6 +1701,7 @@
                 this.sync.completed = 0;
                 this.sync.total = null;
                 this.sync.section = "Token Metadata";
+                const DELAYINMILLIS = 1000;
                 let continuation = null;
                 let tokens = {};
                 do {
@@ -1740,6 +1741,7 @@
                       };
                     }
                     this.sync.completed = Object.keys(tokens).length;
+                    await delay(DELAYINMILLIS);
                   }
                 } while (continuation != null /*&& !state.halt && !state.sync.error */);
 
@@ -1811,7 +1813,7 @@
                   this.collection.symbol = reservoirInfo.collection.symbol || null;
                   this.collection.name = reservoirInfo.collection.name || null;
                   this.collection.slug = reservoirInfo.collection.slug || null;
-                  this.collection.imageUrl = reservoirInfo.collection.metadata.imageUrl || null;
+                  this.collection.imageUrl = reservoirInfo.collection.image || null;
                   this.collection.blockNumber = blockNumber;
                   this.collection.timestamp = timestamp;
                 }
