@@ -1187,9 +1187,17 @@
                 for (const setName of ['validTokenIdsInPool', 'validTokenIdsOwned', 'validTokenIdsNotInPoolOrOwned', 'invalidTokenIdsOwned', 'invalidTokenIdsNotInPoolOrOwned']) {
                   tokens[setName] = [];
                 }
+                let allValid = true;
+                const validMap = {};
+                if (umswap.validTokenIds.length > 0) {
+                  allValid = false;
+                  for (let tokenId of umswap.validTokenIds) {
+                    validMap[parseInt(tokenId)] = true;
+                  }
+                }
                 for (const tokenId of filteredTokenIds) {
                   const token = this.collection.tokens[tokenId];
-                  const validInPool = umswap.validTokenIds.length == 0 || umswap.validTokenIds.includes(parseInt(tokenId));
+                  const validInPool = allValid || validMap[parseInt(tokenId)];
                   let setName;
                   if (token.owner == umswap.address) {
                     setName = 'validTokenIdsInPool';
