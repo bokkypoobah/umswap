@@ -151,7 +151,7 @@
                   <template #cell(collection)="data">
                     <b-row no-gutters>
                       <b-col md="3" class="m-0 p-0">
-                        <b-avatar rounded variant="light" size="5.0rem" :src="data.item.reservoirInfo && data.item.reservoirInfo.metadata.imageUrl" v-b-popover.hover.bottom="'gm'" class="ml-0"></b-avatar>
+                        <b-avatar rounded variant="light" size="5.0rem" :src="data.item.reservoirInfo && data.item.reservoirInfo.image" v-b-popover.hover.bottom="'gm'" class="ml-0"></b-avatar>
                       </b-col>
                       <b-col md="9" class="m-0 p-0">
                         <span v-b-popover.hover="selectedCollection ? 'View all collections' : 'View pools for the \'' + data.item.name + '\' collection'">{{ data.item.name }}</span>
@@ -1596,7 +1596,7 @@
                 collection.symbol = info[1][0].toString();
                 collection.name = info[2][0].toString();
                 collection.totalSupply = info[3][0].toString();
-                let infoUrl = "https://api.reservoir.tools/collection/v2?id=" + address;
+                let infoUrl = "https://api.reservoir.tools/collections/v5?contract=" + address + "&includeTopBid=false&sortBy=allTimeVolume&limit=20";
                 const reservoirInfo = await fetch(infoUrl)
                   .then(handleErrors)
                   .then(response => response.json())
@@ -1605,7 +1605,7 @@
                      // Want to work around API data unavailablity - state.sync.error = true;
                      return [];
                   });
-                collection.reservoirInfo = reservoirInfo && reservoirInfo.collection || null;
+                collection.reservoirInfo = reservoirInfo && reservoirInfo.collections && reservoirInfo.collections.length > 0 && reservoirInfo.collections[0] || null;
                 for (const [umswapAddress, umswap] of Object.entries(collection.umswaps)) {
                   const TOKENIDBATCHSIZE = 3; // 500 OK
                   for (let i = 0; i < umswap.tokenIds.length; i += TOKENIDBATCHSIZE) {
