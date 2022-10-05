@@ -246,70 +246,46 @@
 
               <!-- TABLE OF UMSWAPS -->
               <b-card-body class="m-0 mt-1 p-0">
+
                 <font size="-1">
                   <b-table small fixed striped selectable responsive hover select-mode="single" @row-selected='poolsRowSelected' :fields="poolsFields" :items="selectedPool != null ? [getSelectedPoolRecord] : pagedFilteredSortedPools" head-variant="light" class="m-0">
-                    <template #head(address)="data">
+                    <template #head(pool)="data">
                       <span v-b-popover.hover="'ERC-20 Umswap pool contract address'">{{ selectedPool ? 'Pool' : 'Pools' }}</span>
                     </template>
-                    <template #head(symbol)="data">
-                      <span v-b-popover.hover="'ERC-20 Umswap pool symbol'">{{ data.label }}</span>
+                    <template #head(contents)="data">
+                      <span v-b-popover.hover="'First 10 tokens sorted by tokenId'">{{ data.label }}</span>
                     </template>
-                    <template #head(name)="data">
-                      <span v-b-popover.hover="'ERC-20 Umswap pool name'">{{ data.label }}</span>
-                    </template>
-                    <template #head(validTokenIds)="data">
-                      <span v-b-popover.hover="'ERC-721 token ids accepted by this Umswap pool'">{{ data.label }}</span>
-                    </template>
-                    <template #head(swappedIn)="data">
-                      <span v-b-popover.hover="'Number of ERC-721 tokens swapped into this Umswap pool'">{{ data.label }}</span>
-                    </template>
-                    <template #head(swappedOut)="data">
-                      <span v-b-popover.hover="'Number of ERC-721 tokens swapped out of this Umswap pool'">{{ data.label }}</span>
-                    </template>
-                    <template #head(balance)="data">
-                      <span v-b-popover.hover="'My number of Umswap tokens'">{{ data.label }}</span>
-                    </template>
-                    <template #head(totalSupply)="data">
-                      <span v-b-popover.hover="'Total number of Umswap tokens = number of ERC-721 tokens currently in this pool'">{{ data.label }}</span>
-                    </template>
-                    <template #head(isApprovedForAll)="data">
-                      <span v-b-popover.hover="'Umswap contract has been approved by NFT contract to transfer in tokens'">{{ data.label }}</span>
-                    </template>
-                    <template #cell(address)="data">
-                      <b-link :href="'https://etherscan.io/token/' + data.item.address + '#balances'" v-b-popover.hover.bottom="'View Umswap pool contract in Etherscan.io'" target="_blank">
-                        {{ data.item.address }}
-                      </b-link>
-                    </template>
-                    <template #cell(symbol)="data">
+                    <template #cell(pool)="data">
+                      <span v-b-popover.hover="selectedPool ? 'View pools for the same collection' : ('View pool \'' + data.item.name + '\'')">{{ data.item.name }}</span>
+                      <br />
                       <b-link :href="'https://opensea.io/' + data.item.address" v-b-popover.hover.bottom="'View pool wallet in Opensea.io'" target="_blank">
                         {{ data.item.symbol }}
                       </b-link>
+                      @
+                      <b-link :href="'https://etherscan.io/token/' + data.item.address + '#balances'" v-b-popover.hover.bottom="'View Umswap pool contract in Etherscan.io'" target="_blank">
+                        {{ data.item.address.substring(0, 10) }}
+                      </b-link>
+                      <br />
+                      <span v-if="data.item.validTokenIds.length == 0">
+                        All tokens in collection
+                      </span>
+                      <span v-else-if="data.item.validTokenIds.length <= 10">
+                        Only tokenIds {{ '[' + data.item.validTokenIds.join(",") + ']' }}
+                      </span>
+                      <span v-else>
+                        Only tokenIds {{ '[' + data.item.validTokenIds.slice(0, 10).join(",") + ' +' + (data.item.validTokenIds.length - 10) + ' more]' }}
+                      </span>
+                      <br />
+                      In: {{ data.item.swappedIn }},
+                      Out: {{ data.item.swappedOut }},
+                      My Balance: {{ parseFloat(data.item.balance).toFixed(3) }},
+                      Total Supply: {{ formatETH(data.item.totalSupply) }},
+                      Approved: {{ data.item.isApprovedForAll == 0 ? 'No' : 'Yes' }}
                     </template>
-                    <template #cell(name)="data">
-                      <span v-b-popover.hover="selectedPool ? 'View pools for the same collection' : ('View pool \'' + data.item.name + '\'')">{{ data.item.name }}</span>
-                    </template>
-                    <template #cell(validTokenIds)="data">
-                      <div v-if="data.item.validTokenIds.length == 0">
-                        (All in collection)
-                      </div>
-                      <div v-else>
-                        {{ data.item.validTokenIds.length + 'x: [' + data.item.validTokenIds.join(",") + ']' }}
-                      </div>
-                    </template>
-                    <template #cell(swappedIn)="data">
-                      {{ data.item.swappedIn }}
-                    </template>
-                    <template #cell(swappedOut)="data">
-                      {{ data.item.swappedOut }}
-                    </template>
-                    <template #cell(balance)="data">
-                      {{ parseFloat(data.item.balance).toFixed(9) }}
-                    </template>
-                    <template #cell(totalSupply)="data">
-                      {{ formatETH(data.item.totalSupply) }}
-                    </template>
-                    <template #cell(isApprovedForAll)="data">
-                      {{ data.item.isApprovedForAll == 0 ? 'No' : 'Yes' }}
+                    <template #cell(contents)="data">
+                      <span v-for="token of data.item.tokens.slice(0, 10)">
+                        <b-avatar rounded variant="light" size="4rem" :src="token.image" v-b-popover.hover.bottom="token.tokenId" class="mt-1 mr-1 mb-1"></b-avatar>
+                      </span>
                     </template>
                   </b-table>
                 </font>
@@ -689,17 +665,17 @@
             },
             'validTokenIdsNotInPoolOrOwned': {
               currentPage: 1,
-              pageSize: 25,
+              pageSize: 10,
               sortOption: 'idasc',
             },
             'invalidTokenIdsOwned': {
               currentPage: 1,
-              pageSize: 25,
+              pageSize: 10,
               sortOption: 'idasc',
             },
             'invalidTokenIdsNotInPoolOrOwned': {
               currentPage: 1,
-              pageSize: 25,
+              pageSize: 10,
               sortOption: 'idasc',
             },
             'tokenIdsOwned': {
@@ -709,7 +685,7 @@
             },
             'tokenIdsNotOwned': {
               currentPage: 1,
-              pageSize: 25,
+              pageSize: 10,
               sortOption: 'idasc',
             },
           },
@@ -791,19 +767,12 @@
             { value: 10000, text: '10k' },
           ],
           collectionsFields: [
-            { key: 'collection', label: 'Collection', thStyle: 'width: 30%;', tdClass: 'text-truncate' },
-            { key: 'contents', label: 'Contents in Pools', thStyle: 'width: 70%;' },
+            { key: 'collection', label: 'Collection', thStyle: 'width: 35%;', tdClass: 'text-truncate' },
+            { key: 'contents', label: 'Current Contents in Pools', thStyle: 'width: 75%;' },
           ],
           poolsFields: [
-            { key: 'address', label: 'Pool', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            { key: 'symbol', label: 'Symbol', thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            { key: 'name', label: 'Name', thStyle: 'width: 30%;', tdClass: 'text-truncate' },
-            { key: 'validTokenIds', label: 'Valid Token Ids', thStyle: 'width: 15%;', tdClass: 'text-truncate' },
-            { key: 'swappedIn', label: '# In', thStyle: 'width: 5%;', thClass: 'text-right', tdClass: 'text-right' },
-            { key: 'swappedOut', label: '# Out', thStyle: 'width: 5%;', thClass: 'text-right', tdClass: 'text-right' },
-            { key: 'balance', label: 'My Balance', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
-            { key: 'totalSupply', label: 'Total Supply', thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
-            { key: 'isApprovedForAll', label: 'Apprv', thStyle: 'width: 5%;', thClass: 'text-right', tdClass: 'text-right' },
+            { key: 'pool', label: 'Pool', thStyle: 'width: 40%;', tdClass: 'text-truncate' },
+            { key: 'contents', label: 'Current Contents', thStyle: 'width: 60%;' },
           ],
           tokenAttributesFields: [
             { key: 'select', label: '', thStyle: 'width: 10%;' },
@@ -1629,16 +1598,11 @@
                      return [];
                   });
                 collection.reservoirInfo = reservoirInfo && reservoirInfo.collection || null;
-
-                // TODO
                 for (const [umswapAddress, umswap] of Object.entries(collection.umswaps)) {
-                  // console.log(umswapAddress + " " + collection.address + " => " + JSON.stringify(umswap.tokenIds));
                   const TOKENIDBATCHSIZE = 3; // 500 OK
                   for (let i = 0; i < umswap.tokenIds.length; i += TOKENIDBATCHSIZE) {
                     const batch = umswap.tokenIds.slice(i, parseInt(i) + TOKENIDBATCHSIZE);
-                    // console.log("Processing: " + JSON.stringify(batch));
                     const items = batch.map(e => collection.address + ':' + e);
-                    // console.log("items: " + JSON.stringify(items));
                     let url = "https://api.reservoir.tools/tokens/v5?";
                     let separator = "";
                     for (let tokenId of batch) {
@@ -1646,7 +1610,6 @@
                       separator = "&";
                     }
                     url = url + "&includeAttributes=false";
-                    // console.log("url: " + url);
                     const reservoirTokens = await fetch(url)
                       .then(handleErrors)
                       .then(response => response.json())
@@ -1655,15 +1618,11 @@
                          // Want to work around API data unavailablity - state.sync.error = true;
                          return [];
                       });
-                    // console.log("reservoirTokens: " + JSON.stringify(reservoirTokens, null, 2));
-
                     if (reservoirTokens && reservoirTokens.tokens) {
                       for (const token of reservoirTokens.tokens) {
-                        // console.log("token: " + JSON.stringify(token, null, 2));
                         umswap.tokens.push({ tokenId: token.token.tokenId, image: token.token.image });
                       }
                     }
-                    // console.log(umswapAddress + " " + collection.address + " => " + JSON.stringify(umswap.tokens));
                   }
                 }
                 this.sync.completed++;
