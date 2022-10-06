@@ -2169,7 +2169,7 @@
               h('b-row', {
                 }, [
                   h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'tokenIds:'),
-                  h('b-col', '[' + selectedTokenIds.join(',') + ']'),
+                  h('b-col', '[' + selectedTokenIds.join(', ') + ']'),
                 ]
               ),
               h('b-row', {
@@ -2249,13 +2249,13 @@
               h('b-row', {
                 }, [
                   h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'inTokenIds:'),
-                  h('b-col', '[' + this.tokenIdsToSwapIn.join(",") + ']'),
+                  h('b-col', '[' + this.tokenIdsToSwapIn.join(", ") + ']'),
                 ]
               ),
               h('b-row', {
                 }, [
                   h('b-col', { class: ['text-right'], props: { cols: 3 } }, 'outTokenIds:'),
-                  h('b-col', '[' + this.tokenIdsToSwapOut.join(",") + ']'),
+                  h('b-col', '[' + this.tokenIdsToSwapOut.join(", ") + ']'),
                 ]
               ),
               h('b-row', {
