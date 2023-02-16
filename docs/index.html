@@ -1610,6 +1610,7 @@
                      return [];
                   });
                 collection.reservoirInfo = reservoirInfo && reservoirInfo.collections && reservoirInfo.collections.length > 0 && reservoirInfo.collections[0] || null;
+                await delay(2000);
                 for (const [umswapAddress, umswap] of Object.entries(collection.umswaps)) {
                   const TOKENIDBATCHSIZE = 3; // 500 OK
                   for (let i = 0; i < umswap.tokenIds.length; i += TOKENIDBATCHSIZE) {
@@ -1635,6 +1636,7 @@
                         umswap.tokens.push({ tokenId: token.token.tokenId, image: token.token.image });
                       }
                     }
+                    await delay(2000);
                   }
                 }
                 this.sync.completed++;
@@ -1701,13 +1703,14 @@
                      return [];
                   });
                 this.sync.completed = 1;
+                await delay(2000);
 
                 // Get specific collection token metadata
                 this.sync.section = null;
                 this.sync.completed = 0;
                 this.sync.total = null;
                 this.sync.section = "Token Metadata";
-                const DELAYINMILLIS = 1000;
+                const DELAYINMILLIS = 2000;
                 let continuation = null;
                 let tokens = {};
                 do {
